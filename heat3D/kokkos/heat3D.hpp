@@ -81,8 +81,11 @@ void finalize(ScalarType time,
   auto h_x  = Kokkos::create_mirror_view(x);
   auto h_y  = Kokkos::create_mirror_view(y);
   auto h_z  = Kokkos::create_mirror_view(z);
-  auto h_u  = Kokkos::create_mirror_view(u);
   auto h_un = Kokkos::create_mirror_view(un);
+
+  Kokkos::deep_copy(h_x, x);
+  Kokkos::deep_copy(h_y, y);
+  Kokkos::deep_copy(h_z, z);
 
   // Analytical solution stored to h_un
   for(int iz=0; iz<Config::nz; iz++) {

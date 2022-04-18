@@ -7,14 +7,17 @@ set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 
 if(BACKEND STREQUAL "CUDA")
     find_package(OpenACC REQUIRED)
-    find_package(CUDAToolkit REQUIRED COMPONENTS cufft)
-    # Compiler flags
-    target_compile_options(math_lib INTERFACE -O3 -mcmodel=medium -fast)
+    find_package(CUDAToolkit COMPONENTS cufft)
+    if(CUDAToolkit_FOUND)
+        target_compile_options(math_lib INTERFACE -O3 -mcmodel=medium -fast)
+        target_link_libraries(math_lib INTERFACE layout_contiguous::layout_contiguous OpenACC::OpenACC_CXX CUDA::cufft CUDA::cublas)
+    else()
+        target_compile_options(math_lib INTERFACE -O3 -mcmodel=medium -fast -cudalib=cufft,cublas)
+        target_link_libraries(math_lib INTERFACE layout_contiguous::layout_contiguous OpenACC::OpenACC_CXX -cudalib=cufft,cublas)
+    endif()
 
     # Macro
     target_compile_definitions(math_lib INTERFACE ENABLE_OPENACC)
-
-    target_link_libraries(math_lib INTERFACE layout_contiguous::layout_contiguous OpenACC::OpenACC_CXX CUDA::cufft CUDA::cublas)
 elseif(BACKEND STREQUAL "OPENMP")
     find_package(OpenMP REQUIRED)
     find_package(FFTW REQUIRED COMPONENTS DOUBLE_LIB)
