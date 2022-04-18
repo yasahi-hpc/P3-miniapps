@@ -1,0 +1,27 @@
+add_library(math_lib INTERFACE)
+
+# Find libraries
+find_package(layout_contiguous 0.1 CONFIG REQUIRED)
+
+set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
+
+if(BACKEND STREQUAL "CUDA")
+    find_package(OpenACC REQUIRED)
+    find_package(CUDAToolkit REQUIRED COMPONENTS cufft)
+    # Compiler flags
+    target_compile_options(math_lib INTERFACE -O3 -mcmodel=medium -fast)
+
+    # Macro
+    target_compile_definitions(math_lib INTERFACE ENABLE_OPENACC)
+
+    target_link_libraries(math_lib INTERFACE layout_contiguous::layout_contiguous OpenACC::OpenACC_CXX CUDA::cufft CUDA::cublas)
+elseif(BACKEND STREQUAL "OPENMP")
+    find_package(OpenMP REQUIRED)
+    find_package(FFTW REQUIRED COMPONENTS DOUBLE_LIB)
+    target_compile_options(math_lib INTERFACE -O3)
+    target_link_libraries(math_lib INTERFACE layout_contiguous::layout_contiguous OpenMP::OpenMP_CXX fftw3)
+else()
+    message(FATAL_ERROR "No parallel backend specified. One of CUDA and OPENMP must be On.")
+endif()
+
+target_include_directories(math_lib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
