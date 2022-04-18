@@ -25,7 +25,7 @@ namespace stdex = std::experimental;
   static inline uint3 make_uint3(int x, int y, int z) {uint3 t; t.x=x; t.y=y; t.z=z; return t;}
   static inline uint4 make_uint4(int x, int y, int z, int w) {uint4 t; t.x=x; t.y=y; t.z=z; t.w=w; return t;}
   using default_layout = layout_contiguous_at_right;
-  using default_iterate_layout = layout_contiguous_at_left;
+  using default_iterate_layout = layout_contiguous_at_right;
   #define SIMD_WIDTH 8
   #include<omp.h>
   #if defined(SIMD)
