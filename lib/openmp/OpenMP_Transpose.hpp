@@ -3,6 +3,7 @@
 
 #include <omp.h>
 #include <complex>
+#include <layout_contiguous/layout_contiguous.hpp>
 #include "../Index.hpp"
 
 template <typename RealType> using Complex = std::complex<RealType>;

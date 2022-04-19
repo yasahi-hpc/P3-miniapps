@@ -3,6 +3,7 @@
 
 #include <cublas_v2.h>
 #include <complex>
+#include <omp.h>
 #include <layout_contiguous/layout_contiguous.hpp>
 
 template <typename RealType> using Complex = std::complex<RealType>;
@@ -33,6 +34,7 @@ namespace Impl {
           col_ = row;
         }
         cublasCreate(&handle_);
+        //cublasSetStream(handle_, 0); // This does not work
       }
 
       ~Transpose() {
@@ -41,16 +43,28 @@ namespace Impl {
 
       // Out-place transpose
       void forward(RealType *dptr_in, RealType *dptr_out) {
-        #pragma acc host_data use_device(dptr_in, dptr_out)
+        #pragma omp target data use_device_ptr(dptr_in, dptr_out)
         cublasTranspose_(dptr_in, dptr_out, row_, col_);
+        sync_();
       }
 
       void backward(RealType *dptr_in, RealType *dptr_out) {
-        #pragma acc host_data use_device(dptr_in, dptr_out)
+        #pragma omp target data use_device_ptr(dptr_in, dptr_out)
         cublasTranspose_(dptr_in, dptr_out, col_, row_);
+        sync_();
       }
 
     private:
+      /* For some reason, cublas kernel runs with a non-default stream and
+       * it runs concurrently with OpenMP offload kernel.
+       * Accordingly, synchrnoization is needed, which is achieved by the deep copy of a dummy data.
+       */
+      void sync_() {
+        int dummy[1];
+        #pragma omp target map(to: dummy)
+        {}
+      }
+
       // float32 specialization
       template <typename RType=RealType,
                 std::enable_if_t<std::is_same_v<RType, float>, std::nullptr_t> = nullptr>
