@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <vector>
 #include <experimental/mdspan>
-#include <layout_contiguous/layout_contiguous.hpp>
 #include "View.hpp"
 #include "../Iteration.hpp"
 
@@ -14,11 +13,11 @@ namespace stdex = std::experimental;
 #if defined( _NVHPC_STDPAR_GPU )
   #define SIMD_LOOP
   #define SIMD_WIDTH 1
-  using default_layout = layout_contiguous_at_left;
-  using default_iterate_layout = layout_contiguous_at_left;
+  using default_layout = stdex::layout_left;
+  using default_iterate_layout = stdex::layout_left;
 #else
-  using default_layout = layout_contiguous_at_right;
-  using default_iterate_layout = layout_contiguous_at_right;
+  using default_layout = stdex::layout_right;
+  using default_iterate_layout = stdex::layout_right;
   
   #define SIMD_WIDTH 8
   #include<omp.h>
@@ -45,11 +44,11 @@ using float64 = double;
 using Real = float64;
 
 template < class ScalarType >
-using View1D = View<ScalarType, stdex::dextents< 1 >, layout_contiguous_at_left >;
+using View1D = View<ScalarType, stdex::dextents< 1 >, default_layout >;
 template < class ScalarType >
-using View2D = View<ScalarType, stdex::dextents< 2 >, layout_contiguous_at_left >;
+using View2D = View<ScalarType, stdex::dextents< 2 >, default_layout >;
 template < class ScalarType >
-using View3D = View<ScalarType, stdex::dextents< 3 >, layout_contiguous_at_left >;
+using View3D = View<ScalarType, stdex::dextents< 3 >, default_layout >;
 
 template < size_t ND >
 using Iterate_policy = IteratePolicy<default_iterate_layout, ND>;

@@ -2,7 +2,6 @@ file(GLOB SOURCES "*.cpp")
 
 # Find libraries
 find_package(mdspan CONFIG REQUIRED)
-find_package(layout_contiguous 0.1 CONFIG REQUIRED)
 
 add_executable(heat3D ${SOURCES})
 
@@ -10,7 +9,7 @@ add_executable(heat3D ${SOURCES})
 target_compile_features(heat3D PUBLIC cxx_std_17)
 
 # Link mdspan
-target_link_libraries(heat3D PUBLIC std::mdspan layout_contiguous::layout_contiguous math_lib)
+target_link_libraries(heat3D PUBLIC std::mdspan math_lib)
 
 set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 
