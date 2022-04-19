@@ -35,7 +35,7 @@ void Diags::compute(Config *conf, Efield *ef, int iter) {
   using moment_type = std::tuple<float64, float64, float64, float64>;
   moment_type zeros = {0, 0, 0, 0}, moments = {0, 0, 0, 0};
 
-  if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+  if(std::is_same_v<layout_type, stdex::layout_left>) {
     moments = std::transform_reduce(std::execution::par_unseq,
                                   counting_iterator(0), counting_iterator(n),
                                   zeros,
@@ -109,11 +109,11 @@ void Diags::computeL2norm(Config *conf, RealView4D &fn, int iter) {
   auto _fn = fn.mdspan();
 
   float64 l2loc = 0.0;
-  if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+  if(std::is_same_v<layout_type, stdex::layout_left>) {
     l2loc = std::transform_reduce(std::execution::par_unseq,
                                   counting_iterator(0), counting_iterator(n),
-                                  0,
-                                  std::plus<>(),
+                                  0.0,
+                                  std::plus<float64>(),
                                   [=] (const int idx) {
                                     const int ix   = idx % nx + nx_min;
                                     const int iyzw = idx / nx;
@@ -127,8 +127,8 @@ void Diags::computeL2norm(Config *conf, RealView4D &fn, int iter) {
   } else {
     l2loc = std::transform_reduce(std::execution::par_unseq,
                                   counting_iterator(0), counting_iterator(n),
-                                  0,
-                                  std::plus<>(),
+                                  0.0,
+                                  std::plus<float64>(),
                                   [=] (const int idx) {
                                     const int ivy   = idx % nvy + nvy_min;
                                     const int ixyz = idx / nvy;

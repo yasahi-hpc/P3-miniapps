@@ -56,7 +56,7 @@ public:
   void computeCoeff_xy(RealView4D &fn) {
     using layout_type = RealView4D::layout_type;
 
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( _NVHPC_STDPAR_GPU )
         transpose_->forward(fn.data(), fn_trans_.data());
         computeCoeffCore_parallel_xy(fn_trans_, fn_trans_tmp_);
@@ -77,7 +77,7 @@ public:
 
   void computeCoeff_vxvy(RealView4D &fn) {
     using layout_type = RealView4D::layout_type;
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( _NVHPC_STDPAR_GPU )
         computeCoeffCore_parallel_xy(fn, fn_tmp_);
       #else

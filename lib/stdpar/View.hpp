@@ -134,7 +134,7 @@ private:
     // Compute offsets
     int_type total_offset = 0;
     size_type total_extents = 1;
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       for(size_type i=0; i<extents_type::rank(); i++) {
         total_offset -= offsets[i] * total_extents;
         total_extents *= extents[i];

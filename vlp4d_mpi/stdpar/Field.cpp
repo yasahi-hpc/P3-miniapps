@@ -8,9 +8,6 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
 
   int nx_min = dom->local_nxmin_[0],     ny_min = dom->local_nxmin_[1],     nvx_min = dom->local_nxmin_[2],     nvy_min = dom->local_nxmin_[3];
   int nx_max = dom->local_nxmax_[0] + 1, ny_max = dom->local_nxmax_[1] + 1, nvx_max = dom->local_nxmax_[2] + 1, nvy_max = dom->local_nxmax_[3] + 1;
-  const int nx = nx_max - nx_min;
-  const int ny = ny_max - ny_min;
-
   float64 dvx = dom->dx_[2], dvy = dom->dx_[3];
 
   auto _fn = fn.mdspan();
@@ -26,7 +23,7 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
     _rho_loc(ix, iy) = sum * dvx * dvy;
   };
 
-  Iterate_policy<2> policy2d({0, 0}, {nx, ny});
+  Iterate_policy<2> policy2d({nx_min, ny_min}, {nx_max, ny_max});
   Impl::for_each(policy2d, integral);
 }
 

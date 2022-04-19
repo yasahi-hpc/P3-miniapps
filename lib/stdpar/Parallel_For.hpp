@@ -2,7 +2,6 @@
 #define __PARALLEL_FOR_HPP__
 
 #include <thrust/iterator/counting_iterator.h>
-#include <layout_contiguous/layout_contiguous.hpp>
 #include "../Iteration.hpp"
 
 using counting_iterator = thrust::counting_iterator<int>;
@@ -66,7 +65,7 @@ namespace Impl {
     const auto n0 = strides[0], n1 = strides[1];
     auto n = iterate_policy.size();
 
-    if(std::is_same_v<typename IteratePolicy::layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<typename IteratePolicy::layout_type, stdex::layout_left>) {
       std::for_each_n(std::execution::par_unseq,
                       counting_iterator(0), n,
                       [=](const int idx) {
@@ -98,7 +97,7 @@ namespace Impl {
     const auto n0 = strides[0], n1 = strides[1], n2 = strides[2];
     auto n = iterate_policy.size();
 
-    if(std::is_same_v<typename IteratePolicy::layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<typename IteratePolicy::layout_type, stdex::layout_left>) {
       std::for_each_n(std::execution::par_unseq,
                       counting_iterator(0), n,
                       [=](const int idx) {
@@ -134,7 +133,7 @@ namespace Impl {
     const auto n0 = strides[0], n1 = strides[1], n2 = strides[2], n3 = strides[3];
     auto n = iterate_policy.size();
 
-    if(std::is_same_v<typename IteratePolicy::layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<typename IteratePolicy::layout_type, stdex::layout_left>) {
       std::for_each_n(std::execution::par_unseq,
                       counting_iterator(0), n,
                       [=](const int idx) {

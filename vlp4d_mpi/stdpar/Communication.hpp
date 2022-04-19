@@ -697,13 +697,15 @@ private:
     auto _map     = send_buffers->map_.mdspan();
     auto _buf_flatten = send_buffers->buf_flatten_.mdspan();
 
-    Iterate_policy<1> policy1d(total_size);
-    Impl::for_each(policy1d, 
-                   [=](const int idx){
-                     const int ix  = _map(idx, 0), iy  = _map(idx, 1);
-                     const int ivx = _map(idx, 2), ivy = _map(idx, 3);
-                     _buf_flatten(idx) = _halo_fn(ix, iy, ivx, ivy);
-                   });
+    if(total_size > 0) {
+      Iterate_policy<1> policy1d(total_size);
+      Impl::for_each(policy1d, 
+                     [=](const int idx){
+                       const int ix  = _map(idx, 0), iy  = _map(idx, 1);
+                       const int ivx = _map(idx, 2), ivy = _map(idx, 3);
+                       _buf_flatten(idx) = _halo_fn(ix, iy, ivx, ivy);
+                     });
+    }
   }
 
   void unpack(RealView4D &halo_fn, Halos *recv_buffers) {
@@ -712,13 +714,15 @@ private:
     auto _map = recv_buffers->map_.mdspan();
     auto _buf_flatten = recv_buffers->buf_flatten_.mdspan();
 
-    Iterate_policy<1> policy1d(total_size);
-    Impl::for_each(policy1d, 
-                   [=](const int idx){
-                     const int ix  = _map(idx, 0), iy  = _map(idx, 1);
-                     const int ivx = _map(idx, 2), ivy = _map(idx, 3);
-                     _halo_fn(ix, iy, ivx, ivy) =  _buf_flatten(idx);
-                   });
+    if(total_size > 0) {
+      Iterate_policy<1> policy1d(total_size);
+      Impl::for_each(policy1d, 
+                     [=](const int idx){
+                       const int ix  = _map(idx, 0), iy  = _map(idx, 1);
+                       const int ivx = _map(idx, 2), ivy = _map(idx, 3);
+                       _halo_fn(ix, iy, ivx, ivy) =  _buf_flatten(idx);
+                     });
+    }
   };
 
   void local_copy(Halos *send_buffers, Halos *recv_buffers) {
@@ -729,11 +733,13 @@ private:
     auto _send_buf_flatten = send_buffers->buf_flatten_.mdspan();
     auto _recv_buf_flatten = recv_buffers->buf_flatten_.mdspan();
 
-    Iterate_policy<1> policy1d(total_size);
-    Impl::for_each(policy1d, 
-                   [=](const int idx) {
-                     _recv_buf_flatten(idx + recv_offset) = _send_buf_flatten(idx + send_offset);
-                   });
+    if(total_size > 0) {
+      Iterate_policy<1> policy1d(total_size);
+      Impl::for_each(policy1d, 
+                     [=](const int idx) {
+                       _recv_buf_flatten(idx + recv_offset) = _send_buf_flatten(idx + send_offset);
+                     });
+    }
   }
 
   // Version to survive
