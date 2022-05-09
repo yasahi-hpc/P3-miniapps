@@ -10,6 +10,10 @@ struct Parser {
   std::vector<size_t> shape_;
   std::vector<int> topology_;
   int nbiter_ = 1000;
+  int num_threads_ = 1;
+  int teams_ = 1;
+  int device_ = 0;
+  int ngpu_ = 1;
 
   Parser() = delete;
   Parser(int argc, char **argv) {
@@ -51,6 +55,48 @@ struct Parser {
 
       if((strcmp(argv[i], "-nbiter") == 0) || (strcmp(argv[i], "--nbiter") == 0)) {
         nbiter_ = atoi(argv[++i]);
+        continue;
+      }
+
+      if((strcmp(argv[i], "-t") == 0) || (strcmp(argv[i], "--num_threads") == 0)) {
+        num_threads_ = atoi(argv[++i]);
+        continue;
+      }
+
+      if((strcmp(argv[i], "--teams") == 0)) {
+        teams_ = atoi(argv[++i]);
+        continue;
+      }
+
+      if((strcmp(argv[i], "-d") == 0) || (strcmp(argv[i], "--device") == 0)) {
+        device_ = atoi(argv[++i]);
+        continue;
+      }
+
+      if((strcmp(argv[i], "-ng") == 0) || (strcmp(argv[i], "--num_gpus") == 0)) {
+        ngpu_ = atoi(argv[++i]);
+        continue;
+      }
+
+      if((strcmp(argv[i], "-dm") == 0) || (strcmp(argv[i], "--device_map") == 0)) {
+        char *str;
+        int local_rank;
+
+        if((str = getenv("SLURM_LOCALID")) != NULL) {
+          local_rank = atoi(str);
+          device_ = local_rank % ngpu_;
+        }
+
+        if((str = getenv("MV2_COMM_WORLD_LOCAL_RANK")) != NULL) {
+          local_rank = atoi(str);
+          device_ = local_rank % ngpu_;
+        }
+
+        if((str = getenv("OMPI_COMM_WORLD_LOCAL_RANK")) != NULL) {
+          local_rank = atoi(str);
+          device_ = local_rank % ngpu_;
+        }
+
         continue;
       }
     }
