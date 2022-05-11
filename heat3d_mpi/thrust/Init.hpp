@@ -221,6 +221,17 @@ void performance(Config &conf, Comm &comm, double seconds) {
     std::string arch = "CPU";
   #endif
 
+  #if defined( ENABLE_CUDA ) && ! defined( ENABLE_THRUST )
+    std::string backend = "CUDA";
+  #elif defined( ENABLE_HIP ) && ! defined( ENABLE_THRUST )
+    std::string backend = "HIP";
+  #elif defined( ENABLE_OPENMP ) && ! defined( ENABLE_THRUST )
+    std::string backend = "OPENMP";
+  #else
+    std::string backend = "THRUST";
+  #endif
+
+  std::cout << backend + " backend" << std::endl;
   std::cout << "Elapsed time: " << seconds << " [s]" << std::endl;
   std::cout << "Bandwidth/" + arch + ": " << GBytes / seconds / comm.size() << " [GB/s]" << std::endl;
   std::cout << "Flops/" + arch + ": " << GFlops / seconds / comm.size() << " [GFlops]\n" << std::endl;
