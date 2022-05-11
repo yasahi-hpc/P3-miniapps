@@ -1,7 +1,7 @@
 add_library(math_lib INTERFACE)
 
 # Find libraries
-find_package(layout_contiguous 0.1 CONFIG REQUIRED)
+find_package(mdspan CONFIG REQUIRED)
 
 set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 
@@ -10,10 +10,10 @@ if(BACKEND STREQUAL "CUDA")
     find_package(CUDAToolkit COMPONENTS cufft)
     if(CUDAToolkit_FOUND)
         target_compile_options(math_lib INTERFACE -O3 -mcmodel=medium -fast)
-        target_link_libraries(math_lib INTERFACE layout_contiguous::layout_contiguous OpenACC::OpenACC_CXX CUDA::cufft CUDA::cublas)
+        target_link_libraries(math_lib INTERFACE std::mdspan OpenACC::OpenACC_CXX CUDA::cufft CUDA::cublas)
     else()
         target_compile_options(math_lib INTERFACE -O3 -mcmodel=medium -fast -cudalib=cufft,cublas)
-        target_link_libraries(math_lib INTERFACE layout_contiguous::layout_contiguous OpenACC::OpenACC_CXX -cudalib=cufft,cublas)
+        target_link_libraries(math_lib INTERFACE std::mdspan OpenACC::OpenACC_CXX -cudalib=cufft,cublas)
     endif()
 
     # Macro
@@ -22,7 +22,7 @@ elseif(BACKEND STREQUAL "OPENMP")
     find_package(OpenMP REQUIRED)
     find_package(FFTW REQUIRED COMPONENTS DOUBLE_LIB)
     target_compile_options(math_lib INTERFACE -O3)
-    target_link_libraries(math_lib INTERFACE layout_contiguous::layout_contiguous OpenMP::OpenMP_CXX fftw3)
+    target_link_libraries(math_lib INTERFACE std::mdspan OpenMP::OpenMP_CXX fftw3)
 else()
     message(FATAL_ERROR "No parallel backend specified. One of CUDA and OPENMP must be On.")
 endif()

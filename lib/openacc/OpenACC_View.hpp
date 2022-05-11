@@ -8,16 +8,18 @@
 #include <string>
 #include <type_traits>
 #include <array>
-#include <layout_contiguous/layout_contiguous.hpp>
+#include <experimental/mdspan>
 
 #if defined( ENABLE_OPENACC )
   #include <openacc.h>
 #endif
 
+namespace stdex = std::experimental;
+
 template <size_t ND>
 using shape_nd = std::array<int, ND>;
 
-template <typename ScalarType, size_t ND, class LayoutPolicy=layout_contiguous_at_left>
+template <typename ScalarType, size_t ND, class LayoutPolicy=stdex::layout_left>
 class View {
   std::string name_;
 
@@ -121,7 +123,7 @@ private:
       end_meta_[i] = strides_meta_[i] + offsets_meta_[i];
     }
 
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       int total_strides = 1;
       for(int i=0; i<ND; i++) {
         total_strides *= strides_meta_[i];
@@ -145,7 +147,7 @@ private:
 
     // compute the total offsets
     int offset = 0;
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       offset -= offsets_meta_[0];
       int total_strides = 1;
       for(int i=0; i<ND-1; i++) {
@@ -355,27 +357,27 @@ private:
   // Naive accessors to ease the compiler optimizations
   // For LayoutLeft
   template <typename I0, class L=LayoutPolicy>
-  inline typename std::enable_if_t<std::is_same_v<L, layout_contiguous_at_left>, ScalarType&>
+  inline typename std::enable_if_t<std::is_same_v<L, stdex::layout_left>, ScalarType&>
   access(I0 i0) const noexcept {
     return data_[total_offset_ + i0];
   }
 
   template <typename I0, typename I1, class L=LayoutPolicy>
-  inline typename std::enable_if_t<std::is_same_v<L, layout_contiguous_at_left>, ScalarType&>
+  inline typename std::enable_if_t<std::is_same_v<L, stdex::layout_left>, ScalarType&>
   access(I0 i0, I1 i1) const noexcept {
     int idx = total_offset_ + i0 + i1 * strides_[0];
     return data_[idx];
   }
   
   template <typename I0, typename I1, typename I2, class L=LayoutPolicy>
-  inline typename std::enable_if_t<std::is_same_v<L, layout_contiguous_at_left>, ScalarType&>
+  inline typename std::enable_if_t<std::is_same_v<L, stdex::layout_left>, ScalarType&>
   access(I0 i0, I1 i1, I2 i2) const noexcept {
     int idx = total_offset_ + i0 + i1 * strides_[0] + i2 * strides_[1];
     return data_[idx];
   }
   
   template <typename I0, typename I1, typename I2, typename I3, class L=LayoutPolicy>
-  inline typename std::enable_if_t<std::is_same_v<L, layout_contiguous_at_left>, ScalarType&>
+  inline typename std::enable_if_t<std::is_same_v<L, stdex::layout_left>, ScalarType&>
   access(I0 i0, I1 i1, I2 i2, I3 i3) const noexcept {
     int idx = total_offset_ + i0 + i1 * strides_[0] + i2 * strides_[1] + i3 * strides_[2];
     return data_[idx];
@@ -383,27 +385,27 @@ private:
 
   // For LayoutRight
   template <typename I0, class L=LayoutPolicy>
-  inline typename std::enable_if_t<std::is_same_v<L, layout_contiguous_at_right>, ScalarType&>
+  inline typename std::enable_if_t<std::is_same_v<L, stdex::layout_right>, ScalarType&>
   access(I0 i0) const noexcept {
     return data_[total_offset_ + i0];
   }
 
   template <typename I0, typename I1, class L=LayoutPolicy>
-  inline typename std::enable_if_t<std::is_same_v<L, layout_contiguous_at_right>, ScalarType&>
+  inline typename std::enable_if_t<std::is_same_v<L, stdex::layout_right>, ScalarType&>
   access(I0 i0, I1 i1) const noexcept {
     int idx = total_offset_ + i1 + i0 * strides_[1];
     return data_[idx];
   }
 
   template <typename I0, typename I1, typename I2, class L=LayoutPolicy>
-  inline typename std::enable_if_t<std::is_same_v<L, layout_contiguous_at_right>, ScalarType&>
+  inline typename std::enable_if_t<std::is_same_v<L, stdex::layout_right>, ScalarType&>
   access(I0 i0, I1 i1, I2 i2) const noexcept {
     int idx = total_offset_ + i2 + i1 * strides_[2] + i0 * strides_[1];
     return data_[idx];
   }
 
   template <typename I0, typename I1, typename I2, typename I3, class L=LayoutPolicy>
-  inline typename std::enable_if_t<std::is_same_v<L, layout_contiguous_at_right>, ScalarType&>
+  inline typename std::enable_if_t<std::is_same_v<L, stdex::layout_right>, ScalarType&>
   access(I0 i0, I1 i1, I2 i2, I3 i3) const noexcept {
     int idx = total_offset_ + i3 + i2 * strides_[3] + i1 * strides_[2] + i0 * strides_[1];
     return data_[idx];

@@ -13,14 +13,15 @@
 #include <cufft.h>
 #include <cassert>
 #include <type_traits>
-#include <layout_contiguous/layout_contiguous.hpp>
+#include <experimental/mdspan>
 #include <openacc.h>
 
 template <typename RealType> using Complex = std::complex<RealType>;
+namespace stdex = std::experimental;
 
 namespace Impl {
 
-  template <typename RealType, class LayoutPolicy = layout_contiguous_at_left,
+  template <typename RealType, class LayoutPolicy = stdex::layout_left,
             typename std::enable_if<std::is_same<RealType, float>::value ||
                                     std::is_same<RealType, double>::value 
                                    >::type * = nullptr> 
@@ -85,7 +86,7 @@ namespace Impl {
 
     private:
     void init() {
-      static_assert(std::is_same<array_layout, layout_contiguous_at_left>::value, "The input Layout must be LayoutLeft");
+      static_assert(std::is_same<array_layout, stdex::layout_left>::value, "The input Layout must be LayoutLeft");
       nx1h_ = nx1_/2 + 1;
       nx2h_ = nx2_/2 + 1;
 

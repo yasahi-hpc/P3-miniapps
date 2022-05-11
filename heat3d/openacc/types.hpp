@@ -2,16 +2,19 @@
 #define __TYPES_HPP__
 
 #include <complex>
+#include <omp.h>
+#include <experimental/mdspan>
 #include "OpenACC_View.hpp"
+
+namespace stdex = std::experimental;
 
 // Directives to force vectorization
 #if defined ( ENABLE_OPENACC )
-  using default_layout = layout_contiguous_at_left;
+  using default_layout = stdex::layout_left;
   #define LOOP_SIMD _Pragma("acc loop vector independent")
   #define SIMD_WIDTH 1
 #else
-  #include <omp.h>
-  using default_layout = layout_contiguous_at_left;
+  using default_layout = stdex::layout_right;
   #define SIMD_WIDTH 8
   
   #if defined(SIMD)
@@ -24,6 +27,8 @@
     #define LOOP_SIMD
   #endif
 #endif
+
+#define LONG_BUFFER_WIDTH 256
 
 using int8  = int8_t;
 using int16 = int16_t;
@@ -40,8 +45,6 @@ using float64 = double;
 using complex64 = std::complex<float>;
 using complex128 = std::complex<double>;
 template <typename RealType> using Complex = std::complex<RealType>;
-
-using Real = float64;
 
 const complex128 I = complex128(0., 1.);
 
@@ -62,5 +65,8 @@ using RealView4D = View4D<float64>;
 
 using ComplexView1D = View1D<complex128>;
 using ComplexView2D = View2D<complex128>;
+
+using IntView1D = View1D<int>;
+using IntView2D = View2D<int>;
 
 #endif
