@@ -1,35 +1,48 @@
 #include <iostream>
 #include <chrono>
 #include <array>
-#include "heat3D.hpp"
 #include "types.hpp"
+#include "Config.hpp"
+#include "boundary.hpp"
+#include "../Parser.hpp"
+#include "Init.hpp"
+#include "Timestep.hpp"
 
 int main(int argc, char *argv[]) {
-  View1D<Real> x("x", Config::nx), y("y", Config::ny), z("z", Config::nz);
-  View3D<Real> u("u", Config::nx, Config::ny, Config::nz), un("un", Config::nx, Config::ny, Config::nz);
+  Parser parser(argc, argv);
+  auto shape = parser.shape_;
+  int nbiter = parser.nbiter_;
+  int nx = shape[0], ny = shape[1], nz = shape[2];
 
-  initialize(x, y, z, u, un);
+  Config conf(nx, ny, nz, nbiter);
+  Boundary boundary(shape);
+
+  std::vector<Timer*> timers;
+  defineTimers(timers);
+
+  RealView1D x, y, z;
+  RealView3D u, un;
+
+  initialize(conf, boundary, x, y, z, u, un);
 
   // Main loop
-  auto start = std::chrono::high_resolution_clock::now();
-  for(int i=0; i<Config::nbiter; i++) {
-    step(u, un);
+  timers[Total]->begin();
+  for(int i=0; i<conf.nbiter; i++) {
+    timers[MainLoop]->begin();
+    step(conf, boundary, u, un, timers);
     u.swap(un);
+    timers[MainLoop]->end();
   }
-  auto end = std::chrono::high_resolution_clock::now();
-  double seconds = std::chrono::duration_cast<std::chrono::duration<double> >(end - start).count();
+  timers[Total]->end();
 
-  // 1 load, 1 store (assuming the input array u is on cache)
-  const int n = Config::nx * Config::ny * Config::nz;
-  double memory_GB = static_cast<double>(n) * static_cast<double>(Config::nbiter) * 2 * sizeof(Real) / 1.e9;
-
-  // 9 Flop per iteration
-  double GFlops = static_cast<double>(n) * static_cast<double>(Config::nbiter) * 9 / 1.e9;
-
-  // Check results
-  Real time = Config::dt * Config::nbiter;
-  finalize(time, x, y, z, u, un);
+  using real_type = RealView3D::value_type;
+  real_type time = conf.dt * conf.nbiter;
+  finalize(conf, boundary, time, x, y, z, u, un);
 
   // Measure performance
-  performance(GFlops, memory_GB, seconds);
+  performance(conf, timers[Total]->seconds());
+  printTimers(timers);
+  freeTimers(timers);
+
+  return 0;
 }
