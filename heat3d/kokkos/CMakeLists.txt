@@ -1,13 +1,13 @@
 file(GLOB SOURCES "*.cpp")
 
+# Find libraries
 find_package(Kokkos REQUIRED)
 
-add_executable(heat3D ${SOURCES})
+add_executable(heat3d ${SOURCES})
 
-target_compile_features(heat3D PUBLIC cxx_std_17)
+# Compiler version
+target_compile_features(heat3d PUBLIC cxx_std_17)
 
-set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
-
-target_link_libraries(heat3D PUBLIC Kokkos::kokkos)
-
-target_compile_options(heat3D PUBLIC -O3)
+# Link mdspan
+target_link_libraries(heat3d PUBLIC Kokkos::kokkos math_lib)
+target_compile_definitions(heat3d PUBLIC SIMD)
