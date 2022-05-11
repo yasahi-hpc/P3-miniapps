@@ -4,12 +4,13 @@
 #include <cublas_v2.h>
 #include <complex>
 #include <omp.h>
-#include <layout_contiguous/layout_contiguous.hpp>
+#include <experimental/mdspan>
 
 template <typename RealType> using Complex = std::complex<RealType>;
+namespace stdex = std::experimental;
 
 namespace Impl {
-  template <typename RealType, class LayoutPolicy = layout_contiguous_at_left,
+  template <typename RealType, class LayoutPolicy = stdex::layout_left,
             std::enable_if_t<std::is_same_v<RealType, float           > ||
                              std::is_same_v<RealType, double          > ||
                              std::is_same_v<RealType, Complex<float>  > ||
@@ -29,7 +30,7 @@ namespace Impl {
       Transpose() = delete;
     
       Transpose(int row, int col) : row_(row), col_(col) {
-        if(std::is_same_v<array_layout, layout_contiguous_at_right>) {
+        if(std::is_same_v<array_layout, stdex::layout_right>) {
           row_ = col;
           col_ = row;
         }

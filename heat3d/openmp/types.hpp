@@ -1,40 +1,34 @@
 #ifndef __TYPES_HPP__
 #define __TYPES_HPP__
 
-#include <math.h>
-#include <stdlib.h>
-#include <vector>
-#include <layout_contiguous/layout_contiguous.hpp>
 #include <complex>
-#include<omp.h>
+#include <omp.h>
+#include <experimental/mdspan>
 #include "OpenMP_View.hpp"
 
-#if defined( ENABLE_OPENMP_OFFLOAD )
-  using default_layout = layout_contiguous_at_left;
+namespace stdex = std::experimental;
+
+// Directives to force vectorization
+#if defined ( ENABLE_OPENMP_OFFLOAD )
+  using default_layout = stdex::layout_left;
   #define LOOP_SIMD
   #define SIMD_WIDTH 1
 #else
-  using default_layout = layout_contiguous_at_left;
-  struct int1 {int x;};
-  struct int2 {int x, y;};
-  struct int3 {int x, y, z;};
-  struct int4 {int x, y, z, w;};
-  static inline int1 make_int1(int x) {int1 t; t.x=x; return t;}
-  static inline int2 make_int2(int x, int y) {int2 t; t.x=x; t.y=y; return t;}
-  static inline int3 make_int3(int x, int y, int z) {int3 t; t.x=x; t.y=y; t.z=z; return t;}
-  static inline int4 make_int4(int x, int y, int z, int w) {int4 t; t.x=x; t.y=y; t.z=z; t.w=w; return t;}
+  using default_layout = stdex::layout_right;
+  #define SIMD_WIDTH 8
+  
   #if defined(SIMD)
     #if defined(FUJI)
       #define LOOP_SIMD _Pragma("loop simd")
     #else
       #define LOOP_SIMD _Pragma("omp simd")
     #endif
-    #define SIMD_WIDTH 8
   #else
     #define LOOP_SIMD
-    #define SIMD_WIDTH 1
   #endif
 #endif
+
+#define LONG_BUFFER_WIDTH 256
 
 using int8  = int8_t;
 using int16 = int16_t;
@@ -54,8 +48,6 @@ template <typename RealType> using Complex = std::complex<RealType>;
 
 const complex128 I = complex128(0., 1.);
 
-using Real = float64;
-
 template < typename ScalarType >
 using View1D = View<ScalarType, 1, default_layout >;
 template < typename ScalarType >
@@ -73,5 +65,8 @@ using RealView4D = View4D<float64>;
 
 using ComplexView1D = View1D<complex128>;
 using ComplexView2D = View2D<complex128>;
+
+using IntView1D = View1D<int>;
+using IntView2D = View2D<int>;
 
 #endif

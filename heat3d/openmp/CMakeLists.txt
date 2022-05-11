@@ -1,29 +1,22 @@
 file(GLOB SOURCES "*.cpp")
 
-# Find libraries
-find_package(layout_contiguous 0.1 CONFIG REQUIRED)
+add_executable(heat3d ${SOURCES})
 
-add_executable(heat3D ${SOURCES})
+# Compiler version
+target_compile_features(heat3d PUBLIC cxx_std_17)
 
-target_compile_features(heat3D PUBLIC cxx_std_17)
+# Link mdspan
+target_link_libraries(heat3d PUBLIC math_lib)
 
 set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 
 if(BACKEND STREQUAL "CUDA")
-    target_compile_options(heat3D PUBLIC -O3 -Minfo=accel -mp=gpu -mcmodel=medium -fast)
-    target_compile_definitions(heat3D PUBLIC ENABLE_OPENMP_OFFLOAD)
-    target_link_libraries(heat3D PUBLIC layout_contiguous::layout_contiguous math_lib -mp=gpu)
-elseif(BACKEND STREQUAL "HIP")
-    find_package(rocthrust REQUIRED CONFIG PATHS)
-    target_compile_definitions(heat3D PUBLIC ENABLE_OPENMP_OFFLOAD)
-    target_link_libraries(heat3D PUBLIC layout_contiguous::layout_contiguous math_lib)
+    target_compile_options(heat3d PUBLIC -O3 -Minfo=accel -mp=gpu -mcmodel=medium -fast)
+    target_link_libraries(heat3d PUBLIC math_lib)
+    target_compile_definitions(heat3d PUBLIC ENABLE_OPENMP_OFFLOAD)
 elseif(BACKEND STREQUAL "OPENMP")
-    target_compile_options(heat3D PUBLIC -O3)
-    target_link_libraries(heat3D PUBLIC layout_contiguous::layout_contiguous math_lib)
+    target_compile_options(heat3d PUBLIC -O3)
+    target_link_libraries(heat3d PUBLIC math_lib)
 else()
-    message(FATAL_ERROR "No parallel backend specified. One of CUDA, HIP, and OPENMP must be On.")
+    message(FATAL_ERROR "No parallel backend specified. One of CUDA, and OPENMP must be On.")
 endif()
-
-target_compile_definitions(heat3D PUBLIC
-    $<$<BOOL:${ENABLE_LOOP_3D}>: ENABLE_LOOP_3D>
-)

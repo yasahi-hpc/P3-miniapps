@@ -3,13 +3,14 @@
 
 #include <omp.h>
 #include <complex>
-#include <layout_contiguous/layout_contiguous.hpp>
+#include <experimental/mdspan>
 #include "../Index.hpp"
 
 template <typename RealType> using Complex = std::complex<RealType>;
+namespace stdex = std::experimental;
 
 namespace Impl {
-  template <typename ScalarType, class LayoutPolicy = layout_contiguous_at_right, int blocksize = 16,
+  template <typename ScalarType, class LayoutPolicy = stdex::layout_right, int blocksize = 16,
             std::enable_if_t<std::is_same_v<ScalarType, int             > ||
                              std::is_same_v<ScalarType, float           > ||
                              std::is_same_v<ScalarType, double          > ||
@@ -28,7 +29,7 @@ namespace Impl {
 
     public:
       Transpose(int row, int col) : row_(row), col_(col) {
-        if(std::is_same_v<array_layout, layout_contiguous_at_right>) {
+        if(std::is_same_v<array_layout, stdex::layout_right>) {
           row_ = col;
           col_ = row;
         }
