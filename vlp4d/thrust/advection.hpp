@@ -4,7 +4,7 @@
 #include "config.hpp"
 #include "efield.hpp"
 #include "types.hpp"
-#include "thrust_parallel_for.hpp"
+#include "Parallel_For.hpp"
 
 namespace Advection {
 
@@ -102,8 +102,8 @@ static inline void lag_basis(const double px, double * coef) {
       dx       = dom->dx_[0];
       dvx      = dom->dx_[2];
 
-      fn_   = fn.device_mdspan();
-      fnp1_ = fnp1.device_mdspan();
+      fn_   = fn.mdspan();
+      fnp1_ = fnp1.mdspan();
     }
 
     // 3DRange policy over x, y, vx directions and sequential loop along vy direction
@@ -164,8 +164,8 @@ static inline void lag_basis(const double px, double * coef) {
       dy       = dom->dx_[1];
       dvy      = dom->dx_[3];
 
-      fn_   = fn.device_mdspan();
-      fnp1_ = fnp1.device_mdspan();
+      fn_   = fn.mdspan();
+      fnp1_ = fnp1.mdspan();
     }
 
     // 3DRange policy over x, y, vx directions and sequential loop along vy direction
@@ -229,9 +229,9 @@ static inline void lag_basis(const double px, double * coef) {
       minPhivx = dom->minPhy_[2];
       dvx      = dom->dx_[2];
 
-      ex_   = ef_->ex_.device_mdspan();
-      fn_   = fn.device_mdspan();
-      fnp1_ = fnp1.device_mdspan();
+      ex_   = ef_->ex_.mdspan();
+      fn_   = fn.mdspan();
+      fnp1_ = fnp1.mdspan();
     }
 
     // 3DRange policy over x, y, vx directions and sequential loop along vy direction
@@ -293,9 +293,9 @@ static inline void lag_basis(const double px, double * coef) {
       minPhivy = dom->minPhy_[3];
       dvy      = dom->dx_[3];
 
-      ey_   = ef_->ey_.device_mdspan();
-      fn_   = fn.device_mdspan();
-      fnp1_ = fnp1.device_mdspan();
+      ey_   = ef_->ey_.mdspan();
+      fn_   = fn.mdspan();
+      fnp1_ = fnp1.mdspan();
     }
 
     // 3DRange policy over x, y, vx directions and sequential loop along vy direction
@@ -331,7 +331,7 @@ static inline void lag_basis(const double px, double * coef) {
   void advect_1D_y(Config *conf, const RealView4D &fn, RealView4D &fnp1, float64 dt);
   void advect_1D_vx(Config *conf, const RealView4D &fn, RealView4D &fnp1, Efield *ef, float64 dt);
   void advect_1D_vy(Config *conf, const RealView4D &fn, RealView4D &fnp1, Efield *ef, float64 dt);
-  void print_fxvx(Config *conf, const RealView4D &fn, int iter);
+  void print_fxvx(Config *conf, RealView4D &fn, int iter);
 
   void advect_1D_x(Config *conf, const RealView4D &fn, RealView4D &fnp1, float64 dt) {
     const Domain *dom = &(conf->dom_);
@@ -343,7 +343,7 @@ static inline void lag_basis(const double px, double * coef) {
 //    Impl::for_each(policy3d, advect_1D_x_functor(conf, fn, fnp1, dt));
     const int3 begin = make_int3(0, 0, 0);
     const int3 end   = make_int3(s_nxmax,s_nymax,s_nvxmax);
-    Impl::for_each(begin, end, advect_1D_x_functor(conf, fn, fnp1, dt));
+    Impl::for_each<default_iterate_layout>(begin, end, advect_1D_x_functor(conf, fn, fnp1, dt));
   };
 
   void advect_1D_y(Config *conf, const RealView4D &fn, RealView4D &fnp1, float64 dt) {
@@ -356,7 +356,7 @@ static inline void lag_basis(const double px, double * coef) {
 //    Impl::for_each(policy3d, advect_1D_y_functor(conf, fn, fnp1, dt));
     const int3 begin = make_int3(0, 0, 0);
     const int3 end   = make_int3(s_nxmax,s_nymax,s_nvxmax);
-    Impl::for_each(begin, end, advect_1D_y_functor(conf, fn, fnp1, dt));
+    Impl::for_each<default_iterate_layout>(begin, end, advect_1D_y_functor(conf, fn, fnp1, dt));
   };
 
   void advect_1D_vx(Config *conf, const RealView4D &fn, RealView4D &fnp1, Efield *ef, float64 dt) {
@@ -369,7 +369,7 @@ static inline void lag_basis(const double px, double * coef) {
 //    Impl::for_each(policy3d, advect_1D_vx_functor(conf, fn, fnp1, ef, dt));
     const int3 begin = make_int3(0, 0, 0);
     const int3 end   = make_int3(s_nxmax,s_nymax,s_nvxmax);
-    Impl::for_each(begin, end, advect_1D_vx_functor(conf, fn, fnp1, ef, dt));
+    Impl::for_each<default_iterate_layout>(begin, end, advect_1D_vx_functor(conf, fn, fnp1, ef, dt));
   };
   
   void advect_1D_vy(Config *conf, const RealView4D &fn, RealView4D &fnp1, Efield *ef, float64 dt) {
@@ -382,10 +382,10 @@ static inline void lag_basis(const double px, double * coef) {
 //    Impl::for_each(policy3d, advect_1D_vy_functor(conf, fn, fnp1, ef, dt));
     const int3 begin = make_int3(0, 0, 0);
     const int3 end   = make_int3(s_nxmax,s_nymax,s_nvxmax);
-    Impl::for_each(begin, end, advect_1D_vy_functor(conf, fn, fnp1, ef, dt));
+    Impl::for_each<default_iterate_layout>(begin, end, advect_1D_vy_functor(conf, fn, fnp1, ef, dt));
   };
 
-  void print_fxvx(Config *conf, const RealView4D &fn, int iter) {
+  void print_fxvx(Config *conf, RealView4D &fn, int iter) {
     Domain* dom = &(conf->dom_);
     char filename[128];
     printf("print_fxvx %d\n", iter);
@@ -394,6 +394,8 @@ static inline void lag_basis(const double px, double * coef) {
     
     const int ivy = dom->nxmax_[3] / 2;
     const int iy = 0;
+
+    fn.updateSelf();
     
     for(int ivx = 0; ivx < dom->nxmax_[2]; ivx++)
     {

@@ -2,7 +2,6 @@ file(GLOB SOURCES "*.cpp")
 
 # Find libraries
 find_package(mdspan CONFIG REQUIRED)
-find_package(layout_contiguous 0.1 CONFIG REQUIRED)
 
 add_executable(vlp4d ${SOURCES})
 
@@ -25,7 +24,7 @@ else()
 endif()
 
 # Link mdspan
-target_link_libraries(vlp4d PUBLIC std::mdspan layout_contiguous::layout_contiguous math_lib)
+target_link_libraries(vlp4d PUBLIC std::mdspan math_lib)
 
 # Compiler options
 target_compile_options(vlp4d PUBLIC -O3)

@@ -1,5 +1,5 @@
 #include "efield.hpp"
-#include "thrust_parallel_for.hpp"
+#include "Parallel_For.hpp"
 
 // field init
 Efield::Efield(Config *conf, shape_nd<2> dim) {
@@ -51,13 +51,13 @@ void Efield::solve_poisson_fftw(float64 xmax, float64 ymax) {
   const complex128 I = complex128(0.0, 1.0);
 
   // Access to mdspan
-  auto rho = rho_.device_mdspan();
-  auto ex  = ex_.device_mdspan();
-  auto ey  = ey_.device_mdspan();
-  auto rho_hat = rho_hat_.device_mdspan();
-  auto ex_hat  = ex_hat_.device_mdspan();
-  auto ey_hat  = ey_hat_.device_mdspan();
-  auto filter = filter_.device_mdspan();
+  auto rho = rho_.mdspan();
+  auto ex  = ex_.mdspan();
+  auto ey  = ey_.mdspan();
+  auto rho_hat = rho_hat_.mdspan();
+  auto ex_hat  = ex_hat_.mdspan();
+  auto ey_hat  = ey_hat_.mdspan();
+  auto filter = filter_.mdspan();
 
   // Forward 2D FFT (Real to Complex)
   fft_->rfft2(rho.data(), rho_hat.data());
@@ -94,8 +94,6 @@ void Efield::solve_poisson_fftw(float64 xmax, float64 ymax) {
     }
   };
 
-  //Iterate_policy<1> policy1d(nx1h);
-  //Impl::for_each(policy1d, solve_poisson);
   const int1 begin = make_int1(0);
   const int1 end   = make_int1(nx1h);
   Impl::for_each(begin, end, solve_poisson);

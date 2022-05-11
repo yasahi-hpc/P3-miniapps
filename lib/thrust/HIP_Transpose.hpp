@@ -12,13 +12,14 @@
 #include <thrust/complex.h>
 #include <rocblas.h>
 #include <type_traits>
-#include <layout_contiguous/layout_contiguous.hpp>
+#include <experimental/mdspan>
 #include "../HIP_Helper.hpp"
 
 template <typename RealType> using Complex = thrust::complex<RealType>;
+namespace stdex = std::experimental;
 
 namespace Impl {
-  template <typename ScalarType, class LayoutPolicy = Kokkos::LayoutLeft,
+  template <typename ScalarType, class LayoutPolicy = stdex::layout_left,
             std::enable_if_t<std::is_same_v<ScalarType, float           > ||
                              std::is_same_v<ScalarType, double          > ||
                              std::is_same_v<ScalarType, Complex<float>  > ||
@@ -37,7 +38,7 @@ namespace Impl {
       Transpose() = delete;
 
       Transpose(int row, int col) : row_(row), col_(col) {
-        if(std::is_same_v<array_layout, Kokkos::LayoutRight>) {
+        if(std::is_same_v<array_layout, stdex::layout_right>) {
           row_ = col;
           col_ = row;
         }

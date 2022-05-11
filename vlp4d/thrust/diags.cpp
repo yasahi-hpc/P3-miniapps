@@ -1,7 +1,7 @@
-#include "diags.hpp"
 #include <cstdio>
-#include <thrust/transform_reduce.h>
-#include "thrust_parallel_for.hpp"
+#include "diags.hpp"
+#include "Parallel_Reduce.hpp"
+#include "utils.hpp"
 
 Diags::Diags(Config *conf) {
   const int nbiter = conf->dom_.nbiter_ + 1;
@@ -13,52 +13,36 @@ Diags::Diags(Config *conf) {
 void Diags::compute(Config *conf, Efield *ef, int iter) {
   const Domain *dom = &conf->dom_;
   int nx = dom->nxmax_[0], ny = dom->nxmax_[1];
-  const int n = nx * ny;
 
   assert(iter >= 0 && iter <= dom->nbiter_);
-  auto _rho = ef->rho_.device_mdspan();
-  auto _ex  = ef->ex_.device_mdspan();
-  auto _ey  = ef->ey_.device_mdspan();
+  auto _rho = ef->rho_.mdspan();
+  auto _ex  = ef->ex_.mdspan();
+  auto _ey  = ef->ey_.mdspan();
 
   using moment_type = thrust::tuple<float64, float64>;
   moment_type zeros = {0, 0}, moments = {0, 0};
-  if(std::is_same_v<default_iterate_layout, layout_contiguous_at_left>) {
-    moments = thrust::transform_reduce(thrust::device,
-                                       counting_iterator(0), counting_iterator(0)+n,
-                                       [=] MDSPAN_FORCE_INLINE_FUNCTION (const int idx) {
-                                         const int ix = idx % nx, iy = idx / nx;
-                                         const float64 eex = _ex(ix, iy);
-                                         const float64 eey = _ey(ix, iy);
-                                         const float64 rho = _rho(ix, iy);
-                                         const float64 nrj  = eex*eex + eey*eey;
-                                         return thrust::tuple<float64, float64> {rho, nrj};
-                                       },
-                                       zeros,
-                                       [=] MDSPAN_FORCE_INLINE_FUNCTION (const moment_type &left, const moment_type &right) {
-                                        return moment_type {thrust::get<0>(left) + thrust::get<0>(right),
-                                                            thrust::get<1>(left) + thrust::get<1>(right)
-                                                           };
-                                       }
-                                   );
-  } else {
-    moments = thrust::transform_reduce(thrust::device,
-                                       counting_iterator(0), counting_iterator(0)+n,
-                                       [=] MDSPAN_FORCE_INLINE_FUNCTION (const int idx) {
-                                         const int iy = idx % ny, ix = idx / ny;
-                                         const float64 eex = _ex(ix, iy);
-                                         const float64 eey = _ey(ix, iy);
-                                         const float64 rho = _rho(ix, iy);
-                                         const float64 nrj  = eex*eex + eey*eey;
-                                         return thrust::tuple<float64, float64> {rho, nrj};
-                                       },
-                                       zeros,
-                                       [=] MDSPAN_FORCE_INLINE_FUNCTION (const moment_type &left, const moment_type &right) {
-                                        return moment_type {thrust::get<0>(left) + thrust::get<0>(right),
-                                                            thrust::get<1>(left) + thrust::get<1>(right)
-                                                           };
-                                       }
-                                   );
-  }
+
+  auto moment_kernel = 
+    [=] MDSPAN_FORCE_INLINE_FUNCTION (const int ix, const int iy) {
+      const float64 eex = _ex(ix, iy);
+      const float64 eey = _ey(ix, iy);
+      const float64 rho = _rho(ix, iy);
+      const float64 nrj  = eex*eex + eey*eey;
+      return moment_type {rho, nrj};
+  };
+
+  auto binary_operator =
+    [=] MDSPAN_FORCE_INLINE_FUNCTION (const moment_type &left, const moment_type &right) {
+      return moment_type {thrust::get<0>(left) + thrust::get<0>(right),
+                          thrust::get<1>(left) + thrust::get<1>(right)
+                         };
+  };
+
+  int2 begin = make_int2(0, 0);
+  int2 end   = make_int2(nx, ny);
+  Impl::transform_reduce<default_iterate_layout>(begin, end, binary_operator, moment_kernel, moments);
+  synchronize();
+
   float64 iter_mass = thrust::get<0>(moments);
   float64 iter_nrj  = thrust::get<1>(moments);
 

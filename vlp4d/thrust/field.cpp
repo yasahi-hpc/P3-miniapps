@@ -1,5 +1,5 @@
 #include "field.hpp"
-#include "thrust_parallel_for.hpp"
+#include "Parallel_For.hpp"
 
 void lu_solve_poisson(Config *conf, Efield *ef, Diags *dg, int iter);
 
@@ -10,13 +10,13 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
   int nvx = dom->nxmax_[2], nvy = dom->nxmax_[3];
   float64 dvx = dom->dx_[2], dvy = dom->dx_[3];
 
-  auto _fn = fn.device_mdspan();
-  auto _rho = ef->rho_.device_mdspan();
+  auto _fn = fn.mdspan();
+  auto _rho = ef->rho_.mdspan();
 
-  auto integral = [=] MDSPAN_FORCE_INLINE_FUNCTION (const unsigned int ix, const unsigned int iy) {
+  auto integral = [=] MDSPAN_FORCE_INLINE_FUNCTION (const int ix, const int iy) {
     float64 sum = 0.0;
-    for(unsigned int ivy=0; ivy<nvy; ivy++) {
-      for(unsigned int ivx=0; ivx<nvx; ivx++) {
+    for(int ivy=0; ivy<nvy; ivy++) {
+      for(int ivx=0; ivx<nvx; ivx++) {
         sum += _fn(ix, iy, ivx, ivy);
       }
     }
@@ -28,7 +28,7 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
   const int2 begin = make_int2(0, 0);
   const int2 end = make_int2(nx, ny);
  
-  Impl::for_each(begin, end, integral);
+  Impl::for_each<default_iterate_layout>(begin, end, integral);
 };
 
 void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
@@ -38,9 +38,9 @@ void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
   double dx = dom->dx_[0], dy = dom->dx_[1];
   double minPhyx = dom->minPhy_[0], minPhyy = dom->minPhy_[1];
 
-  auto rho = ef->rho_.device_mdspan();
-  auto ex  = ef->ex_.device_mdspan();
-  auto ey  = ef->ey_.device_mdspan();
+  auto rho = ef->rho_.mdspan();
+  auto ex  = ef->ex_.mdspan();
+  auto ey  = ef->ey_.mdspan();
 
   //Iterate_policy<2> policy2d({0, 0}, {nx, ny});
   const int2 begin = make_int2(0, 0);
@@ -49,14 +49,14 @@ void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
   switch(dom->idcase_)
   {
     case 2:
-        Impl::for_each(begin, end,
+        Impl::for_each<default_iterate_layout>(begin, end,
           [=] MDSPAN_FORCE_INLINE_FUNCTION (const int ix, const int iy){
             ex(ix, iy) = -(minPhyx + ix * dx);
             ey(ix, iy) = 0.;
           });
         break;
     case 6:
-        Impl::for_each(begin, end,
+        Impl::for_each<default_iterate_layout>(begin, end,
           [=] MDSPAN_FORCE_INLINE_FUNCTION (const int ix, const int iy){
             ey(ix, iy) = -(minPhyy + iy * dy);
             ex(ix, iy) = 0.;
@@ -64,7 +64,7 @@ void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
         break;
     case 10:
     case 20:
-        Impl::for_each(begin, end,
+        Impl::for_each<default_iterate_layout>(begin, end,
           [=] MDSPAN_FORCE_INLINE_FUNCTION (const int ix, const int iy){
             rho(ix, iy) -= 1.;
           });
