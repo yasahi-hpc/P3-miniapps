@@ -5,7 +5,8 @@
 #include <numeric>
 #include <algorithm>
 #include "types.hpp"
-#include "thrust_parallel_for.hpp"
+#include "Parallel_For.hpp"
+#include "Parallel_Reduce.hpp"
 
 namespace Config {
   constexpr int nx = 512;
@@ -31,7 +32,18 @@ namespace Config {
 void performance(double GFlops, double memory_GB, double seconds);
 
 void performance(double GFlops, double memory_GB, double seconds) {
+  #if defined( ENABLE_CUDA ) && ! defined( ENABLE_THRUST )
+    std::string backend = "CUDA";
+  #elif defined( ENABLE_HIP ) && ! defined( ENABLE_THRUST )
+    std::string backend = "HIP";
+  #elif defined( ENABLE_OPENMP ) && ! defined( ENABLE_THRUST )
+    std::string backend = "OPENMP";
+  #else
+    std::string backend = "THRUST";
+  #endif
+
   double bandwidth = memory_GB/seconds;
+  std::cout << backend + " backend" << std::endl;
   std::cout << "Elapsed time " << seconds << " [s]" << std::endl;
   std::cout << "Bandwidth " << bandwidth << " [GB/s]" << std::endl; 
   std::cout << GFlops / seconds << " [GFlops]" << std::endl; 
@@ -90,19 +102,20 @@ void finalize(ScalarType time,
   un.updateDevice();
 
   // Check error
-  auto u_ptr  = u.device_data();
-  auto un_ptr = un.device_data();
-  const int n = u.size();
-  ScalarType L2_norm = sqrt( thrust::transform_reduce(thrust::device,
-                                                      counting_iterator(0),
-                                                      counting_iterator(0) + n,
-                                                      [=] MDSPAN_FORCE_INLINE_FUNCTION (const unsigned int i) {
-                                                        auto diff = u_ptr[i] - un_ptr[i];
-                                                        return diff*diff;
-                                                      },
-                                                      0.0,
-                                                      thrust::plus<ScalarType>()
-                                                     ));
+  auto _u  = u.mdspan();
+  auto _un = un.mdspan();
+  ScalarType L2_norm = 0.0;
+
+  int3 begin = make_int3(0, 0, 0);
+  int3 end   = make_int3(Config::nx, Config::ny, Config::nz);
+
+  auto L2norm_kernel = [=] MDSPAN_FORCE_INLINE_FUNCTION (const int ix, const int iy, const int iz) {
+    auto diff = _un(ix, iy, iz) - _u(ix, iy, iz);
+    return diff * diff;
+  };
+
+  Impl::transform_reduce<default_iterate_layout>(begin, end, thrust::plus<ScalarType>(), L2norm_kernel, L2_norm);
+
   std::cout << "L2_norm: " << L2_norm << std::endl;
 }
 
@@ -130,11 +143,9 @@ void step(const View3D<ScalarType> &u, View3D<ScalarType> &un) {
                    + _u(i, j, kp1) + _u(i, j, km1) - 6 * _u(i, j, k));
     };
 
-    //Iterate_policy<3> policy3d({0, 0, 0}, {nx, ny, nz});
-    //Impl::for_each(policy3d, heat_eq);
     const int3 begin = make_int3(0, 0, 0);
     const int3 end   = make_int3(nx, ny, nz);
-    Impl::for_each(begin, end, heat_eq);
+    Impl::for_each<default_iterate_layout>(begin, end, heat_eq);
 
   #else
     // Access to the data through raw pointers
@@ -160,8 +171,6 @@ void step(const View3D<ScalarType> &u, View3D<ScalarType> &un) {
                    + _u[ix  + iy*nx  + kp1*nx*ny] + _u[ix  + iy*nx  + km1*nx*ny] - 6 * _u[idx]);
     };
 
-    //Iterate_policy<1> policy1d(nx*ny*nz);
-    //Impl::for_each(policy1d, heat_eq);
     const int1 begin = make_int1(0);
     const int1 end   = make_int1(nx*ny*nz);
     Impl::for_each(begin, end, heat_eq);
