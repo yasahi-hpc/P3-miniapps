@@ -73,7 +73,10 @@ public:
   }
 
   ~Boundary() {
-    #if defined( ENABLE_OPENMP_OFFLOAD )
+    #if defined(ENABLE_OPENMP_OFFLOAD)
+      #pragma omp target exit data map(delete: x_send_halo_[0:1], x_recv_halo_[0:1])
+      #pragma omp target exit data map(delete: y_send_halo_[0:1], y_recv_halo_[0:1])
+      #pragma omp target exit data map(delete: z_send_halo_[0:1], z_recv_halo_[0:1])
       #pragma omp target exit data map(delete: this[0:1])
     #endif
     delete x_send_halo_;
@@ -112,6 +115,12 @@ private:
 
     z_send_halo_ = new Halo("z_send", {shape_[0], shape_[1]});
     z_recv_halo_ = new Halo("z_recv", {shape_[0], shape_[1]});
+
+    #if defined(ENABLE_OPENMP_OFFLOAD)
+      #pragma omp target enter data map(alloc: x_send_halo_[0:1], x_recv_halo_[0:1])
+      #pragma omp target enter data map(alloc: y_send_halo_[0:1], y_recv_halo_[0:1])
+      #pragma omp target enter data map(alloc: z_send_halo_[0:1], z_recv_halo_[0:1])
+    #endif
   }
 
   /* Pack data to send buffers
