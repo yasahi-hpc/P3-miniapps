@@ -121,7 +121,7 @@ private:
     // Compute offsets
     int_type total_offset = 0;
     size_type total_extents = 1;
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       for(size_type i=0; i<extents_type::rank(); i++) {
         total_offset -= offsets[i] * total_extents;
         total_extents *= extents[i];
@@ -224,13 +224,20 @@ public:
   constexpr int rank_dynamic() noexcept { return extents_type::rank_dynamic(); }
   constexpr size_type size() const noexcept { return host_mdspan_.size(); }
   constexpr extents_type extents() const noexcept { return host_mdspan_.extents(); }
+  constexpr size_type extent(size_t r) const noexcept { return host_mdspan_.extents().extent(r); }
   int_type total_offset() const noexcept { return total_offset_; }
   std::array<int_type, extents_type::rank()> offsets() const noexcept { return offsets_; }
+  int_type offset(size_t r) const noexcept { return offsets_[r]; }
 
+  value_type *data() { return device_mdspan_.data() - total_offset_; }
+  const value_type *data() const { return device_mdspan_.data() - total_offset_; }
   value_type *host_data() { return host_mdspan_.data() - total_offset_; }
   const value_type *host_data() const { return host_mdspan_.data() - total_offset_; }
   value_type *device_data() { return device_mdspan_.data() - total_offset_; }
   const value_type *device_data() const { return device_mdspan_.data() - total_offset_; }
+
+  mdspan_type mdspan() const { return device_mdspan_; }
+  mdspan_type &mdspan() { return device_mdspan_; }
   mdspan_type host_mdspan() const { return host_mdspan_; }
   mdspan_type &host_mdspan() { return host_mdspan_; }
   mdspan_type device_mdspan() const { return device_mdspan_; }
@@ -238,8 +245,8 @@ public:
 
   std::array<int_type, extents_type::rank()> begin() const noexcept { return offsets_; }
   std::array<int_type, extents_type::rank()> end() const noexcept { return ends_; }
-  int_type begin(size_t i) const noexcept { return offsets_[i]; }
-  int_type end(size_t i) const noexcept { return ends_[i]; }
+  int_type begin(size_t r) const noexcept { return offsets_[r]; }
+  int_type end(size_t r) const noexcept { return ends_[r]; }
 
   inline void setName(const std::string &name) { name_ = name; }
   inline void setIsEmpty(bool is_empty) { is_empty_ = is_empty; }
@@ -249,6 +256,11 @@ public:
 
   void updateDevice() { device_vector_ = host_vector_; }
   void updateSelf() { host_vector_ = device_vector_; }
+
+  void fill(const ElementType value = 0) {
+    thrust::fill(device_vector_.begin(), device_vector_.end(), value);
+    updateSelf();
+  }
 
   template <typename... I>
   inline ElementType& operator()(I... indices) noexcept {

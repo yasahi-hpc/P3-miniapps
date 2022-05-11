@@ -1,9 +1,9 @@
 set(PROGRAMMING_MODEL AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 
 if(PROGRAMMING_MODEL STREQUAL "CUDA")
-    add_subdirectory(cuda)
+    add_subdirectory(thrust)
 elseif(PROGRAMMING_MODEL STREQUAL "HIP")
-    add_subdirectory(hip)
+    add_subdirectory(thrust)
 elseif(PROGRAMMING_MODEL STREQUAL "OPENMP")
     add_subdirectory(openmp)
 elseif(PROGRAMMING_MODEL STREQUAL "OPENACC")

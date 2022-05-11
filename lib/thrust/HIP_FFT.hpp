@@ -13,12 +13,14 @@
 #include <rocfft.h>
 #include <type_traits>
 #include <thrust/complex.h>
+#include <experimental/mdspan>
 #include "../HIP_Helper.hpp"
 
 template <typename RealType> using Complex = thrust::complex<RealType>;
+namespace stdex = std::experimental;
 
 namespace Impl {
-  template <typename RealType, class LayoutPolicy = layout_contiguous_at_left,
+  template <typename RealType, class LayoutPolicy = stdex::layout_left,
             typename std::enable_if<std::is_same<RealType, float>::value ||
                                     std::is_same<RealType, double>::value 
                                    >::type * = nullptr> 
@@ -112,7 +114,7 @@ namespace Impl {
 
     private:
     void init() {
-      static_assert(std::is_same<array_layout, Kokkos::LayoutLeft>::value, "The input Layout must be LayoutLeft");
+      static_assert(std::is_same<array_layout, stdex::layout_left>::value, "The input Layout must be LayoutLeft");
       nx1h_ = nx1_/2 + 1;
       nx2h_ = nx2_/2 + 1;
 

@@ -223,10 +223,11 @@ public:
 public:
   const std::string name() const noexcept {return name_;}
   bool is_empty() const noexcept { return is_empty_; }
-  constexpr int rank() noexcept { return extents_type::rank(); }
-  constexpr int rank_dynamic() noexcept { return extents_type::rank_dynamic(); }
+  constexpr size_t rank() noexcept { return extents_type::rank(); }
+  constexpr size_t rank_dynamic() noexcept { return extents_type::rank_dynamic(); }
   constexpr size_type size() const noexcept { return mdspan_.size(); }
   constexpr extents_type extents() const noexcept { return mdspan_.extents(); }
+  constexpr size_type extent(size_t r) const noexcept { return mdspan_.extents().extent(r); }
   int_type total_offset() const noexcept { return total_offset_; }
   std::array<int_type, extents_type::rank()> offsets() const noexcept { return offsets_; }
 

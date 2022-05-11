@@ -128,9 +128,6 @@ private:
   MPI_Datatype mpi_data_type_;
 
   // Halo data
-  //std::vector<Halo> x_halo_, y_halo_, z_halo_;
-  //std::vector<Halo> send_halos_;
-  //std::vector<Halo> recv_halos_;
   Halo *x_send_halo_, *x_recv_halo_;
   Halo *y_send_halo_, *y_recv_halo_;
   Halo *z_send_halo_, *z_recv_halo_;
