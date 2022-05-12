@@ -3,13 +3,10 @@
 
 #include "Config.hpp"
 #include "../Timer.hpp"
-#include "boundary.hpp"
 #include "tiles.h"
 
 template <class View3DType>
-void step(Config &conf, Boundary &boundary, View3DType &u, View3DType &un, std::vector<Timer*> &timers) {
-  boundary.exchangeHalos(u, timers);
-
+void step(Config &conf, View3DType &u, View3DType &un, std::vector<Timer*> &timers) {
   const int nx = conf.nx, ny = conf.ny, nz = conf.nz;
   const float64 coef = conf.Kappa * conf.dt / (conf.dx*conf.dx);
   
@@ -20,11 +17,18 @@ void step(Config &conf, Boundary &boundary, View3DType &u, View3DType &un, std::
                            );
 
   auto heat_eq = KOKKOS_LAMBDA (const int ix, const int iy, const int iz) {
+    const int ixp1 = (ix + nx + 1) % nx;
+    const int ixm1 = (ix + nx - 1) % nx;
+    const int iyp1 = (iy + ny + 1) % ny;
+    const int iym1 = (iy + ny - 1) % ny;
+    const int izp1 = (iz + nz + 1) % nz;
+    const int izm1 = (iz + nz - 1) % nz;
+
     un(ix, iy, iz) = u(ix, iy, iz)
-      + coef * ( u(ix+1, iy, iz) + u(ix-1, iy, iz)
-               + u(ix, iy+1, iz) + u(ix, iy-1, iz)
-               + u(ix, iy, iz+1) + u(ix, iy, iz-1)
-               - 6. * u(ix, iy, iz) );
+                   + coef * ( u(ixp1, iy, iz) + u(ixm1, iy, iz)
+                            + u(ix, iyp1, iz) + u(ix, iym1, iz)
+                            + u(ix, iy, izp1) + u(ix, iy, izm1)
+                            - 6. * u(ix, iy, iz) );
   };
 
   Kokkos::parallel_for("heat", heat_policy3d, heat_eq);

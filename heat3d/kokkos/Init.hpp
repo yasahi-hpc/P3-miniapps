@@ -2,24 +2,23 @@
 #define __INIT_HPP__
 
 #include "Config.hpp"
-#include "boundary.hpp"
 #include "types.hpp"
 #include "tiles.h"
 
 // Prototypes
-void initialize(Config &conf, Boundary &boundary,
+void initialize(Config &conf,
                 RealView1D &x, RealView1D &y, RealView1D &z,
                 RealOffsetView3D &u, RealOffsetView3D &un
                );
 
-void finalize(Config &conf, Boundary &boundary, float64 time,
+void finalize(Config &conf, float64 time,
               RealView1D &x, RealView1D &y, RealView1D &z,
               RealOffsetView3D &u, RealOffsetView3D &un
              );
 
 void performance(Config &conf, double seconds);
 
-void initialize(Config &conf, Boundary &boundary,
+void initialize(Config &conf,
                 RealView1D &x, RealView1D &y, RealView1D &z,
                 RealOffsetView3D &u, RealOffsetView3D &un) {
   using real_type = RealView1D::value_type;
@@ -27,8 +26,8 @@ void initialize(Config &conf, Boundary &boundary,
   y = RealView1D("y", conf.ny);
   z = RealView1D("z", conf.nz);
  
-  u  = RealOffsetView3D("u", {-1, conf.nx}, {-1, conf.ny}, {-1, conf.nz});
-  un = RealOffsetView3D("u", {-1, conf.nx}, {-1, conf.ny}, {-1, conf.nz});
+  u  = RealView3D("u", conf.nx, conf.ny, conf.nz);
+  un = RealView3D("un", conf.nx, conf.ny, conf.nz);
 
   // Print information
   std::cout << "(nx, ny, nz) = " << conf.nx << ", " << conf.ny << ", " << conf.nz << "\n" << std::endl;
@@ -61,7 +60,7 @@ void initialize(Config &conf, Boundary &boundary,
   Kokkos::deep_copy(u, h_u);
 }
 
-void finalize(Config &conf, Boundary &boundary, float64 time,
+void finalize(Config &conf, float64 time,
               RealView1D &x, RealView1D &y, RealView1D &z,
               RealOffsetView3D &u, RealOffsetView3D &un) {
   using real_type = RealOffsetView3D::value_type;
