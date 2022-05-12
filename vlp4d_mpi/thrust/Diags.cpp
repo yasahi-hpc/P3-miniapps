@@ -71,7 +71,7 @@ void Diags::computeL2norm(Config *conf, RealView4D &fn, int iter) {
   using layout_type = RealView4D::layout_type;
   const Domain *dom = &conf->dom_;
   int nx_min = dom->local_nxmin_[0], ny_min = dom->local_nxmin_[1], nvx_min = dom->local_nxmin_[2], nvy_min = dom->local_nxmin_[3];
-  int nx_max = dom->local_nxmax_[0], ny_max = dom->local_nxmax_[1], nvx_max = dom->local_nxmax_[2], nvy_max = dom->local_nxmax_[3];
+  int nx_max = dom->local_nxmax_[0]+1, ny_max = dom->local_nxmax_[1]+1, nvx_max = dom->local_nxmax_[2]+1, nvy_max = dom->local_nxmax_[3]+1;
 
   auto _fn = fn.mdspan();
 
