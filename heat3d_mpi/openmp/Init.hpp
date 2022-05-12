@@ -6,6 +6,7 @@
 #include "Types.hpp"
 
 // Prototypes
+void testComm(Config &conf, Comm &comm, RealView3D &u, RealView3D &un);
 void initialize(Config &conf, Comm &comm,
                 RealView1D &x, RealView1D &y, RealView1D &z,
                 RealView3D &u, RealView3D &un
@@ -17,6 +18,85 @@ void finalize(Config &conf, Comm &comm, float64 time,
              );
 
 void performance(Config &conf, Comm &comm, float64 seconds);
+
+void testComm(Config &conf, Comm &comm, RealView3D &u, RealView3D &un) {
+  auto cart_rank = comm.cart_rank();
+  auto topology  = comm.topology();
+
+  // fill u and un
+  for(int iz=0; iz<conf.nz; iz++) {
+    for(int iy=0; iy<conf.ny; iy++) {
+      for(int ix=0; ix<conf.nx; ix++) {
+        int gix = ix + conf.nx * cart_rank.at(0);
+        int giy = iy + conf.ny * cart_rank.at(1);
+        int giz = iz + conf.nz * cart_rank.at(2);
+
+        u(ix, iy, iz)  = ((double)giz * conf.gny + (double)giy) * conf.gnx + gix;
+        un(ix, iy, iz) = ((double)giz * conf.gny + (double)giy) * conf.gnx + gix;
+      }
+    }
+  }
+
+  u.updateDevice();
+
+  // Boundary conditions
+  std::vector<Timer*> timers;
+  comm.exchangeHalos(conf, u, timers);
+
+  u.updateSelf();
+
+  auto print_error = [&](int ix, int iy, int iz, int gix, int giy, int giz) {
+    auto diff = un(ix, iy, iz) - u(ix, iy, iz);
+    if (fabs(diff) > .1) {
+      printf("Pb at rank %d (%d, %d, %d) u(%d, %d, %d): %lf, un(%d, %d, %d): %lf, error: %lf\n",
+             comm.rank(), cart_rank.at(0), cart_rank.at(1), cart_rank.at(2), ix, iy, iz, u(ix, iy, iz), gix, giy, giz, un(ix, iy, iz), diff);
+    }
+  };
+
+  // Fill halos manually
+  for(int iz=0; iz<conf.nz; iz++) {
+    for(int iy=0; iy<conf.ny; iy++) {
+      int gix_left  = 0 + conf.nx * ( ( cart_rank.at(0) + topology.at(0) + 1) % topology.at(0) );
+      int gix_right = conf.nx-1 + conf.nx * ( ( cart_rank.at(0) + topology.at(0) - 1 ) % topology.at(0) );
+      int giy = iy + conf.ny * cart_rank.at(1);
+      int giz = iz + conf.nz * cart_rank.at(2);
+
+      un(-1, iy, iz)      = ((double)giz * conf.gny + (double)giy) * conf.gnx + gix_right;
+      un(conf.nx, iy, iz) = ((double)giz * conf.gny + (double)giy) * conf.gnx + gix_left;
+
+      print_error(-1, iy, iz, gix_right, giy, giz);
+      print_error(conf.nx, iy, iz, gix_left, giy, giz);
+    }
+  }
+
+  for(int iz=0; iz<conf.nz; iz++) {
+    for(int ix=0; ix<conf.nx; ix++) {
+      int giy_left  = 0 + conf.ny * ( ( cart_rank.at(1) + topology.at(1) + 1 ) % topology.at(1) );
+      int giy_right = conf.ny-1 + conf.ny * ( ( cart_rank.at(1) + topology.at(1) - 1 ) % topology.at(1) );
+      int gix = ix + conf.nx * cart_rank.at(0);
+      int giz = iz + conf.nz * cart_rank.at(2);
+
+      un(ix, -1, iz)      = ((double)giz * conf.gny + (double)giy_right) * conf.gnx + gix;
+      un(ix, conf.ny, iz) = ((double)giz * conf.gny + (double)giy_left) * conf.gnx + gix;
+      print_error(ix, -1, iz, gix, giy_right, giz);
+      print_error(ix, conf.ny, iz, gix, giy_left, giz);
+    }
+  }
+
+  for(int iy=0; iy<conf.ny; iy++) {
+    for(int ix=0; ix<conf.nx; ix++) {
+      int giz_left  = 0 + conf.nz * ( ( cart_rank.at(2) + topology.at(2) + 1 ) % topology.at(2) );
+      int giz_right = conf.nz-1 + conf.nz * ( ( cart_rank.at(2) + topology.at(2) - 1 ) % topology.at(2) );
+      int gix = ix + conf.nx * cart_rank.at(0);
+      int giy = iy + conf.ny * cart_rank.at(1);
+
+      un(ix, iy, -1)      = ((double)giz_right * conf.gny + (double)giy) * conf.gnx + gix;
+      un(ix, iy, conf.nz) = ((double)giz_left * conf.gny + (double)giy) * conf.gnx + gix;
+      print_error(ix, iy, -1, gix, giy, giz_right);
+      print_error(ix, iy, conf.nz, gix, giy, giz_left);
+    }
+  }
+}
 
 void initialize(Config &conf, Comm &comm,
                 RealView1D &x, RealView1D &y, RealView1D &z,
@@ -44,6 +124,9 @@ void initialize(Config &conf, Comm &comm,
     std::cout << "Global (nx, ny, nz) = " << conf.gnx << ", " << conf.gny << ", " << conf.gnz << "\n" << std::endl;
   }
 
+  // Test for communication
+  testComm(conf, comm, u, un);
+
   // Initialize at host
   for(int iz=0; iz<conf.nz; iz++) {
     for(int iy=0; iy<conf.ny; iy++) {
@@ -61,9 +144,7 @@ void initialize(Config &conf, Comm &comm,
     }
   }
 
-  std::vector<Timer*> timers(1);
-  timers[TimerEnum::HaloComm] = new Timer("HaloComm");
-
+  std::vector<Timer*> timers;
   comm.exchangeHalos(conf, u, timers);
 
   x.updateDevice();

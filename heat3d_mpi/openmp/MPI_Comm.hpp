@@ -8,9 +8,6 @@
 #include "../Timer.hpp"
 #include "Types.hpp"
 #include "Config.hpp"
-//#include "Parallel_For.hpp"
-//#include "Helper.hpp"
-//#include "Utils.hpp"
 
 constexpr int UP     = 0;
 constexpr int DOWN   = 1;
@@ -43,21 +40,6 @@ MPI_Datatype get_mpi_data_type() {
 struct Halo {
   using value_type = RealView2D::value_type;
   using int_type = int;
-  /*
-  using mpi_data_type
-    = typename std::conditional_t<
-        std::is_same_v<value_type, Complex<double>>, MPI_DOUBLE_COMPLEX, 
-        typename std::conditional_t< 
-          std::is_same_v<value_type, Complex<float>>, MPI_COMPLEX,
-          typename std::conditional_t< 
-            std::is_same_v<value_type, double>, MPI_DOUBLE,
-            typename std::conditional_t< 
-              std::is_same_v<value_type, float>, MPI_FLOAT, MPI_INT
-            >,
-          >,
-        >,
-      >;
-  */
   std::string name_;
   RealView2D left_buffer_, right_buffer_;
   size_t size_;
@@ -159,7 +141,13 @@ public:
       #pragma omp target exit data map(delete: this[0:1])
     #endif
   }
+
   void cleanup() {
+    #if defined(ENABLE_OPENMP_OFFLOAD)
+     #pragma omp target exit data map(delete: x_send_halo_[0:1], x_recv_halo_[0:1])
+     #pragma omp target exit data map(delete: y_send_halo_[0:1], y_recv_halo_[0:1])
+     #pragma omp target exit data map(delete: z_send_halo_[0:1], z_recv_halo_[0:1])
+    #endif
     delete x_send_halo_;
     delete y_send_halo_;
     delete z_send_halo_;
@@ -167,6 +155,7 @@ public:
     delete y_recv_halo_;
     delete z_recv_halo_;
   }
+
   void finalize() { ::MPI_Finalize(); }
   bool is_master() { return rank_==0; }
   int size() const { return size_; }
@@ -187,15 +176,21 @@ public:
   }
 
   void exchangeHalos(const Config &conf, RealView3D &u, std::vector<Timer*> &timers) {
-    pack(conf, u);
+    bool use_timer = timers.size() > 0;
 
-    timers[HaloComm]->begin();
+    if(use_timer) timers[HaloPack]->begin();
+    pack(conf, u);
+    if(use_timer) timers[HaloPack]->end();
+
+    if(use_timer) timers[HaloComm]->begin();
     commP2P(x_recv_halo_, x_send_halo_);
     commP2P(y_recv_halo_, y_send_halo_);
     commP2P(z_recv_halo_, z_send_halo_);
-    timers[HaloComm]->end();
+    if(use_timer) timers[HaloComm]->end();
 
+    if(use_timer) timers[HaloUnpack]->begin();
     unpack(conf, u);
+    if(use_timer) timers[HaloUnpack]->end();
   }
 
 private:
@@ -240,6 +235,12 @@ private:
 
     z_send_halo_ = new Halo("z_send", {shape_[0], shape_[1]}, neighbors[TOP],  neighbors[BOTTOM], left_tag, right_tag, cart_comm, is_comm_z);
     z_recv_halo_ = new Halo("z_recv", {shape_[0], shape_[1]}, neighbors[TOP],  neighbors[BOTTOM], right_tag, left_tag, cart_comm, is_comm_z);
+
+    #if defined(ENABLE_OPENMP_OFFLOAD)
+      #pragma omp target enter data map(alloc: x_send_halo_[0:1], x_recv_halo_[0:1])
+      #pragma omp target enter data map(alloc: y_send_halo_[0:1], y_recv_halo_[0:1])
+      #pragma omp target enter data map(alloc: z_send_halo_[0:1], z_recv_halo_[0:1])
+    #endif
   }
 
   /* Pack data to send buffers
@@ -350,11 +351,20 @@ private:
     if(send->is_comm()) {
       MPI_Status  status[4];
       MPI_Request request[4];
-      MPI_Irecv(recv->left_buffer_.data(),  recv->size(), recv->type(), recv->left_rank(),  0, recv->communicator(), &request[0]);
-      MPI_Irecv(recv->right_buffer_.data(), recv->size(), recv->type(), recv->right_rank(), 1, recv->communicator(), &request[1]);
-      MPI_Isend(send->left_buffer_.data(),  send->size(), send->type(), send->left_rank(),  1, send->communicator(), &request[2]);
-      MPI_Isend(send->right_buffer_.data(), send->size(), send->type(), send->right_rank(), 0, send->communicator(), &request[3]);
-      MPI_Waitall( 4, request, status );
+      auto *recv_left_buffer  = recv->left_buffer_.data();
+      auto *recv_right_buffer = recv->right_buffer_.data();
+      auto *send_left_buffer  = send->left_buffer_.data();
+      auto *send_right_buffer = send->right_buffer_.data();
+      #if defined( ENABLE_OPENMP_OFFLOAD )
+        #pragma omp target data use_device_ptr(recv_left_buffer, recv_right_buffer, send_left_buffer, send_right_buffer)
+      #endif
+      {
+        MPI_Irecv(recv_left_buffer,  recv->size(), recv->type(), recv->left_rank(),  0, recv->communicator(), &request[0]);
+        MPI_Irecv(recv_right_buffer, recv->size(), recv->type(), recv->right_rank(), 1, recv->communicator(), &request[1]);
+        MPI_Isend(send_left_buffer,  send->size(), send->type(), send->left_rank(),  1, send->communicator(), &request[2]);
+        MPI_Isend(send_right_buffer, send->size(), send->type(), send->right_rank(), 0, send->communicator(), &request[3]);
+        MPI_Waitall( 4, request, status );
+      }
     } else {
       recv->left_buffer_.swap(  send->right_buffer_ );
       recv->right_buffer_.swap( send->left_buffer_ );
