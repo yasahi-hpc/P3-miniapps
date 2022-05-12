@@ -28,7 +28,7 @@ namespace Impl {
       Transpose() = delete;
     
       Transpose(int row, int col) : row_(row), col_(col) {
-        if(std::is_same_v<array_layout, stdex::layout_right>) {
+        if(std::is_same_v<array_layout, layout_right>) {
           row_ = col;
           col_ = row;
         }
