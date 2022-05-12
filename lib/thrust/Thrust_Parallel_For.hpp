@@ -8,10 +8,25 @@ using counting_iterator = thrust::counting_iterator<int>;
 
 namespace Impl {
   template < class FunctorType >
+  void for_each(const int end, const FunctorType f) {
+    static_assert( std::is_invocable_v< FunctorType, int > );
+    thrust::for_each(thrust::device,
+                     counting_iterator(0), counting_iterator(0)+end,
+                     [=] MDSPAN_FORCE_INLINE_FUNCTION (const int ix) {
+                       f(ix);
+                     });
+  }
+
+  template < class FunctorType >
   void for_each(const int begin, const int end, const FunctorType f) {
-    const int1 _begin = make_int1(begin);
-    const int1 _end   = make_int1(end);
-    for_each(_begin, _end, f);
+    static_assert( std::is_invocable_v< FunctorType, int > );
+    const unsigned int n = end - begin;
+    thrust::for_each(thrust::device,
+                     counting_iterator(0), counting_iterator(0)+n,
+                     [=] MDSPAN_FORCE_INLINE_FUNCTION (const int i) {
+                       const int ix = i + begin;
+                       f(ix);
+                     });
   }
 
   template < class FunctorType >

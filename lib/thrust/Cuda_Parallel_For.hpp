@@ -93,6 +93,26 @@ namespace Impl {
 
   template < class FunctorType,
              std::enable_if_t<std::is_invocable_v< FunctorType, int >, std::nullptr_t> = nullptr >
+  void for_each( const int end, FunctorType && f, const size_t _nb_threads=nb_threads ) {
+    const int n = end;
+    const dim3 blocks(_nb_threads, 1, 1);
+    const dim3 grids( (n-1) / blocks.x + 1, 1, 1);
+
+    kernel_for_each<<<grids, blocks>>>(0, end, std::forward<FunctorType>(f));
+  }
+
+  template < class FunctorType,
+             std::enable_if_t<std::is_invocable_v< FunctorType, int >, std::nullptr_t> = nullptr >
+  void for_each( const int begin, const int end, FunctorType && f, const size_t _nb_threads=nb_threads ) {
+    int n = end - begin;
+    const dim3 blocks(_nb_threads, 1, 1);
+    const dim3 grids( (n-1) / blocks.x + 1, 1, 1);
+
+    kernel_for_each<<<grids, blocks>>>(begin, end, std::forward<FunctorType>(f));
+  }
+
+  template < class FunctorType,
+             std::enable_if_t<std::is_invocable_v< FunctorType, int >, std::nullptr_t> = nullptr >
   void for_each( const int1 begin, const int1 end, FunctorType && f, const size_t _nb_threads=nb_threads ) {
     int begin0 = begin.x, end0 = end.x;
     int n = end0 - begin0;
