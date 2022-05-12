@@ -15,7 +15,7 @@ namespace Spline {
   // Common interface for OpenACC/OpenMP, fn_tmp is used as a buffer
   // Layout Left
   template <class LayoutPolicy, 
-            typename std::enable_if_t< std::is_same_v<LayoutPolicy, layout_contiguous_at_left>, std::nullptr_t> = nullptr
+            typename std::enable_if_t< std::is_same_v<LayoutPolicy, stdex::layout_left>, std::nullptr_t> = nullptr
   >
   void computeCoeff(RealView4D &fn, RealView4D &fn_tmp) {
     const float64 sqrt3 = sqrt(3);
@@ -201,7 +201,7 @@ namespace Spline {
 
   // Layout Right
   template <class LayoutPolicy, 
-            typename std::enable_if_t< std::is_same_v<LayoutPolicy, layout_contiguous_at_right>, std::nullptr_t> = nullptr
+            typename std::enable_if_t< std::is_same_v<LayoutPolicy, stdex::layout_right>, std::nullptr_t> = nullptr
   >
   void computeCoeff(RealView4D &fn, RealView4D &fn_tmp) {
     const float64 sqrt3 = sqrt(3);
@@ -400,7 +400,7 @@ namespace Spline {
     const int nvx = nvx_max - nvx_min;
     const int nvy = nvy_max - nvy_min;
 
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       // Layout left
       #if defined( ENABLE_OPENACC )
         RealView4D fn_trans("fn_trans", {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
@@ -448,7 +448,7 @@ namespace Spline {
     const int nvx = nvx_max - nvx_min;
     const int nvy = nvy_max - nvy_min;
 
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       // Layout left
       #if defined( ENABLE_OPENACC )
         RealView4D fn_tmp("fn_tmp", {nx,ny,nvx,nvy}, {nx_min,ny_min,nvx_min,nvy_min});
