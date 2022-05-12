@@ -2,9 +2,9 @@
 #define __FFT_HPP__
 
 #if defined( _NVHPC_STDPAR_GPU )
-  #include "Cuda_FFT.hpp"
+  #include "../Cuda_FFT.hpp"
 #else
-  #include "OpenMP_FFT.hpp"
+  #include "../OpenMP_FFT.hpp"
 #endif
 
 #endif
