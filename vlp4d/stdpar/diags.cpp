@@ -1,9 +1,6 @@
 #include "diags.hpp"
-#include "Parallel_For.hpp"
+#include "Parallel_Reduce.hpp"
 #include <cstdio>
-#include <numeric>
-#include <execution>
-#include <algorithm>
 
 Diags::Diags(Config *conf) {
   const int nbiter = conf->dom_.nbiter_ + 1;
@@ -15,7 +12,6 @@ Diags::Diags(Config *conf) {
 void Diags::compute(Config *conf, Efield *ef, int iter) {
   const Domain *dom = &conf->dom_;
   int nx = dom->nxmax_[0], ny = dom->nxmax_[1];
-  const int n = nx * ny;
 
   assert(iter >= 0 && iter <= dom->nbiter_);
   auto _ex = ef->ex_.mdspan();
@@ -23,44 +19,27 @@ void Diags::compute(Config *conf, Efield *ef, int iter) {
   auto _rho = ef->rho_.mdspan();
  
   using moment_type = std::tuple<float64, float64>;
-  moment_type zeros = {0, 0}, moments = {0, 0};
-  if(std::is_same_v<default_iterate_layout, stdex::layout_left>) {
-    moments = std::transform_reduce(std::execution::par_unseq,
-                                    counting_iterator(0), counting_iterator(n),
-                                    zeros,
-                                    [=] (const moment_type &left, const moment_type &right) {
-                                      return moment_type {std::get<0>(left) + std::get<0>(right),
-                                                          std::get<1>(left) + std::get<1>(right)
-                                                         };
-                                    },
-                                    [=] (const int idx) {
-                                      const int ix = idx % nx, iy = idx / nx;
-                                      const float64 eex = _ex(ix, iy);
-                                      const float64 eey = _ey(ix, iy);
-                                      const float64 rho = _rho(ix, iy);
-                                      const float64 nrj  = eex*eex + eey*eey;
-                                      return std::tuple<float64, float64> {rho, nrj};
-                                    }
-                                   );
-  } else {
-    moments = std::transform_reduce(std::execution::par_unseq,
-                                    counting_iterator(0), counting_iterator(n),
-                                    zeros,
-                                    [=] (const moment_type &left, const moment_type &right) {
-                                      return moment_type {std::get<0>(left) + std::get<0>(right),
-                                                          std::get<1>(left) + std::get<1>(right)
-                                                         };
-                                    },
-                                    [=] (const int idx) {
-                                      const int iy = idx % ny, ix = idx / ny;
-                                      const float64 eex = _ex(ix, iy);
-                                      const float64 eey = _ey(ix, iy);
-                                      const float64 rho = _rho(ix, iy);
-                                      const float64 nrj  = eex*eex + eey*eey;
-                                      return std::tuple<float64, float64> {rho, nrj};
-                                    }
-                                   );
-  }
+  moment_type moments = {0, 0};
+
+  Iterate_policy<2> policy2d({0, 0}, {nx, ny});
+
+  auto moment_kernel =
+    [=](const int ix, const int iy) {
+      const float64 eex = _ex(ix, iy);
+      const float64 eey = _ey(ix, iy);
+      const float64 rho = _rho(ix, iy);
+      const float64 nrj  = eex*eex + eey*eey;
+      return moment_type {rho, nrj};
+  };
+ 
+  auto binary_operator =
+    [=] (const moment_type &left, const moment_type &right) {
+      return moment_type {std::get<0>(left) + std::get<0>(right),
+                          std::get<1>(left) + std::get<1>(right),
+                         };
+  };
+ 
+  Impl::transform_reduce(policy2d, binary_operator, moment_kernel, moments);
 
   float64 iter_mass = std::get<0>(moments);
   float64 iter_nrj  = std::get<1>(moments);

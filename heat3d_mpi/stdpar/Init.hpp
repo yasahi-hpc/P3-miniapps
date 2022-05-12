@@ -4,7 +4,7 @@
 #include <cstdio>
 #include "Config.hpp"
 #include "MPI_Comm.hpp"
-#include "Parallel_For.hpp"
+#include "Parallel_Reduce.hpp"
 
 // Prototypes
 void testComm(Config &conf, Comm &comm, RealView3D &u, RealView3D &un);
@@ -39,8 +39,7 @@ void testComm(Config &conf, Comm &comm, RealView3D &u, RealView3D &un) {
   }
 
   // Boundary conditions
-  std::vector<Timer*> timers(1);
-  timers[TimerEnum::HaloComm] = new Timer("HaloComm");
+  std::vector<Timer*> timers;
   comm.exchangeHalos(u, timers);
 
   auto print_error = [&](int ix, int iy, int iz, int gix, int giy, int giz) {
@@ -142,8 +141,7 @@ void initialize(Config &conf, Comm &comm,
     }
   }
 
-  std::vector<Timer*> timers(1);
-  timers[TimerEnum::HaloComm] = new Timer("HaloComm");
+  std::vector<Timer*> timers;
 
   // Boundary conditions
   comm.exchangeHalos(u, timers);
@@ -157,7 +155,6 @@ void finalize(Config &conf, Comm &comm, float64 time,
   const int nx = conf.nx;
   const int ny = conf.ny;
   const int nz = conf.nz;
-  const int n = nx * ny * nz;
   
   auto topology  = comm.topology();
   for(int iz=0; iz<nz; iz++) {
@@ -176,38 +173,17 @@ void finalize(Config &conf, Comm &comm, float64 time,
   }
 
   float64 l2loc = 0.0;
-  using layout_type = RealView3D::layout_type;
   auto _u  = u.mdspan();
   auto _un = un.mdspan();
-  if(std::is_same_v<layout_type, stdex::layout_left>) {
-    l2loc = std::transform_reduce(std::execution::par_unseq,
-                                  counting_iterator(0), counting_iterator(n),
-                                  0.0,
-                                  std::plus<float64>(),
-                                  [=] (const int idx) {
-                                    const int ix   = idx % nx;
-                                    const int iyz  = idx / nx;
-                                    const int iy   = iyz%ny;
-                                    const int iz   = iyz/ny;
-                                    auto diff = _un(ix, iy, iz) - _u(ix, iy, iz);
-                                    return diff * diff;
-                                  }
-                                 );
-  } else {
-    l2loc = std::transform_reduce(std::execution::par_unseq,
-                                  counting_iterator(0), counting_iterator(n),
-                                  0.0,
-                                  std::plus<float64>(),
-                                  [=] (const int idx) {
-                                    const int iz   = idx % nz;
-                                    const int ixy  = idx / nz;
-                                    const int iy   = ixy%ny;
-                                    const int ix   = ixy/ny;
-                                    auto diff = _un(ix, iy, iz) - _u(ix, iy, iz);
-                                    return diff * diff;
-                                  }
-                                 );
-  }
+
+  auto L2norm_kernel = [=] (const int ix, const int iy, const int iz) {
+    auto diff = _un(ix, iy, iz) - _u(ix, iy, iz);
+    return diff * diff;
+  };
+
+  Iterate_policy<3> policy3d({0, 0, 0}, {conf.nx, conf.ny, conf.nz});
+  Impl::transform_reduce(policy3d, std::plus<float64>(), L2norm_kernel, l2loc);
+
   float64 l2glob = 0.;
   MPI_Reduce(&l2loc, &l2glob, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   if(comm.is_master()) {
