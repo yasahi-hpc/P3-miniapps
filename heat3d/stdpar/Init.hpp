@@ -3,24 +3,22 @@
 
 #include <cstdio>
 #include "Config.hpp"
-#include "boundary.hpp"
-#include "Parallel_For.hpp"
 #include "Parallel_Reduce.hpp"
 
 // Prototypes
-void initialize(Config &conf, Boundary &boundary,
+void initialize(Config &conf,
                 RealView1D &x, RealView1D &y, RealView1D &z,
                 RealView3D &u, RealView3D &un
                );
 
-void finalize(Config &conf, Boundary &boundary, float64 time,
+void finalize(Config &conf, float64 time,
               RealView1D &x, RealView1D &y, RealView1D &z,
               RealView3D &u, RealView3D &un
              );
 
 void performance(Config &conf, float64 seconds);
 
-void initialize(Config &conf, Boundary &boundary,
+void initialize(Config &conf,
                 RealView1D &x, RealView1D &y, RealView1D &z,
                 RealView3D &u, RealView3D &un
                ) {
@@ -29,15 +27,8 @@ void initialize(Config &conf, Boundary &boundary,
   y = RealView1D("y", conf.ny);
   z = RealView1D("z", conf.nz);
  
-  const size_t nx_halo = conf.nx+2;
-  const size_t ny_halo = conf.ny+2;
-  const size_t nz_halo = conf.nz+2;
-
-  using shape_3d = std::array<size_t, 3>;
-  using range_3d = std::array<int, 3>;
-
-  u  = RealView3D("u",  shape_3d{nx_halo, ny_halo, nz_halo}, range_3d{-1, -1, -1});
-  un = RealView3D("un", shape_3d{nx_halo, ny_halo, nz_halo}, range_3d{-1, -1, -1});
+  u  = RealView3D("u",  conf.nx, conf.ny, conf.nz);
+  un = RealView3D("un", conf.nx, conf.ny, conf.nz);
 
   // Print information
   std::cout << "(nx, ny, nz) = " << conf.nx << ", " << conf.ny << ", " << conf.nz << "\n" << std::endl;
@@ -64,9 +55,10 @@ void initialize(Config &conf, Boundary &boundary,
   y.updateDevice();
   z.updateDevice();
   u.updateDevice();
+  un.updateDevice();
 }
 
-void finalize(Config &conf, Boundary &boundary, float64 time,
+void finalize(Config &conf, float64 time,
               RealView1D &x, RealView1D &y, RealView1D &z,
               RealView3D &u, RealView3D &un
              ) {
