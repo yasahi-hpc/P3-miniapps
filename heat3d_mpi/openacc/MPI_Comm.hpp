@@ -174,15 +174,21 @@ public:
   }
 
   void exchangeHalos(const Config &conf, RealView3D &u, std::vector<Timer*> &timers) {
-    pack(conf, u);
+    bool use_timer = timers.size() > 0;
 
-    timers[HaloComm]->begin();
+    if(use_timer) timers[HaloPack]->begin();
+    pack(conf, u);
+    if(use_timer) timers[HaloPack]->end();
+
+    if(use_timer) timers[HaloComm]->begin();
     commP2P(x_recv_halo_, x_send_halo_);
     commP2P(y_recv_halo_, y_send_halo_);
     commP2P(z_recv_halo_, z_send_halo_);
-    timers[HaloComm]->end();
+    if(use_timer) timers[HaloComm]->end();
 
+    if(use_timer) timers[HaloUnpack]->begin();
     unpack(conf, u);
+    if(use_timer) timers[HaloUnpack]->end();
   }
 
 private:

@@ -40,8 +40,7 @@ void testComm(Config &conf, Comm &comm, RealView3D &u, RealView3D &un) {
   u.updateDevice();
 
   // Boundary conditions
-  std::vector<Timer*> timers(1);
-  timers[TimerEnum::HaloComm] = new Timer("HaloComm");
+  std::vector<Timer*> timers;
   comm.exchangeHalos(conf, u, timers);
 
   u.updateSelf();
@@ -145,9 +144,7 @@ void initialize(Config &conf, Comm &comm,
     }
   }
 
-  std::vector<Timer*> timers(1);
-  timers[TimerEnum::HaloComm] = new Timer("HaloComm");
-
+  std::vector<Timer*> timers;
   comm.exchangeHalos(conf, u, timers);
 
   x.updateDevice();
