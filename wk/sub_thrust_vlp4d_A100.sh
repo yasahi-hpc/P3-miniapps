@@ -6,6 +6,8 @@
 #PJM -g jh220031a
 #PJM --mpi proc=1
 
-module load nvidia/22.2 nvmpi/22.2
+module load gcc/8.3.1
+module load cuda/11.2
+module load ompi-cuda/4.1.1-11.2
 
-../build/heat3d/openacc/heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000
+../build/vlp4d/thrust/vlp4d SLD10_large.dat
