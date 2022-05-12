@@ -12,15 +12,15 @@
 #include <omp.h>
 #include <cassert>
 #include <iostream>
-#include <thrust/complex.h>
-#include <layout_contiguous/layout_contiguous.hpp>
-#include "../Index.hpp"
+#include "Index.hpp"
+#include "Layout.hpp"
+#include "ComplexType.hpp"
 
-template <typename RealType> using Complex = thrust::complex<RealType>;
+template <typename RealType> using Complex = Impl::complex<RealType>;
 
 namespace Impl {
 
-  template <typename RealType, class LayoutPolicy = layout_contiguous_at_right,
+  template <typename RealType, class LayoutPolicy = layout_left,
             typename std::enable_if<std::is_same<RealType, float>::value ||
                                     std::is_same<RealType, double>::value
                                    >::type * = nullptr>
@@ -104,7 +104,7 @@ namespace Impl {
      * @param[out] dptr_out(nx1,nx2,batch)
      */
     void rfft2(RealType *dptr_in, Complex<RealType> *dptr_out) {
-      if(std::is_same<LayoutPolicy, layout_contiguous_at_left>::value) {
+      if(std::is_same<LayoutPolicy, layout_left>::value) {
         if(nb_batches_ == 1) {
           rfft2_serial_left(dptr_in, dptr_out);
         } else {
@@ -124,7 +124,7 @@ namespace Impl {
      * @param[out] dptr_out(nx1,nx2,batch)
      */
     void irfft2(Complex<RealType> *dptr_in, RealType *dptr_out) {
-      if(std::is_same<LayoutPolicy, layout_contiguous_at_left>::value) {
+      if(std::is_same<LayoutPolicy, layout_left>::value) {
         if(nb_batches_ == 1) {
           irfft2_serial_left(dptr_in, dptr_out);
         }

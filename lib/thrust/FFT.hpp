@@ -2,11 +2,11 @@
 #define __FFT_HPP__
 
 #if defined( ENABLE_CUDA )
-  #include "Cuda_FFT.hpp"
+  #include "../Cuda_FFT.hpp"
 #elif defined( ENABLE_HIP )
   #include "HIP_FFT.hpp"
 #else
-  #include "OpenMP_FFT.hpp"
+  #include "../OpenMP_FFT.hpp"
 #endif
 
 #endif

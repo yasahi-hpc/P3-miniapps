@@ -2,15 +2,14 @@
 #define __OPENMP_TRANSPOSE_HPP__
 
 #include <omp.h>
-#include <thrust/complex.h>
-#include <experimental/mdspan>
-#include "../Index.hpp"
+#include "Index.hpp"
+#include "Layout.hpp"
+#include "ComplexType.hpp"
 
-template <typename RealType> using Complex = thrust::complex<RealType>;
-namespace stdex = std::experimental;
+template <typename RealType> using Complex = Impl::complex<RealType>;
 
 namespace Impl {
-  template <typename ScalarType, class LayoutPolicy = stdex::layout_right, int blocksize = 16,
+  template <typename ScalarType, class LayoutPolicy = layout_right, int blocksize = 16,
             std::enable_if_t<std::is_same_v<ScalarType, int             > ||
                              std::is_same_v<ScalarType, float           > ||
                              std::is_same_v<ScalarType, double          > ||
@@ -29,7 +28,7 @@ namespace Impl {
 
     public:
       Transpose(int row, int col) : row_(row), col_(col) {
-        if(std::is_same_v<array_layout, stdex::layout_right>) {
+        if(std::is_same_v<array_layout, layout_right>) {
           row_ = col;
           col_ = row;
         }

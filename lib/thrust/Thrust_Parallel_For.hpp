@@ -7,9 +7,15 @@
 using counting_iterator = thrust::counting_iterator<int>;
 
 namespace Impl {
+  template < class FunctorType >
+  void for_each(const int begin, const int end, const FunctorType f) {
+    const int1 _begin = make_int1(begin);
+    const int1 _end   = make_int1(end);
+    for_each(_begin, _end, f);
+  }
 
   template < class FunctorType >
-  void parallel_for_each(const int1 begin, const int1 end, const FunctorType f) {
+  void for_each(const int1 begin, const int1 end, const FunctorType f) {
     static_assert( std::is_invocable_v< FunctorType, int > );
     const unsigned int n = end.x - begin.x;
     thrust::for_each(thrust::device,

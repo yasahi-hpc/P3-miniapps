@@ -2,14 +2,13 @@
 #define __CUDA_TRANSPOSE_HPP__
 
 #include <cublas_v2.h>
-#include <thrust/complex.h>
-#include <experimental/mdspan>
+#include "Layout.hpp"
+#include "ComplexType.hpp"
 
-template <typename RealType> using Complex = thrust::complex<RealType>;
-namespace stdex = std::experimental;
+template <typename RealType> using Complex = Impl::complex<RealType>;
 
 namespace Impl {
-  template <typename RealType, class LayoutPolicy = stdex::layout_left,
+  template <typename RealType, class LayoutPolicy = layout_left,
             std::enable_if_t<std::is_same_v<RealType, float           > ||
                              std::is_same_v<RealType, double          > ||
                              std::is_same_v<RealType, Complex<float>  > ||

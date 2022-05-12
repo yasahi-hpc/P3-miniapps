@@ -7,19 +7,18 @@
  * Input data is assumed to be LayuotLeft
  */
 
-#include <thrust/complex.h>
 #include <cufft.h>
 #include <cassert>
 #include <type_traits>
-#include <experimental/mdspan>
-#include "../Cuda_Helper.hpp"
+#include "Cuda_Helper.hpp"
+#include "Layout.hpp"
+#include "ComplexType.hpp"
 
-template <typename RealType> using Complex = thrust::complex<RealType>;
-namespace stdex = std::experimental;
+template <typename RealType> using Complex = Impl::complex<RealType>;
 
 namespace Impl {
 
-  template <typename RealType, class LayoutPolicy = stdex::layout_left,
+  template <typename RealType, class LayoutPolicy = layout_left,
             typename std::enable_if<std::is_same<RealType, float>::value ||
                                     std::is_same<RealType, double>::value 
                                    >::type * = nullptr> 
@@ -82,7 +81,7 @@ namespace Impl {
 
     private:
     void init() {
-      static_assert(std::is_same<array_layout, stdex::layout_left>::value, "The input Layout must be LayoutLeft");
+      static_assert(std::is_same<array_layout, layout_left>::value, "The input Layout must be LayoutLeft");
       nx1h_ = nx1_/2 + 1;
       nx2h_ = nx2_/2 + 1;
 
