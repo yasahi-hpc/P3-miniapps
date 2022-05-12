@@ -35,9 +35,6 @@ public:
 enum TimerEnum : int {Total,
                       MainLoop,
                       Heat,
-                      HaloPack,
-                      HaloUnpack,
-                      HaloSwap,
                       Nb_timers};
 
 static void defineTimers(std::vector<Timer*> &timers) {
@@ -46,9 +43,6 @@ static void defineTimers(std::vector<Timer*> &timers) {
   timers[Total]                 = new Timer("total");
   timers[MainLoop]              = new Timer("MainLoop");
   timers[TimerEnum::Heat]       = new Timer("Heat");
-  timers[TimerEnum::HaloPack]   = new Timer("HaloPack");
-  timers[TimerEnum::HaloUnpack] = new Timer("HaloUnpack");
-  timers[TimerEnum::HaloSwap]   = new Timer("HaloSwap");
 }
 
 static void printTimers(std::vector<Timer*> &timers) {
