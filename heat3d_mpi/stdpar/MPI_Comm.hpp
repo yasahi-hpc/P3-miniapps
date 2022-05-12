@@ -176,6 +176,7 @@ public:
   }
 
   void exchangeHalos(RealView3D &u, std::vector<Timer*> &timers) {
+    bool use_timer = timers.size() > 0;
     auto _u = u.mdspan();
     const std::pair inner_x(0, _u.extent(0) - 2 * halo_width_);
     const std::pair inner_y(0, _u.extent(1) - 2 * halo_width_);
@@ -188,13 +189,17 @@ public:
       auto send_right_x = submdspan(_u, _u.extent(i) - 2 * halo_width_ - 1, inner_y, inner_z);
       auto recv_left_x  = submdspan(_u, -1, inner_y, inner_z);
       auto recv_right_x = submdspan(_u, _u.extent(i) - 2 * halo_width_, inner_y, inner_z);
+      if(use_timer) timers[HaloPack]->begin();
       pack(x_send_halo_, send_left_x, send_right_x);
+      if(use_timer) timers[HaloPack]->end();
 
-      timers[HaloComm]->begin();
+      if(use_timer) timers[HaloComm]->begin();
       commP2P(x_recv_halo_, x_send_halo_);
-      timers[HaloComm]->end();
+      if(use_timer) timers[HaloComm]->end();
 
+      if(use_timer) timers[HaloUnpack]->begin();
       unpack(recv_left_x, recv_right_x, x_recv_halo_);
+      if(use_timer) timers[HaloUnpack]->end();
     }
 
     // Exchange in y direction
@@ -204,13 +209,17 @@ public:
       auto send_right_y = submdspan(_u, inner_x, _u.extent(i) - 2 * halo_width_ - 1, inner_z);
       auto recv_left_y  = submdspan(_u, inner_x, -1, inner_z);
       auto recv_right_y = submdspan(_u, inner_x, _u.extent(i) - 2 * halo_width_, inner_z);
+      if(use_timer) timers[HaloPack]->begin();
       pack(y_send_halo_, send_left_y, send_right_y);
+      if(use_timer) timers[HaloPack]->end();
 
-      timers[HaloComm]->begin();
+      if(use_timer) timers[HaloComm]->begin();
       commP2P(y_recv_halo_, y_send_halo_);
-      timers[HaloComm]->end();
+      if(use_timer) timers[HaloComm]->end();
 
+      if(use_timer) timers[HaloUnpack]->begin();
       unpack(recv_left_y, recv_right_y, y_recv_halo_);
+      if(use_timer) timers[HaloUnpack]->end();
     }
 
     // Exchange in z direction
@@ -220,13 +229,17 @@ public:
       auto send_right_z = submdspan(_u, inner_x, inner_y, _u.extent(i) - 2 * halo_width_ - 1);
       auto recv_left_z  = submdspan(_u, inner_x, inner_y, -1);
       auto recv_right_z = submdspan(_u, inner_x, inner_y, _u.extent(i) - 2 * halo_width_);
+      if(use_timer) timers[HaloPack]->begin();
       pack(z_send_halo_, send_left_z, send_right_z);
+      if(use_timer) timers[HaloPack]->end();
 
-      timers[HaloComm]->begin();
+      if(use_timer) timers[HaloComm]->begin();
       commP2P(z_recv_halo_, z_send_halo_);
-      timers[HaloComm]->end();
+      if(use_timer) timers[HaloComm]->end();
 
+      if(use_timer) timers[HaloUnpack]->begin();
       unpack(recv_left_z, recv_right_z, z_recv_halo_);
+      if(use_timer) timers[HaloUnpack]->end();
     }
   }
 

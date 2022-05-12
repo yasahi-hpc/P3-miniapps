@@ -13,14 +13,15 @@
 #include <cassert>
 #include <iostream>
 #include <complex>
-#include <layout_contiguous/layout_contiguous.hpp>
+#include <experimental/mdspan>
 #include "../Index.hpp"
 
 template <typename RealType> using Complex = std::complex<RealType>;
+namespace stdex = std::experimental;
 
 namespace Impl {
 
-  template <typename RealType, class LayoutPolicy = layout_contiguous_at_right,
+  template <typename RealType, class LayoutPolicy = stdex::layout_right,
             typename std::enable_if<std::is_same_v<RealType, float> ||
                                     std::is_same_v<RealType, double>
                                    >::type * = nullptr>
@@ -104,7 +105,7 @@ namespace Impl {
      * @param[out] dptr_out(nx1,nx2,batch)
      */
     void rfft2(RealType *dptr_in, Complex<RealType> *dptr_out) {
-      if(std::is_same_v<LayoutPolicy, layout_contiguous_at_left>) {
+      if(std::is_same_v<LayoutPolicy, stdex::layout_left>) {
         if(nb_batches_ == 1) {
           rfft2_serial_left(dptr_in, dptr_out);
         } else {
@@ -124,7 +125,7 @@ namespace Impl {
      * @param[out] dptr_out(nx1,nx2,batch)
      */
     void irfft2(Complex<RealType> *dptr_in, RealType *dptr_out) {
-      if(std::is_same_v<LayoutPolicy, layout_contiguous_at_left>) {
+      if(std::is_same_v<LayoutPolicy, stdex::layout_left>) {
         if(nb_batches_ == 1) {
           irfft2_serial_left(dptr_in, dptr_out);
         }

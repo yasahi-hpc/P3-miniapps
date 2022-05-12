@@ -8,5 +8,4 @@
 
 module load nvidia/22.2 nvmpi/22.2
 
-#../build/vlp4d/stdpar/vlp4d SLD10_large.dat
-../build/heat3D/openacc/heat3D
+../build/heat3d/openacc/heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000

@@ -333,7 +333,7 @@ namespace Advection {
 
     int err = 0;
     // Layout left specialization
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( ENABLE_OPENMP_OFFLOAD )
         #pragma omp target teams distribute parallel for simd collapse(4) map(tofrom:err) reduction(+:err)
       #else
@@ -437,7 +437,7 @@ namespace Advection {
     Impl::deep_copy(tmp_fn, fn);
 
     // Layout left specialization
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( ENABLE_OPENMP_OFFLOAD )
         #pragma omp target teams distribute parallel for simd collapse(4) map(tofrom:err) reduction(+:err)
       #else

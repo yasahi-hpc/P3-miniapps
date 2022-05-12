@@ -3,17 +3,20 @@
 
 #include <complex>
 #include <omp.h>
+#include <experimental/mdspan>
 #include "OpenACC_View.hpp"
+
+namespace stdex = std::experimental;
 
 // Directives to force vectorization
 #if defined ( ENABLE_OPENACC )
   #include <openacc.h>
-  using default_layout = layout_contiguous_at_left;
+  using default_layout = stdex::layout_left;
   #define LOOP_SIMD _Pragma("acc loop vector independent")
   #define SIMD_WIDTH 1
 #else
   #include <omp.h>
-  using default_layout = layout_contiguous_at_left;
+  using default_layout = stdex::layout_left;
   #define SIMD_WIDTH 8
   
   #if defined(SIMD)

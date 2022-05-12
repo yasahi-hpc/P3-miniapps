@@ -333,7 +333,7 @@ namespace Advection {
 
     int err = 0;
     // Layout left specialization
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( ENABLE_OPENACC )
         #pragma acc data present(fn, fn_tmp)
         #pragma acc parallel loop collapse(2) reduction(+:err)
@@ -444,7 +444,7 @@ namespace Advection {
     Impl::deep_copy(tmp_fn, fn);
 
     // Layout left
-    if(std::is_same_v<layout_type, layout_contiguous_at_left>) {
+    if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( ENABLE_OPENACC )
         #pragma acc data present(fn, tmp_fn, ef[0:1], ef->ex_, ef->ey_)
         #pragma acc parallel loop collapse(2) reduction(+:err)
