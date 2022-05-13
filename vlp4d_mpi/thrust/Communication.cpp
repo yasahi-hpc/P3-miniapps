@@ -516,6 +516,7 @@ void Distrib::packAndBoundary(Config *conf, RealView4D &halo_fn, Halos *send_buf
   if(spline_) {
     pack(halo_fn, send_buffers);
     boundary_condition(halo_fn, send_buffers);
+    synchronize();
   }
 }
 

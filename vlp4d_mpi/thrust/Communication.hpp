@@ -721,6 +721,7 @@ public:
                        const int ivx = _map(idx, 2), ivy = _map(idx, 3);
                        _halo_fn(ix, iy, ivx, ivy) =  _buf_flatten(idx);
                      });
+      synchronize();
     }
   };
 
