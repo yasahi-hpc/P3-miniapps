@@ -3,6 +3,8 @@
 
 #include <cassert>
 #include <experimental/mdspan>
+#include <thrust/transform_reduce.h>
+#include <thrust/execution_policy.h>
 
 using counting_iterator = thrust::counting_iterator<int>;
 

@@ -13,14 +13,6 @@
   using default_layout = stdex::layout_left;
   using default_iterate_layout = stdex::layout_left;
 #else
-  struct uint1 {int x;};
-  struct uint2 {int x, y;};
-  struct uint3 {int x, y, z;};
-  struct uint4 {int x, y, z, w;};
-  static inline uint1 make_uint1(int x) {uint1 t; t.x=x; return t;}
-  static inline uint2 make_uint2(int x, int y) {uint2 t; t.x=x; t.y=y; return t;}
-  static inline uint3 make_uint3(int x, int y, int z) {uint3 t; t.x=x; t.y=y; t.z=z; return t;}
-  static inline uint4 make_uint4(int x, int y, int z, int w) {uint4 t; t.x=x; t.y=y; t.z=z; t.w=w; return t;}
   using default_layout = stdex::layout_right;
   using default_iterate_layout = stdex::layout_right;
   #include<omp.h>
