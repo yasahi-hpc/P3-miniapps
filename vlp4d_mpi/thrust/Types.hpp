@@ -15,14 +15,6 @@ namespace stdex = std::experimental;
   using default_layout = stdex::layout_left;
   using default_iterate_layout = stdex::layout_left;
 #else
-  struct int1 {int x;};
-  struct int2 {int x, y;};
-  struct int3 {int x, y, z;};
-  struct int4 {int x, y, z, w;};
-  static inline int1 make_int1(int x) {int1 t; t.x=x; return t;}
-  static inline int2 make_int2(int x, int y) {int2 t; t.x=x; t.y=y; return t;}
-  static inline int3 make_int3(int x, int y, int z) {int3 t; t.x=x; t.y=y; t.z=z; return t;}
-  static inline int4 make_int4(int x, int y, int z, int w) {int4 t; t.x=x; t.y=y; t.z=z; t.w=w; return t;}
   using default_layout = stdex::layout_left;
   using default_iterate_layout = stdex::layout_left;
   #define SIMD_WIDTH 8
