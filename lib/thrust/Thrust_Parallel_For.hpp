@@ -3,6 +3,8 @@
 
 #include <cassert>
 #include <experimental/mdspan>
+#include <thrust/for_each.h>
+#include <thrust/execution_policy.h>
 
 using counting_iterator = thrust::counting_iterator<int>;
 
@@ -10,6 +12,7 @@ namespace Impl {
   template < class FunctorType >
   void for_each(const int end, const FunctorType f) {
     static_assert( std::is_invocable_v< FunctorType, int > );
+
     thrust::for_each(thrust::device,
                      counting_iterator(0), counting_iterator(0)+end,
                      [=] MDSPAN_FORCE_INLINE_FUNCTION (const int ix) {

@@ -2,6 +2,7 @@
 #define __INIT_HPP__
 
 #include <cstdio>
+#include <cmath>
 #include "Config.hpp"
 #include "MPI_Comm.hpp"
 #include "Parallel_Reduce.hpp"
@@ -200,9 +201,17 @@ void performance(Config &conf, Comm &comm, double seconds) {
   // 9 Flop per iteration
   double GFlops = static_cast<double>(n) * size * static_cast<double>(conf.nbiter) * 9 / 1.e9;
 
+  std::string backend = "STDPAR";
+  #if defined( _NVHPC_STDPAR_GPU )
+    std::string arch = "GPU";
+  #else
+    std::string arch = "CPU";
+  #endif
+
+  std::cout << backend + " backend" << std::endl;
   std::cout << "Elapsed time: " << seconds << " [s]" << std::endl;
-  std::cout << "Bandwidth/GPU: " << GBytes / seconds / comm.size() << " [GB/s]" << std::endl;
-  std::cout << "Flops/GPU: " << GFlops / seconds / comm.size() << " [GFlops]\n" << std::endl;
+  std::cout << "Bandwidth/" + arch + ": " << GBytes / seconds / comm.size() << " [GB/s]" << std::endl;
+  std::cout << "Flops/" + arch + ": " << GFlops / seconds / comm.size() << " [GFlops]\n" << std::endl;
 }
 
 #endif

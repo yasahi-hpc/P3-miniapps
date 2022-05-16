@@ -1,9 +1,6 @@
 #ifndef __TYPES_HPP__
 #define __TYPES_HPP__
 
-#include <math.h>
-#include <stdlib.h>
-#include <vector>
 #include <experimental/mdspan>
 #include "View.hpp"
 #include "../Iteration.hpp"
