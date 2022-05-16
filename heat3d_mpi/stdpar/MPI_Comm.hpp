@@ -367,9 +367,9 @@ private:
     if(send->is_comm()) {
       MPI_Status  status[4];
       MPI_Request request[4];
-      MPI_Irecv(recv->left_buffer_.data(),  recv->size(), recv->type(), recv->left_rank(),  recv->left_tag(), recv->communicator(), &request[0]);
+      MPI_Irecv(recv->left_buffer_.data(),  recv->size(), recv->type(), recv->left_rank(),  recv->left_tag(),  recv->communicator(), &request[0]);
       MPI_Irecv(recv->right_buffer_.data(), recv->size(), recv->type(), recv->right_rank(), recv->right_tag(), recv->communicator(), &request[1]);
-      MPI_Isend(send->left_buffer_.data(),  send->size(), send->type(), send->left_rank(),  send->left_tag(), send->communicator(), &request[2]);
+      MPI_Isend(send->left_buffer_.data(),  send->size(), send->type(), send->left_rank(),  send->left_tag(),  send->communicator(), &request[2]);
       MPI_Isend(send->right_buffer_.data(), send->size(), send->type(), send->right_rank(), send->right_tag(), send->communicator(), &request[3]);
 
       MPI_Waitall( 4, request, status );
