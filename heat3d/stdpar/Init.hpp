@@ -1,6 +1,7 @@
 #ifndef __INIT_HPP__
 #define __INIT_HPP__
 
+#include <cmath>
 #include <cstdio>
 #include "Config.hpp"
 #include "Parallel_Reduce.hpp"
