@@ -22,4 +22,4 @@ cmake -DCMAKE_CXX_COMPILER=<compiler_name> \
 | :-: | :-: | :-: | :-: |
 |  IceLake  | OPENMP <br> THRUST <br> KOKKOS <br> STDPAR  | icpc <br> NONE <br> icpc <br> nvc++ | OPENMP | 
 |  P100 <br> V100 <br> A100 | CUDA <br> OPENMP <br> OPENACC <br> THRUST <br> KOKKOS <br> STDPAR | NONE <br> nvc++ <br> nvc++ <br> NONE <br> nvcc_wrapper <br> nvc++ | CUDA |
-|  MI100 | HIP <br> OPENMP <br> THRUST <br> KOKKOS | hipc++ <br> clang++ <br> hipc++ <br> hipc++ | HIP |
+|  MI100 | HIP <br> OPENMP <br> THRUST <br> KOKKOS | hipcc <br> clang++ <br> hipcc <br> hipcc | HIP |
