@@ -9,17 +9,16 @@
 
 #include <hip/hip_runtime.h>
 #include <hip/hip_complex.h>
-#include <thrust/complex.h>
 #include <rocblas.h>
 #include <type_traits>
-#include <experimental/mdspan>
-#include "../HIP_Helper.hpp"
+#include "HIP_Helper.hpp"
+#include "Layout.hpp"
+#include "ComplexType.hpp"
 
-template <typename RealType> using Complex = thrust::complex<RealType>;
-namespace stdex = std::experimental;
+template <typename RealType> using Complex = Impl::complex<RealType>;
 
 namespace Impl {
-  template <typename ScalarType, class LayoutPolicy = stdex::layout_left,
+  template <typename ScalarType, class LayoutPolicy = layout_left,
             std::enable_if_t<std::is_same_v<ScalarType, float           > ||
                              std::is_same_v<ScalarType, double          > ||
                              std::is_same_v<ScalarType, Complex<float>  > ||
@@ -38,7 +37,7 @@ namespace Impl {
       Transpose() = delete;
 
       Transpose(int row, int col) : row_(row), col_(col) {
-        if(std::is_same_v<array_layout, stdex::layout_right>) {
+        if(std::is_same_v<array_layout, layout_right>) {
           row_ = col;
           col_ = row;
         }

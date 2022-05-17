@@ -4,6 +4,7 @@
 #include "Config.hpp"
 #include "Types.hpp"
 #include "Transpose.hpp"
+#include "Utils.hpp"
 
 struct Spline {
   Impl::Transpose<float64, default_layout> *transpose_;
@@ -51,6 +52,11 @@ public:
   ~Spline() {
     if(transpose_ != nullptr) delete transpose_;
   }
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(Spline);
+
+public:
   // Internal functions
   void computeCoeff_xy(RealView4D &fn) {
     using layout_type = RealView4D::layout_type;

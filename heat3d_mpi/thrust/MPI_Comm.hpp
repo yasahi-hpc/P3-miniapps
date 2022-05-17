@@ -67,10 +67,6 @@ struct Halo {
   ~Halo() {}
 
   const std::string name() const noexcept {return name_;}
-  RealView2D left_buffer() const { return left_buffer_; }
-  RealView2D right_buffer() const { return right_buffer_; }
-  RealView2D &left_buffer() { return left_buffer_; }
-  RealView2D &right_buffer() { return right_buffer_; }
 
   size_t size() const { return left_buffer_.size(); }
   int_type left_rank() const { return left_rank_; }
@@ -80,6 +76,9 @@ struct Halo {
   MPI_Comm communicator() const { return communicator_; }
   MPI_Datatype type() const { return mpi_data_type_; }
   bool is_comm() const {return is_comm_; }
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(Halo);
 };
 
 
@@ -231,7 +230,7 @@ private:
     assert(topology_size == size_);
 
     // Create a Cartesian Communicator
-    int ndims = 3;
+    constexpr int ndims = 3;
     int periods[ndims] = {1, 1, 1}; // Periodic in all directions
     int reorder = 1;
     int old_rank = rank_;
@@ -274,8 +273,8 @@ public:
    */
   template < class mdspan2d_type >
   void pack(const Halo *halo, const mdspan2d_type &left, const mdspan2d_type &right) {
-    auto left_buffer = halo->left_buffer().mdspan();
-    auto right_buffer = halo->right_buffer().mdspan();
+    auto left_buffer = halo->left_buffer_.mdspan();
+    auto right_buffer = halo->right_buffer_.mdspan();
     assert( left.extents() == right.extents() );
     assert( left.extents() == left_buffer.extents() );
     assert( left.extents() == right_buffer.extents() );
@@ -295,8 +294,8 @@ public:
    */
   template < class mdspan2d_type >
   void unpack(const mdspan2d_type &left, const mdspan2d_type &right, const Halo *halo) {
-    auto left_buffer = halo->left_buffer().mdspan();
-    auto right_buffer = halo->right_buffer().mdspan();
+    auto left_buffer = halo->left_buffer_.mdspan();
+    auto right_buffer = halo->right_buffer_.mdspan();
     assert( left.extents() == right.extents() );
     assert( left.extents() == left_buffer.extents() );
     assert( left.extents() == right_buffer.extents() );
@@ -322,7 +321,7 @@ public:
    * */
 
 private:
-  void commP2P(Halo *recv, const Halo *send) {
+  void commP2P(Halo *recv, Halo *send) {
     if(send->is_comm()) {
       MPI_Status  status[4];
       MPI_Request request[4];
@@ -334,10 +333,8 @@ private:
       MPI_Waitall( 4, request, status );
 
     } else {
-      auto send_left_buffer  = send->left_buffer();
-      auto send_right_buffer = send->right_buffer();
-      recv->left_buffer().swap( send_right_buffer );
-      recv->right_buffer().swap( send_left_buffer );
+      recv->left_buffer_.swap( send->right_buffer_ );
+      recv->right_buffer_.swap( send->left_buffer_ );
     }
   }
 

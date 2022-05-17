@@ -3,6 +3,11 @@
 
 #include <cstdio>
 
+// Class helper
+#define DISALLOW_COPY_AND_ASSIGN(ClassName) \
+    ClassName(const ClassName&); \
+    void operator=(const ClassName&);
+
 #if defined(__CUDACC__)
   inline void synchronize() {
     cudaDeviceSynchronize();

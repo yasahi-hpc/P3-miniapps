@@ -233,7 +233,7 @@ public:
     assert(topology_size == size_);
 
     // Create a Cartesian Communicator
-    int ndims = 3;
+    constexpr int ndims = 3;
     int periods[ndims] = {1, 1, 1}; // Periodic in all directions
     int reorder = 1;
     int old_rank = rank_;
