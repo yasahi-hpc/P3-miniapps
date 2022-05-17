@@ -1,5 +1,5 @@
-#ifndef __KOKKOS_HIP_TRANSPOSE_HPP__
-#define __KOKKOS_HIP_TRANSPOSE_HPP__
+#ifndef __HIP_TRANSPOSE_HPP__
+#define __HIP_TRANSPOSE_HPP__
 
 /*
  * Simple wrapper for rocblas
@@ -7,18 +7,18 @@
  * https://github.com/ROCmSoftwarePlatform/rocBLAS
  */
 
-#include <vector>
 #include <hip/hip_runtime.h>
 #include <hip/hip_complex.h>
 #include <rocblas.h>
 #include <type_traits>
-#include <layout_contiguous/layout_contiguous.hpp>
-#include "../HIP_Helper.hpp"
+#include "HIP_Helper.hpp"
+#include "Layout.hpp"
+#include "ComplexType.hpp"
 
-template <typename RealType> using Complex = Kokkos::complex<RealType>;
+template <typename RealType> using Complex = Impl::complex<RealType>;
 
 namespace Impl {
-  template <typename ScalarType, class ArrayLayout = Kokkos::LayoutLeft,
+  template <typename ScalarType, class LayoutPolicy = layout_left,
             std::enable_if_t<std::is_same_v<ScalarType, float           > ||
                              std::is_same_v<ScalarType, double          > ||
                              std::is_same_v<ScalarType, Complex<float>  > ||
@@ -31,13 +31,13 @@ namespace Impl {
       rocblas_handle handle_;
 
     public:
-      using array_layout = ArrayLayout;
+      using array_layout = LayoutPolicy;
 
     public:
       Transpose() = delete;
 
       Transpose(int row, int col) : row_(row), col_(col) {
-        if(std::is_same_v<array_layout, Kokkos::LayoutRight>) {
+        if(std::is_same_v<array_layout, layout_right>) {
           row_ = col;
           col_ = row;
         }

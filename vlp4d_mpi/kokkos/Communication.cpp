@@ -96,7 +96,7 @@ void Distrib::createDecomposition(Config *conf) {
   uint64 mref = static_cast<uint64>(dom.nxmax_[3]) * static_cast<uint64>(dom.nxmax_[2]) * static_cast<uint64>(dom.nxmax_[1]) * static_cast<uint64>(dom.nxmax_[0]);
 
   if(mref != msum) {
-    printf("Problem: sum check mref %lf mcalc %lu \n", mref, msum);
+    printf("Problem: sum check mref %lu mcalc %lu \n", mref, msum);
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
     exit(1);

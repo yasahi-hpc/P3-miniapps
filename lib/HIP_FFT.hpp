@@ -1,5 +1,5 @@
-#ifndef __KOKKOS_HIP_FFT_HPP__
-#define __KOKKOS_HIP_FFT_HPP__
+#ifndef __HIP_FFT_HPP__
+#define __HIP_FFT_HPP__
 
 /* 
  * Simple wrapper for rocFFT
@@ -12,14 +12,14 @@
 #include <vector>
 #include <rocfft.h>
 #include <type_traits>
-#include <Kokkos_Core.hpp>
-#include <Kokkos_Complex.hpp>
-#include "../HIP_Helper.hpp"
+#include "HIP_Helper.hpp"
+#include "Layout.hpp"
+#include "ComplexType.hpp"
 
-template <typename RealType> using Complex = Kokkos::complex<RealType>;
+template <typename RealType> using Complex = Impl::complex<RealType>;
 
 namespace Impl {
-  template <typename RealType, class ArrayLayout = Kokkos::LayoutLeft,
+  template <typename RealType, class LayoutPolicy = layout_left,
             typename std::enable_if<std::is_same<RealType, float>::value ||
                                     std::is_same<RealType, double>::value 
                                    >::type * = nullptr> 
@@ -59,7 +59,7 @@ namespace Impl {
       RealType normcoeff_;
 
     public:
-      using array_layout = ArrayLayout;
+      using array_layout = LayoutPolicy;
 
     public:
       FFT(int nx1, int nx2)
@@ -113,7 +113,7 @@ namespace Impl {
 
     private:
     void init() {
-      static_assert(std::is_same<array_layout, Kokkos::LayoutLeft>::value, "The input Layout must be LayoutLeft");
+      static_assert(std::is_same<array_layout, layout_left>::value, "The input Layout must be LayoutLeft");
       nx1h_ = nx1_/2 + 1;
       nx2h_ = nx2_/2 + 1;
 
