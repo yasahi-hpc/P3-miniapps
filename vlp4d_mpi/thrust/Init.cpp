@@ -82,7 +82,7 @@ void import(const char *f, Config *conf) {
   fclose(stream);
   for(int i = 0; i < DIMENSION; i++) {
     if(dom->nxmax_[i] < (MMAX + 2)) {
-      fprintf(stderr, "Error: dimension %lu is to small (ie lower to %u): %u\n", i, MMAX + 2, dom->nxmax_[i]);
+      fprintf(stderr, "Error: dimension %d is to small (ie lower to %u): %u\n", i, MMAX + 2, dom->nxmax_[i]);
     }
   }
 };

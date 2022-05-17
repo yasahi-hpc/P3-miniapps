@@ -4,6 +4,7 @@
 #include "types.hpp"
 #include "config.hpp"
 #include "efield.hpp"
+#include "utils.hpp"
 
 struct Diags
 {
@@ -17,6 +18,9 @@ public:
 
   void compute(Config *conf, Efield *ef, int iter);
   void save(Config *conf);
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(Diags);
 };
 
 #endif

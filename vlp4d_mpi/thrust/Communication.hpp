@@ -94,6 +94,9 @@ public:
   Halos() {}
   ~Halos() {}
 
+private:
+  DISALLOW_COPY_AND_ASSIGN(Halos);
+
 public:
   float64* head(const int i) {
     float64* dptr_buf = buf_flatten_.data() + merged_heads_.at(i);
