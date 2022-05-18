@@ -1,5 +1,8 @@
-# About
+# P3-miniapps
+P3-miniapps are designed to evalute Performance, Portability and Productivity (P3) of mini-applications with C++ parallel algorithms (stdpar). 
+We have implemented 3D heat equation solver and 4D (2D space and 2D velocity space) Vlasov-Poisson solver. These mini-apps are parallelized with MPI + "X" programming model in C++. "X" includes _stdpar_, OpenMP, OpenACC, OpenMP4.5, Kokkos, thrust, CUDA, and HIP.   
 
+For questions or comments, please find us in the AUTHORS file.
 
 # Usage
 ## Preparation
