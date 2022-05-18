@@ -9,7 +9,7 @@ git clone https://github.com/yasahi-hpc/P3-miniapps.git
 ```
 
 ## Compile
-We rely on CMake to build the applications. You will compile with the following CMake command.
+We rely on CMake to build the applications. 4 mini applications `heat3d`, `heat3d_mpi`, `vlp4d`, and `vlp4d_mpi` are provided. You will compile with the following CMake command. For `-DAPPLICATION` option, `<app_name>` should be choosen from the application names provided above.
 ```bash
 cmake -DCMAKE_CXX_COMPILER=<compiler_name> \
       -DCMAKE_BUILD_TYPE=<build_type> \
@@ -23,6 +23,9 @@ cmake -DCMAKE_CXX_COMPILER=<compiler_name> \
 |  IceLake  | OPENMP <br> THRUST <br> KOKKOS <br> STDPAR  | icpc <br> NONE <br> icpc <br> nvc++ | OPENMP | 
 |  P100 <br> V100 <br> A100 | CUDA <br> OPENMP <br> OPENACC <br> THRUST <br> KOKKOS <br> STDPAR | NONE <br> nvc++ <br> nvc++ <br> NONE <br> nvcc_wrapper <br> nvc++ | CUDA |
 |  MI100 | HIP <br> OPENMP <br> THRUST <br> KOKKOS | hipcc <br> clang++ <br> hipcc <br> hipcc | HIP |
+
+## Run
+
 
 # Citations
 ```bibtex
