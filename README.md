@@ -1,6 +1,6 @@
 # P3-miniapps
 P3-miniapps are designed to evalute Performance, Portability and Productivity (P3) of mini-applications with C++ parallel algorithms (stdpar). 
-We have implemented 3D heat equation solver and 4D (2D space and 2D velocity space) Vlasov-Poisson solver. These mini-apps are parallelized with MPI + "X" programming model in C++. "X" includes _stdpar_, OpenMP, OpenACC, OpenMP4.5, Kokkos, thrust, CUDA, and HIP.   
+We have implemented 3D heat equation solver and 4D (2D space and 2D velocity space) Vlasov-Poisson solver. These mini-apps are parallelized with MPI + "X" programming model in C++. "X" includes _stdpar_, OpenMP, OpenACC, OpenMP4.5, Kokkos, thrust, CUDA, and HIP. As well as the language standard parallelization (stdpar), we also focus on the language standard high dimensional array support [_mdspan_](https://github.com/kokkos/mdspan). 
 
 For questions or comments, please find us in the AUTHORS file.
 
@@ -28,7 +28,15 @@ cmake -DCMAKE_CXX_COMPILER=<compiler_name> \
 |  MI100 | HIP <br> OPENMP <br> THRUST <br> KOKKOS | hipcc <br> clang++ <br> hipcc <br> hipcc | HIP |
 
 ## Run
+To run the applications, several command line arguments are necessary. Following table includes the list of commad line arguments for each mini-app. 
+| app_name | Arguments | Examples |
+| --- | --- | --- |
+| heat3d | nx, ny, nz, nbiter | ```heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000``` |
+| heat3d_mpi | px, py, pz, nx, ny, nz, nbiter | ```heat3d_mpi --px 2 --py 2 --pz 2 --nx 256 --ny 256 --nz 256 --nbiter 1000``` |
+| vlp4d | (file_name) | ```vlp4d SLD10_large.dat``` |
+| vlp4d_mpi | f | ```vlp4d_mpi -f SLD10.dat``` |
 
+For the Kokkos version, you additionally need to give "num_threads", "teams", "device", "num_gpus", and "device_map", e.g. ```vlp4d_mpi --num_threads 1 --teams 1 --device 0 --num_gpus 8 --device_map 1 -f SLD10.dat```.
 
 # Citations
 ```bibtex
