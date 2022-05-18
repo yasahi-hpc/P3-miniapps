@@ -1,6 +1,6 @@
 # P3-miniapps
 P3-miniapps are designed to evalute Performance, Portability and Productivity (P3) of mini-applications with C++ parallel algorithms (stdpar). 
-We have implemented 3D heat equation solver and 4D (2D space and 2D velocity space) Vlasov-Poisson solver. These mini-apps are parallelized with MPI + "X" programming model in C++. "X" includes _stdpar_, OpenMP, OpenACC, OpenMP4.5, Kokkos, thrust, CUDA, and HIP. As well as the language standard parallelization (stdpar), we also focus on the language standard high dimensional array support [_mdspan_](https://github.com/kokkos/mdspan). 
+We have implemented 3D heat equation solver and 4D (2D space and 2D velocity space) Vlasov-Poisson solver. These mini-apps are parallelized with MPI + "X" programming model in C++. "X" includes _stdpar_, OpenMP, OpenACC, OpenMP4.5, [Kokkos](https://github.com/kokkos/kokkos), [thrust](https://github.com/NVIDIA/thrust), CUDA, and HIP. As well as the language standard parallelization (stdpar), we also focus on the language standard high dimensional array support [_mdspan_](https://github.com/kokkos/mdspan). 
 
 For questions or comments, please find us in the AUTHORS file.
 
@@ -10,6 +10,8 @@ Firstly, you need to git clone on your environment as
 ```
 git clone https://github.com/yasahi-hpc/P3-miniapps.git
 ```
+
+In order to try [Kokkos](https://github.com/kokkos/kokkos) version, you need to install Kokkos on your environment following the [instructions](https://github.com/kokkos/kokkos). Please make sure that we only support the Kokkos installation through CMake.
 
 ## Compile
 We rely on CMake to build the applications. 4 mini applications `heat3d`, `heat3d_mpi`, `vlp4d`, and `vlp4d_mpi` are provided. You will compile with the following CMake command. For `-DAPPLICATION` option, `<app_name>` should be choosen from the application names provided above.
