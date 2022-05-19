@@ -25,6 +25,17 @@ The numerical solution is checked against this solution.
 
 # Run
 ## heat3d
+### Example Compile Command (with stdpar for Nvidia GPUs)
+```
+mkdir build && cd build
+cmake -DCMAKE_CXX_COMPILER=nvc++ -DCMAKE_BUILD_TYPE=Release -DPROGRAMMING_MODEL=STDPAR -DBACKEND=CUDA -DAPPLICATION=heat3d ..
+cmake --build .
+```
+
+### Example Run Command
+```./heat3d --nx 512 --ny 512 --nz 512 --nbiter 50000 --freq_diag 1000```
+
+### Input parameters
 You can set the problem size (resolution), the number of iteration and the frequency of diagnostics.  
 - `nx`: The number of grid points in x direction. (default: 128)  
 - `ny`: The number of grid points in y direction. (default: 128)    
@@ -32,7 +43,21 @@ You can set the problem size (resolution), the number of iteration and the frequ
 - `nbiter`: The number of iterations of simulations. (default: 1000)  
 - `freq_diag`: The diagnostics is made for every `freq_diag` step. (default: 10)
 
+For example, we have executed the following command to make the animation.  
+```./heat3d --nx 512 --ny 512 --nz 512 --nbiter 50000 --freq_diag 1000```
+
 ## heat3d_mpi
+### Example Compile Command (with stdpar for Nvidia GPUs)
+```
+mkdir build && cd build
+cmake -DCMAKE_CXX_COMPILER=nvc++ -DCMAKE_BUILD_TYPE=Release -DPROGRAMMING_MODEL=STDPAR -DBACKEND=CUDA -DAPPLICATION=heat3d_mpi ..
+cmake --build .
+```
+
+### Example Run Command
+```./heat3d_mpi --px 2 --py 2 --pz 2 --nx 256 --ny 256 --nz 256 --nbiter 1000 --freq_diag 10```  
+
+### Input parameters
 You can set the problem size (resolution), the MPI domain decomposition, the number of iteration and the frequency of diagnostics.  
 - `nx`: The number of grid points in x direction. (default: 128)  
 - `ny`: The number of grid points in y direction. (default: 128)    
@@ -43,5 +68,9 @@ You can set the problem size (resolution), the MPI domain decomposition, the num
 - `nbiter`: The number of iterations of simulations. (default: 1000)  
 - `freq_diag`: The diagnostics is made for every `freq_diag` step. (default: 10)
 
+Contrary to the `heat3d` case, `nx`, `ny`, and `nz` are the number of grid points in each MPI process. In other words,
+the total number of grid points in each direction are `nx * px`, `ny * py`, and `nz * pz`.
 It should be noted that the total MPI processes `nb_procs` must be eqaul to `px * py * pz`.
 If we set `px = 1`, then MPI communication along x direction is suppressed and replaced by swapping halo regions. 
+
+
