@@ -1,7 +1,7 @@
 #include "field.hpp"
 #include "tiles.hpp"
 
-void lu_solve_poisson(Config *conf, Efield *ef, Diags *dg, int iter);
+void lu_solve_poisson(Config *conf, Efield *ef);
 
 void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
   const Domain *dom = &(conf->dom_);
@@ -30,7 +30,7 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
   Kokkos::fence();
 };
 
-void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
+void field_poisson(Config *conf, Efield *ef) {
   const Domain *dom = &(conf->dom_);
   int nx = dom->nxmax_[0], ny = dom->nxmax_[1];
   int nvx = dom->nxmax_[2], nvy = dom->nxmax_[3];
@@ -63,16 +63,15 @@ void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
         Kokkos::parallel_for("poisson", poisson_policy2d, KOKKOS_LAMBDA (const int ix, const int iy) {
           rho(ix, iy) -= 1.;
         });
-        lu_solve_poisson(conf, ef, dg, iter);
+        lu_solve_poisson(conf, ef);
         break;
     default:
-        lu_solve_poisson(conf, ef, dg, iter);
+        lu_solve_poisson(conf, ef);
         break;
   }
 };
 
-void lu_solve_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
+void lu_solve_poisson(Config *conf, Efield *ef) {
   const Domain *dom = &(conf->dom_);
   ef->solve_poisson_fftw(dom->maxPhy_[0], dom->maxPhy_[1]);
-  dg->compute(conf, ef, iter);
 };

@@ -512,7 +512,7 @@ void lag_basis(const double px, double * coef) {
     Domain* dom = &(conf->dom_);
     char filename[128];
     printf("print_fxvx %d\n", iter);
-    sprintf(filename, "fxvx%04d.out", iter);
+    sprintf(filename, "data/vlp4d/fxvx_it%06d.csv", iter);
     FILE* fileid = fopen(filename, "w");
     
     const int ivy = dom->nxmax_[3] / 2;
@@ -521,12 +521,14 @@ void lag_basis(const double px, double * coef) {
     auto h_fn = Kokkos::create_mirror_view(fn);
     Kokkos::deep_copy(h_fn, fn);
     
-    for(int ivx = 0; ivx < dom->nxmax_[2]; ivx++)
-    {
-      for(int ix = 0; ix < dom->nxmax_[0]; ix++)
-        fprintf(fileid, "%4d %4d %20.13le\n", ix, ivx, h_fn(ix, iy, ivx, ivy));
-     
-      fprintf(fileid, "\n");
+    for(int ivx = 0; ivx < dom->nxmax_[2]; ivx++) {
+      for(int ix = 0; ix < dom->nxmax_[0]; ix++) {
+        if(ix == dom->nxmax_[0]-1) {
+          fprintf(fileid, "%20.13le\n", h_fn(ix, iy, ivx, ivy));
+        } else {
+          fprintf(fileid, "%20.13le, ", h_fn(ix, iy, ivx, ivy));
+        }
+      }
     }
     
     fclose(fileid);
