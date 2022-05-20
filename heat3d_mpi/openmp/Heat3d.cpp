@@ -29,7 +29,6 @@ int main(int argc, char *argv[]) {
 
   initialize(conf, comm, x, y, z, u, un);
 
-
   // Main loop
   timers[Total]->begin();
   for(int i=0; i<conf.nbiter; i++) {
@@ -41,16 +40,8 @@ int main(int argc, char *argv[]) {
   }
   timers[Total]->end();
 
-  // 1 load, 1 store (assuming the input array u is on cache)
-  using real_type = RealView3D::value_type;
-  const int n = conf.nx * conf.ny * conf.nz;
-  const double size = static_cast<double>( comm.size() );
-  double memory_GB = static_cast<double>(n) * size * static_cast<double>(conf.nbiter) * 2 * sizeof(real_type) / 1.e9;
-
-  // 9 Flop per iteration
-  double GFlops = static_cast<double>(n) * size * static_cast<double>(conf.nbiter) * 9 / 1.e9;
-
   // Check results
+  using real_type = RealView3D::value_type;
   float64 time = conf.dt * conf.nbiter;
   finalize(conf, comm, time, x, y, z, u, un);
 
