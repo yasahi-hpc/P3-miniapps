@@ -11,6 +11,7 @@ void to_csv(Config &conf, RealView3D &u, int iter, std::vector<Timer*> &timers);
 
 void to_csv(Config &conf, RealView3D &u, int iter, std::vector<Timer*> &timers) {
   if(iter % conf.freq_diag == 0) {
+    timers[TimerEnum::IO]->begin();
     u.updateSelf();
     const int nx = conf.nx, ny = conf.ny, nz = conf.nz;
 
@@ -32,6 +33,7 @@ void to_csv(Config &conf, RealView3D &u, int iter, std::vector<Timer*> &timers) 
       }
     }
     fout.close();
+    timers[TimerEnum::IO]->end();
   }
 }
 
