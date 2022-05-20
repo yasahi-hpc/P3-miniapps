@@ -60,7 +60,7 @@
  *        Interpolation operator within advection is Lagrange polynomial of order 5, 7 depending on a compilation flag (order 5 by default).
  *
  *  @author
- *  @url    https://github.com/yasahi-hpc/vlp4d
+ *  @url    https://github.com/yasahi-hpc/P3-miniapps
  */
 
 #include <Kokkos_Core.hpp>
@@ -111,7 +111,9 @@ int main (int argc, char* argv[]) {
 
     timers[Total]->begin();
     field_rho(&conf, fn, ef);
-    field_poisson(&conf, ef, dg, iter);
+    field_poisson(&conf, ef);
+    dg->compute(&conf, ef, iter);
+    if(conf.dom_.fxvx_) Advection::print_fxvx(&conf, fn, iter);
 
     Kokkos::fence();
     while(iter < conf.dom_.nbiter_) {

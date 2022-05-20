@@ -8,6 +8,7 @@ struct Config {
   int nx, ny, nz;
 
   int nbiter;
+  int freq_diag;
 
   // Grid size
   const float64 Lx = 1.0;
@@ -21,8 +22,8 @@ struct Config {
   float64 dt;
 
   Config() = delete;
-  Config(int _nx, int _ny, int _nz, int _nbiter)
-    : nx(_nx), ny(_ny), nz(_nz), nbiter(_nbiter) {
+  Config(int _nx, int _ny, int _nz, int _nbiter, int _freq_diag)
+    : nx(_nx), ny(_ny), nz(_nz), nbiter(_nbiter), freq_diag(_freq_diag) {
 
     dx = Lx / static_cast<float64>(nx);
     dy = Ly / static_cast<float64>(ny);

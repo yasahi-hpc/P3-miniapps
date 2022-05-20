@@ -840,35 +840,33 @@ namespace Advection {
       printf("print_fxvx %d\n",  iter);
 
       {
-        sprintf(filename, "fxvx%04d.out", iter);
+        sprintf(filename, "data/vlp4d_mpi/fxvx_it%06d.csv", iter);
         FILE* fileid = fopen(filename, "w");
 
         for(int ivx = 0; ivx < dom->nxmax_[2]; ivx++) {
           for(int ix = 0; ix < dom->nxmax_[0]; ix++) {
-            fprintf(fileid, "%.7f %.7f %20.13le\n",
-                    dom->minPhy_[0] + ix  * dom->dx_[0],
-                    dom->minPhy_[2] + ivx * dom->dx_[2],
-                    fnxvxres(ix, ivx)
-                   );
+            if(ix == dom->nxmax_[0]-1) {
+              fprintf(fileid, "%20.13le\n", fnxvxres(ix, ivx));
+            } else {
+              fprintf(fileid, "%20.13le, ", fnxvxres(ix, ivx));
+            }
           }
-          fprintf(fileid, "\n");
         }
         fclose(fileid);
       }
 
       {
-        sprintf(filename, "fyvy%04d.out", iter);
+        sprintf(filename, "data/vlp4d_mpi/fyvy_it%06d.csv", iter);
         FILE* fileid = fopen(filename, "w");
 
         for(int ivy = 0; ivy < dom->nxmax_[3]; ivy++) {
           for(int iy = 0; iy < dom->nxmax_[1]; iy++) {
-            fprintf(fileid, "%.7f %.7f %20.13le\n",
-                    dom->minPhy_[1] + iy  * dom->dx_[1],
-                    dom->minPhy_[3] + ivy * dom->dx_[3],
-                    fnyvyres(iy, ivy)
-                   );
+            if(iy == dom->nxmax_[1]-1) {
+              fprintf(fileid, "%20.13le\n", fnyvyres(iy, ivy));
+            } else {
+              fprintf(fileid, "%20.13le, ", fnyvyres(iy, ivy));
+            }
           }
-          fprintf(fileid, "\n");
         }
         fclose(fileid);
       }

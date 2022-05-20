@@ -9,4 +9,4 @@
 module load nvidia/22.2 nvmpi/22.2
 
 ../build/vlp4d/stdpar/vlp4d SLD10_large.dat
-#../build/heat3D/stdpar/heat3D
+#../build/vlp4d/stdpar/vlp4d TSI20.dat

@@ -30,9 +30,14 @@ void onetimestep(Config *conf, RealView4D &fn, RealView4D &fnp1, Efield *ef, Dia
   timers[Field]->end();
 
   timers[Fourier]->begin();
-  field_poisson(conf, ef, dg, iter);
+  field_poisson(conf, ef);
   synchronize();
   timers[Fourier]->end();
+
+  timers[Diag]->begin();
+  dg->compute(conf, ef, iter);
+  synchronize();
+  timers[Diag]->end();
 
   timers[Advec1D_vx]->begin();
   Advection::advect_1D_vx(conf, fn, fnp1, ef, dom->dt_);
@@ -54,8 +59,11 @@ void onetimestep(Config *conf, RealView4D &fn, RealView4D &fnp1, Efield *ef, Dia
   synchronize();
   timers[Advec1D_y]->end();
 
-  if(dom->fxvx_)
-    Advection::print_fxvx(conf, fn, iter);
+  if(dom->fxvx_) {
+    if(iter % dom->ifreq_ == 0) {
+      Advection::print_fxvx(conf, fn, iter);
+    }
+  }
 }
 
 #endif

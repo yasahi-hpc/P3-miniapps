@@ -8,4 +8,5 @@
 
 module load nvidia/22.2 nvmpi/22.2
 
-../build/vlp4d/openmp/vlp4d SLD10_large.dat
+../build/vlp4d/openmp/vlp4d TSI20.dat
+#../build/vlp4d/openmp/vlp4d SLD10_large.dat
