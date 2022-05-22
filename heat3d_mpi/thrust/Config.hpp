@@ -10,7 +10,10 @@ struct Config {
 
   // Parallelization
   int px, py, pz;
+
+  // Iteration
   int nbiter;
+  int freq_diag;
 
   // Grid size
   const float64 Lx = 1.0;
@@ -24,15 +27,15 @@ struct Config {
   float64 dt;
 
   Config() = delete;
-  Config(int _nx, int _ny, int _nz, int _px, int _py, int _pz, int _nbiter)
-    : nx(_nx), ny(_ny), nz(_nz), px(_px), py(_py), pz(_pz), nbiter(_nbiter) {
+  Config(int _nx, int _ny, int _nz, int _px, int _py, int _pz, int _nbiter, int _freq_diag=0)
+    : nx(_nx), ny(_ny), nz(_nz), px(_px), py(_py), pz(_pz), nbiter(_nbiter), freq_diag(_freq_diag) {
     gnx = nx * px;
     gny = ny * py;
     gnz = nz * pz;
 
-    dx = Lx / static_cast<Real>(gnx);
-    dy = Ly / static_cast<Real>(gny);
-    dz = Lz / static_cast<Real>(gnz);
+    dx = Lx / static_cast<float64>(gnx);
+    dy = Ly / static_cast<float64>(gny);
+    dz = Lz / static_cast<float64>(gnz);
     dt = 0.1 * dx * dx / Kappa;
   }
 };

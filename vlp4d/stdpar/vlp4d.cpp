@@ -57,7 +57,9 @@ int main (int argc, char* argv[]) {
 
   timers[Total]->begin();
   field_rho(&conf, fn, ef);
-  field_poisson(&conf, ef, dg, iter);
+  field_poisson(&conf, ef);
+  dg->compute(&conf, ef, iter);
+  if(conf.dom_.fxvx_) Advection::print_fxvx(&conf, fn, iter);
 
   while(iter < conf.dom_.nbiter_) {
     timers[MainLoop]->begin();

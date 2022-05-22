@@ -38,6 +38,7 @@ enum TimerEnum : int {Total,
                       HaloPack,
                       HaloUnpack,
                       HaloComm,
+                      IO,
                       Nb_timers};
 
 static void defineTimers(std::vector<Timer*> &timers) {
@@ -49,6 +50,7 @@ static void defineTimers(std::vector<Timer*> &timers) {
   timers[TimerEnum::HaloPack]   = new Timer("HaloPack");
   timers[TimerEnum::HaloUnpack] = new Timer("HaloUnpack");
   timers[TimerEnum::HaloComm]   = new Timer("HaloComm");
+  timers[TimerEnum::IO]         = new Timer("IO");
 }
 
 static void printTimers(std::vector<Timer*> &timers) {

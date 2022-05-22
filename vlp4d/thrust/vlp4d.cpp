@@ -34,7 +34,7 @@ int main (int argc, char* argv[]) {
   Config conf;
   RealView4D fn, fnp1;
   Efield *ef = nullptr;
-  Diags *dg = NULL;
+  Diags *dg = nullptr;
 
   std::vector<Timer*> timers;
   defineTimers(timers);
@@ -57,7 +57,9 @@ int main (int argc, char* argv[]) {
 
   timers[Total]->begin();
   field_rho(&conf, fn, ef);
-  field_poisson(&conf, ef, dg, iter);
+  field_poisson(&conf, ef);
+  dg->compute(&conf, ef, iter);
+  if(conf.dom_.fxvx_) Advection::print_fxvx(&conf, fn, iter);
   synchronize();
 
   while(iter < conf.dom_.nbiter_) {
