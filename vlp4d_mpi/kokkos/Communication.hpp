@@ -48,12 +48,14 @@ struct Halos{
   using RangeHostView2D = RangeView2D::HostMirror;
 
   RealView1D buf_flatten_;
-  RangeView2D xmin_;
-  RangeView2D xmax_;
-  RangeView2D bc_in_min_;
-  RangeView2D bc_in_max_;
-  RangeView2D lxmin_;
-  RangeView2D lxmax_;
+
+  // Used only for initialization at host
+  RangeHostView2D xmin_;
+  RangeHostView2D xmax_;
+  RangeHostView2D bc_in_min_;
+  RangeHostView2D bc_in_max_;
+  RangeHostView2D lxmin_;
+  RangeHostView2D lxmax_;
 
   shape_t<DIMENSION> nhalo_max_;
   int size_;     // buffer size of each halo
@@ -132,15 +134,6 @@ struct Halos{
     map_orc_ = RangeView2D(name + "_map_orc", total_size_);
     map_bc_  = RangeView3D(name + "_map_bc",  total_size_);
 
-    typename RangeView2D::HostMirror h_xmin = Kokkos::create_mirror_view(xmin_);
-    typename RangeView2D::HostMirror h_xmax = Kokkos::create_mirror_view(xmax_);
-    typename RangeView2D::HostMirror h_bc_in_min = Kokkos::create_mirror_view(bc_in_min_);
-    typename RangeView2D::HostMirror h_bc_in_max = Kokkos::create_mirror_view(bc_in_max_);
-    Kokkos::deep_copy(h_xmin, xmin_);
-    Kokkos::deep_copy(h_xmax, xmax_);
-    Kokkos::deep_copy(h_bc_in_min, bc_in_min_);
-    Kokkos::deep_copy(h_bc_in_max, bc_in_max_);
-
     typename RangeView3D::HostMirror h_sign1 = Kokkos::create_mirror_view(sign1_);
     typename RangeView3D::HostMirror h_sign2 = Kokkos::create_mirror_view(sign2_);
     typename RangeView3D::HostMirror h_sign3 = Kokkos::create_mirror_view(sign3_);
@@ -152,8 +145,8 @@ struct Halos{
     for(int ib = 0; ib < nb_halos_; ib++) {
       int halo_min[4], halo_max[4];
       for(int k = 0; k < DIMENSION; k++) {
-        halo_min[k] = h_xmin(ib, k);
-        halo_max[k] = h_xmax(ib, k);
+        halo_min[k] = xmin_(ib, k);
+        halo_max[k] = xmax_(ib, k);
       }
       
       const int halo_nx =  halo_max[0] - halo_min[0] + 1;
@@ -166,8 +159,8 @@ struct Halos{
       char bitconf = 0;
 
       for(int k = 0; k < 4; k++) {
-        bc_in[2 * k + 0] = h_bc_in_min(ib, k);
-        bc_in[2 * k + 1] = h_bc_in_max(ib, k);
+        bc_in[2 * k + 0] = bc_in_min_(ib, k);
+        bc_in[2 * k + 1] = bc_in_max_(ib, k);
         orcheck[k] = (bc_in[2 * k] != VUNDEF) || (bc_in[2 * k + 1] != VUNDEF);
         orcsum += orcheck[k];
         bitconf |= 1 << k;
@@ -486,10 +479,6 @@ struct Halos{
     buf_flatten_ = RealView1D(name + "_buf_flat", total_size);
 
     typename RangeView2D::HostMirror h_map  = Kokkos::create_mirror_view(map_);
-    typename RangeView2D::HostMirror h_xmin = Kokkos::create_mirror_view(xmin_);
-    typename RangeView2D::HostMirror h_xmax = Kokkos::create_mirror_view(xmax_);
-    Kokkos::deep_copy(h_xmin, xmin_);
-    Kokkos::deep_copy(h_xmax, xmax_);
 
     const Domain *dom = &(conf->dom_);
     int nx_max  = dom->nxmax_[0];
@@ -507,10 +496,10 @@ struct Halos{
       // Keeping the head index of each halo sets for MPI communication
       merged_heads_.push_back(idx_flatten);
       for(auto it: same_dst) {
-        const int ix_min  = h_xmin(it, 0), ix_max  = h_xmax(it, 0);
-        const int iy_min  = h_xmin(it, 1), iy_max  = h_xmax(it, 1);
-        const int ivx_min = h_xmin(it, 2), ivx_max = h_xmax(it, 2);
-        const int ivy_min = h_xmin(it, 3), ivy_max = h_xmax(it, 3);
+        const int ix_min  = xmin_(it, 0), ix_max  = xmax_(it, 0);
+        const int iy_min  = xmin_(it, 1), iy_max  = xmax_(it, 1);
+        const int ivx_min = xmin_(it, 2), ivx_max = xmax_(it, 2);
+        const int ivy_min = xmin_(it, 3), ivy_max = xmax_(it, 3);
         
         const int nx  = ix_max  - ix_min  + 1;
         const int ny  = iy_max  - iy_min  + 1;
@@ -566,18 +555,12 @@ struct Halos{
     tags_.resize(nb_halos_);
     total_size_orc_.resize(DIMENSION);
 
-    xmin_      = RangeView2D("halo_xmin",  nb_halos_);
-    xmax_      = RangeView2D("halo_xmax",  nb_halos_);
-    lxmin_     = RangeView2D("halo_lxmin", nb_halos_);
-    lxmax_     = RangeView2D("halo_lxmax", nb_halos_);
-    bc_in_min_ = RangeView2D("bc_in_min", nb_halos_);
-    bc_in_max_ = RangeView2D("bc_in_max", nb_halos_);
-    auto h_xmin  = Kokkos::create_mirror_view(xmin_);
-    auto h_xmax  = Kokkos::create_mirror_view(xmax_);
-    auto h_lxmin = Kokkos::create_mirror_view(lxmin_);
-    auto h_lxmax = Kokkos::create_mirror_view(lxmax_);
-    auto h_bc_in_min = Kokkos::create_mirror_view(bc_in_min_);
-    auto h_bc_in_max = Kokkos::create_mirror_view(bc_in_max_);
+    xmin_      = RangeHostView2D("halo_xmin",  nb_halos_);
+    xmax_      = RangeHostView2D("halo_xmax",  nb_halos_);
+    lxmin_     = RangeHostView2D("halo_lxmin", nb_halos_);
+    lxmax_     = RangeHostView2D("halo_lxmax", nb_halos_);
+    bc_in_min_ = RangeHostView2D("bc_in_min",  nb_halos_);
+    bc_in_max_ = RangeHostView2D("bc_in_max",  nb_halos_);
 
     std::vector<int> nx_halos, ny_halos, nvx_halos, nvy_halos;
     for(size_t i = 0; i < nb_halos_; i++) {
@@ -594,21 +577,15 @@ struct Halos{
       tags_[i] = halo->tag_;
 
       for(int j = 0; j < DIMENSION; j++) {
-        h_xmin(i, j)  = halo->xmin_[j]; 
-        h_xmax(i, j)  = halo->xmax_[j];
-        h_lxmin(i, j) = halo->lxmin_[j]; 
-        h_lxmax(i, j) = halo->lxmax_[j]; 
-        int lxmin = h_lxmin(i, j) - HALO_PTS, lxmax = h_lxmax(i, j) + HALO_PTS;
-        h_bc_in_min(i, j) = (h_xmin(i, j) <= lxmin && lxmin <= h_xmax(i, j)) ? lxmin : VUNDEF;
-        h_bc_in_max(i, j) = (h_xmin(i, j) <= lxmax && lxmax <= h_xmax(i, j)) ? lxmax : VUNDEF;
+        xmin_(i, j)  = halo->xmin_[j]; 
+        xmax_(i, j)  = halo->xmax_[j];
+        lxmin_(i, j) = halo->lxmin_[j]; 
+        lxmax_(i, j) = halo->lxmax_[j]; 
+        int lxmin = lxmin_(i, j) - HALO_PTS, lxmax = lxmax_(i, j) + HALO_PTS;
+        bc_in_min_(i, j) = (xmin_(i, j) <= lxmin && lxmin <= xmax_(i, j)) ? lxmin : VUNDEF;
+        bc_in_max_(i, j) = (xmin_(i, j) <= lxmax && lxmax <= xmax_(i, j)) ? lxmax : VUNDEF;
       }
     }
-    Kokkos::deep_copy(xmin_,  h_xmin);
-    Kokkos::deep_copy(xmax_,  h_xmax);
-    Kokkos::deep_copy(lxmin_, h_lxmin);
-    Kokkos::deep_copy(lxmax_, h_lxmax);
-    Kokkos::deep_copy(bc_in_min_, h_bc_in_min);
-    Kokkos::deep_copy(bc_in_max_, h_bc_in_max);
 
     // Prepare large enough buffer
     auto max_size = std::max_element(sizes_.begin(), sizes_.end());
@@ -814,7 +791,6 @@ struct unpack_functor {
 };
 
 struct local_copy_functor {
-  using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   RealView1D  send_buf_, recv_buf_;
   Halos       *send_halos_, *recv_halos_;
   int         send_offset_, recv_offset_;
