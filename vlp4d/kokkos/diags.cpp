@@ -20,25 +20,18 @@ void Diags::compute(Config *conf, Efield *ef, int iter) {
   RealView2D ey  = ef->ey_; 
   RealView2D rho = ef->rho_; 
 
-  // Capturing a class member causes a problem
-  // See https://github.com/kokkos/kokkos/issues/695
-  double_pair sum; sum.x = 0; sum.y = 0;
-
   MDPolicy<2> moment_policy2d({{0, 0}},
                               {{nx, ny}},
                               {{TILE_SIZE0, TILE_SIZE1}}
                              );
 
-  Kokkos::parallel_reduce("moments", moment_policy2d, KOKKOS_LAMBDA (const int ix, const int iy,  double_pair& lsum) {
+  Kokkos::parallel_reduce("moments", moment_policy2d, KOKKOS_LAMBDA (const int& ix, const int& iy, float64& liter_mass, float64& liter_nrj) {
     const float64 eex = ex(ix, iy);
     const float64 eey = ey(ix, iy);
 
-    lsum.x += rho(ix, iy);
-    lsum.y += eex * eex + eey * eey;
-  }, sum);
-
-  iter_mass = sum.x;
-  iter_nrj = sum.y;
+    liter_mass += rho(ix, iy);
+    liter_nrj += eex * eex + eey * eey;
+  }, iter_mass, iter_nrj);
 
   iter_nrj = sqrt(iter_nrj * dom->dx_[0] * dom->dx_[1]);
   iter_mass *= dom->dx_[0] + dom->dx_[1];
