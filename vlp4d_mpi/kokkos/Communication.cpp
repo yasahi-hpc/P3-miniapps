@@ -465,32 +465,9 @@ void Distrib::boundary_condition_(RealOffsetView4D &halo_fn, Halos *send_buffers
   @param[in] send_list
   @param[in] recv_list
   @param[inout] halo_fn
-    Indentical to fn?
  */
 void Distrib::packAndBoundary(Config *conf, RealOffsetView4D halo_fn) {
   if(spline_) {
-    /* Older version
-    const int nx_send  = send_buffers_->nhalo_max_[0];
-    const int ny_send  = send_buffers_->nhalo_max_[1];
-    const int nvx_send = send_buffers_->nhalo_max_[2];
-    const int nvy_send = send_buffers_->nhalo_max_[3];
-    const int nb_send_halos = send_buffers_->nb_halos_;
-    const int total_size = send_buffers_->total_size_;
-    MDPolicyType_4D mdpolicy4d({{0, 0, 0, 0}},
-                               {{nx_send, ny_send, nvx_send, nb_send_halos}},
-                               {{TILE_SIZE0, TILE_SIZE1, TILE_SIZE2, TILE_SIZE3}}
-                              );
-
-    Kokkos::parallel_for("pack", mdpolicy4d, pack(conf, halo_fn, send_buffers_));
-
-    #if defined( KOKKOS_ENABLE_CUDA )
-      Kokkos::parallel_for("boundary_condition", mdpolicy4d, boundary_condition(conf, halo_fn, send_buffers_));
-    #else
-      Kokkos::parallel_for("boundary_condition", nb_send_halos, boundary_condition(conf, halo_fn, send_buffers_));
-    #endif
-    Kokkos::parallel_for("merged_pack", total_size, merged_pack(send_buffers_));
-    */
-
     const int total_size = send_buffers_->total_size_;
     Kokkos::parallel_for("pack", total_size, pack_(halo_fn, send_buffers_));
     boundary_condition_(halo_fn, send_buffers_);
