@@ -25,6 +25,7 @@ namespace Advection {
 
   static void testError(View1D<int> &err) {
     auto h_err = Kokkos::create_mirror_view(err);
+    Kokkos::deep_copy(h_err, err);
     if(h_err(0) != 0) {
       fprintf(stderr, "Time step is too large, exiting\n");
       exit(0);
