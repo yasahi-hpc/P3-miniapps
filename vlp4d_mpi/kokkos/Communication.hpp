@@ -54,8 +54,6 @@ struct Halos{
   RangeHostView2D xmax_;
   RangeHostView2D bc_in_min_;
   RangeHostView2D bc_in_max_;
-  RangeHostView2D lxmin_;
-  RangeHostView2D lxmax_;
 
   shape_t<DIMENSION> nhalo_max_;
   int size_;     // buffer size of each halo
@@ -557,8 +555,6 @@ struct Halos{
 
     xmin_      = RangeHostView2D("halo_xmin",  nb_halos_);
     xmax_      = RangeHostView2D("halo_xmax",  nb_halos_);
-    lxmin_     = RangeHostView2D("halo_lxmin", nb_halos_);
-    lxmax_     = RangeHostView2D("halo_lxmax", nb_halos_);
     bc_in_min_ = RangeHostView2D("bc_in_min",  nb_halos_);
     bc_in_max_ = RangeHostView2D("bc_in_max",  nb_halos_);
 
@@ -579,9 +575,7 @@ struct Halos{
       for(int j = 0; j < DIMENSION; j++) {
         xmin_(i, j)  = halo->xmin_[j]; 
         xmax_(i, j)  = halo->xmax_[j];
-        lxmin_(i, j) = halo->lxmin_[j]; 
-        lxmax_(i, j) = halo->lxmax_[j]; 
-        int lxmin = lxmin_(i, j) - HALO_PTS, lxmax = lxmax_(i, j) + HALO_PTS;
+        int lxmin = halo->lxmin_[j] - HALO_PTS, lxmax = halo->lxmax_[j] + HALO_PTS;
         bc_in_min_(i, j) = (xmin_(i, j) <= lxmin && lxmin <= xmax_(i, j)) ? lxmin : VUNDEF;
         bc_in_max_(i, j) = (xmin_(i, j) <= lxmax && lxmax <= xmax_(i, j)) ? lxmax : VUNDEF;
       }
