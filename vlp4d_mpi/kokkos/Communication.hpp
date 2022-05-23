@@ -45,7 +45,8 @@ struct Halo{
 struct Halos{
   using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   using RangeView3D = Kokkos::View<int*[DIMENSION][DIMENSION], execution_space>;
-  RealView2D buf_; // remove this no longer used
+  using RangeHostView2D = RangeView2D::HostMirror;
+
   RealView1D buf_flatten_;
   RangeView2D xmin_;
   RangeView2D xmax_;
@@ -70,7 +71,6 @@ struct Halos{
   RangeView3D sign2_;
   RangeView3D sign3_;
   RangeView3D sign4_;
-  IntView1D   orcsum_;
 
   /* Used for merge */
   RangeView2D map_;         // f -> flatten_buf
@@ -771,14 +771,14 @@ private:
 
 // functors
 
-struct pack_ {
+struct pack_functor {
   using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   RealOffsetView4D halo_fn_;
   RealView1D       buf_flatten_;
   Halos            *send_halos_;
   RangeView2D      map_;
 
-  pack_(RealOffsetView4D halo_fn, Halos *send_halos)
+  pack_functor(RealOffsetView4D halo_fn, Halos *send_halos)
     : halo_fn_(halo_fn), send_halos_(send_halos) {
     buf_flatten_  = send_halos_->buf_flatten_;
     map_ = send_halos_->map_;
@@ -792,14 +792,14 @@ struct pack_ {
   }
 };
 
-struct merged_unpack {
+struct unpack_functor {
   using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   RealOffsetView4D halo_fn_;
   RealView1D       buf_flatten_;
   Halos            *recv_halos_;
   RangeView2D      map_;
    
-  merged_unpack(RealOffsetView4D halo_fn, Halos *recv_halos)
+  unpack_functor(RealOffsetView4D halo_fn, Halos *recv_halos)
     : halo_fn_(halo_fn), recv_halos_(recv_halos) {
     buf_flatten_ = recv_halos_->buf_flatten_;
     map_         = recv_halos_->map_;
@@ -813,13 +813,13 @@ struct merged_unpack {
   }
 };
 
-struct local_copy {
+struct local_copy_functor {
   using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   RealView1D  send_buf_, recv_buf_;
   Halos       *send_halos_, *recv_halos_;
   int         send_offset_, recv_offset_;
    
-  local_copy(Halos *send_halos, Halos *recv_halos)
+  local_copy_functor(Halos *send_halos, Halos *recv_halos)
     : send_halos_(send_halos), recv_halos_(recv_halos) {
     send_buf_ = send_halos_->buf_flatten_;
     recv_buf_ = recv_halos_->buf_flatten_;
@@ -834,7 +834,7 @@ struct local_copy {
 };
 
 // Version to survive
-struct boundary_condition_orc0 {
+struct boundary_condition_orc0_functor {
   using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   using RangeView3D = Kokkos::View<int*[DIMENSION][DIMENSION], execution_space>;
   RealOffsetView4D halo_fn_;
@@ -845,7 +845,7 @@ struct boundary_condition_orc0 {
   RangeView3D sign1_;
   float64 alpha_;
 
-  boundary_condition_orc0(RealOffsetView4D halo_fn, Halos *send_halos)
+  boundary_condition_orc0_functor(RealOffsetView4D halo_fn, Halos *send_halos)
     : halo_fn_(halo_fn), send_halos_(send_halos) {
     buf_flatten_ = send_halos_->buf_flatten_;
     map_bc_ = send_halos_->map_bc_;
@@ -878,7 +878,7 @@ struct boundary_condition_orc0 {
   }
 };
 
-struct boundary_condition_orc1 {
+struct boundary_condition_orc1_functor {
   using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   using RangeView3D = Kokkos::View<int*[DIMENSION][DIMENSION], execution_space>;
   RealOffsetView4D halo_fn_;
@@ -889,7 +889,7 @@ struct boundary_condition_orc1 {
   RangeView3D sign1_, sign2_;
   float64 alpha_;
 
-  boundary_condition_orc1(RealOffsetView4D halo_fn, Halos *send_halos)
+  boundary_condition_orc1_functor(RealOffsetView4D halo_fn, Halos *send_halos)
     : halo_fn_(halo_fn), send_halos_(send_halos) {
     buf_flatten_ = send_halos_->buf_flatten_;
     map_bc_ = send_halos_->map_bc_;
@@ -926,7 +926,7 @@ struct boundary_condition_orc1 {
   }
 };
 
-struct boundary_condition_orc2 {
+struct boundary_condition_orc2_functor {
   using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   using RangeView3D = Kokkos::View<int*[DIMENSION][DIMENSION], execution_space>;
   RealOffsetView4D halo_fn_;
@@ -937,7 +937,7 @@ struct boundary_condition_orc2 {
   RangeView3D sign1_, sign2_, sign3_;
   float64 alpha_;
 
-  boundary_condition_orc2(RealOffsetView4D halo_fn, Halos *send_halos)
+  boundary_condition_orc2_functor(RealOffsetView4D halo_fn, Halos *send_halos)
     : halo_fn_(halo_fn), send_halos_(send_halos) {
     buf_flatten_ = send_halos_->buf_flatten_;
     map_bc_ = send_halos_->map_bc_;
@@ -979,7 +979,7 @@ struct boundary_condition_orc2 {
   }
 };
 
-struct boundary_condition_orc3 {
+struct boundary_condition_orc3_functor {
   using RangeView2D = Kokkos::View<int*[DIMENSION], execution_space>;
   using RangeView3D = Kokkos::View<int*[DIMENSION][DIMENSION], execution_space>;
   RealOffsetView4D halo_fn_;
@@ -990,7 +990,7 @@ struct boundary_condition_orc3 {
   RangeView3D sign1_, sign2_, sign3_, sign4_;
   float64 alpha_;
 
-  boundary_condition_orc3(RealOffsetView4D halo_fn, Halos *send_halos)
+  boundary_condition_orc3_functor(RealOffsetView4D halo_fn, Halos *send_halos)
     : halo_fn_(halo_fn), send_halos_(send_halos) {
     buf_flatten_ = send_halos_->buf_flatten_;
     map_bc_ = send_halos_->map_bc_;
