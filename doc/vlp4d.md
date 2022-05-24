@@ -9,6 +9,14 @@ We have prepared the non-MPI and MPI versions, where the non-MPI version uses th
 
 ![vlp4d](figs/fxvx_anime.gif). 
 
+Detailed descriptions of the test cases can be found in 
+- [Crouseilles & al. J. Comput. Phys., 228, pp. 1429-1446, (2009).](http://people.rennes.inria.fr/Nicolas.Crouseilles/loss4D.pdf)  
+  Section 5.3.1 Two-dimensional Landau damping -> SLD10
+- [Crouseilles & al. Communications in Nonlinear Science and Numerical Simulation, pp 94-99, 13, (2008).](http://people.rennes.inria.fr/Nicolas.Crouseilles/cgls2.pdf)  
+  Section 2 and 3 Two stream Instability and Beam focusing pb -> TSI20
+- [Crouseilles & al. Beam Dynamics Newsletter no 41 (2006).](http://icfa-bd.kek.jp/Newsletter41.pdf )  
+  Section 3.3, Beam focusing pb.
+
 # Run
 ## vlp4d
 ### Example Compile Command (with stdpar for Nvidia GPUs)
