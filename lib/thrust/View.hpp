@@ -138,8 +138,14 @@ private:
 
     host_vector_.resize(size);
     host_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(host_vector_.data()) + total_offset_, extents);
-    device_vector_.resize(size);
-    device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(device_vector_.data()) + total_offset_, extents);
+
+    #if defined (ENABLE_CUDA) || defined (ENABLE_HIP)
+      device_vector_.resize(size);
+      device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(device_vector_.data()) + total_offset_, extents);
+    #else
+      // In the host configuration, device_mdspan_ also points the host_vector
+      device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(host_vector_.data()) + total_offset_, extents);
+    #endif
   }
 
   // Only copying meta data
@@ -173,9 +179,14 @@ private:
     ends_ = rhs.end();
 
     host_vector_ = rhs.host_vector_; // not a move
-    device_vector_ = rhs.device_vector_; // not a move
     host_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(host_vector_.data()) + total_offset_, rhs.extents());
-    device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(device_vector_.data()) + total_offset_, rhs.extents());
+
+    #if defined (ENABLE_CUDA) || defined (ENABLE_HIP)
+      device_vector_ = rhs.device_vector_; // not a move
+      device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(device_vector_.data()) + total_offset_, rhs.extents());
+    #else
+      device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(host_vector_.data()) + total_offset_, rhs.extents());
+    #endif
   }
 
   void deep_copy(View &&rhs) {
@@ -186,9 +197,13 @@ private:
     ends_ = rhs.end();
 
     host_vector_ = std::move(rhs.host_vector_);
-    device_vector_ = std::move(rhs.device_vector_);
     host_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(host_vector_.data()) + total_offset_, rhs.extents());
-    device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(device_vector_.data()) + total_offset_, rhs.extents());
+    #if defined (ENABLE_CUDA) || defined (ENABLE_HIP)
+      device_vector_ = std::move(rhs.device_vector_);
+      device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(device_vector_.data()) + total_offset_, rhs.extents());
+    #else
+      device_mdspan_ = mdspan_type((value_type *)thrust::raw_pointer_cast(host_vector_.data()) + total_offset_, rhs.extents());
+    #endif
   }
 
 public:
@@ -212,7 +227,9 @@ public:
     rhs.setEnds(ends);
 
     thrust::swap(this->host_vector_, rhs.host_vector_);
-    thrust::swap(this->device_vector_, rhs.device_vector_);
+    #if defined (ENABLE_CUDA) || defined (ENABLE_HIP)
+      thrust::swap(this->device_vector_, rhs.device_vector_);
+    #endif
     std::swap(this->host_mdspan_, rhs.host_mdspan_);
     std::swap(this->device_mdspan_, rhs.device_mdspan_);
   }
@@ -254,12 +271,25 @@ public:
   inline void setOffsets(std::array<int_type, extents_type::rank()> offsets) { offsets_ = offsets; }
   inline void setEnds(std::array<int_type, extents_type::rank()> ends) { ends_ = ends; }
 
-  void updateDevice() { device_vector_ = host_vector_; }
-  void updateSelf() { host_vector_ = device_vector_; }
+  void updateDevice() {
+    #if defined (ENABLE_CUDA) || defined (ENABLE_HIP)
+      device_vector_ = host_vector_; 
+    #endif
+  }
+
+  void updateSelf() {
+    #if defined (ENABLE_CUDA) || defined (ENABLE_HIP)
+      host_vector_ = device_vector_; 
+    #endif
+  }
 
   void fill(const ElementType value = 0) {
-    thrust::fill(device_vector_.begin(), device_vector_.end(), value);
-    updateSelf();
+    #if defined (ENABLE_CUDA) || defined (ENABLE_HIP)
+      thrust::fill(device_vector_.begin(), device_vector_.end(), value);
+      updateSelf();
+    #else 
+      thrust::fill(host_vector_.begin(), host_vector_.end(), value);
+    #endif
   }
 
   template <typename... I>
