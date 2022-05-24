@@ -525,9 +525,6 @@ void Distrib::Irecv(int &creq, std::vector<MPI_Request> &req) {
  */
 void Distrib::packAndBoundary(Config *conf, RealView4D &halo_fn, Halos *send_buffers) {
   if(spline_) {
-    //pack(conf, halo_fn, send_buffers);
-    //boundary_condition(conf, halo_fn, send_buffers_);
-    //merged_pack(send_buffers);
     pack_(halo_fn, send_buffers);
     boundary_condition_(halo_fn, send_buffers);
   }
