@@ -52,8 +52,6 @@ struct Halos{
   RangeView2D xmax_;
   RangeView2D bc_in_min_;
   RangeView2D bc_in_max_;
-  RangeView2D lxmin_;
-  RangeView2D lxmax_;
 
   shape_nd<DIMENSION> nhalo_max_;
   int size_;     // buffer size of each halo
@@ -76,7 +74,6 @@ struct Halos{
 
   /* Used for merge */
   RangeView2D map_;         // f -> flatten_buf
-  IntView2D   flatten_map_; // buf -> flatten_buf
 
   int offset_local_copy_;   // The head address for the local copy
   std::vector<int> merged_sizes_; // buffer size of each halo
@@ -478,7 +475,6 @@ public:
     total_size_  = total_size;
     map_         = RangeView2D("map", total_size, DIMENSION); // This is used for receive buffer
     buf_flatten_ = RealView1D(name + "_buf_flat", total_size);
-    flatten_map_ = IntView2D("flatten_map", total_size, 2); // storing (idx_in_buf, buf_id)
 
     const Domain *dom = &(conf->dom_);
     int nx_max  = dom->nxmax_[0];
@@ -534,8 +530,6 @@ public:
                 }
                                                                                                  
                 // h_flatten_map is used for send buffer
-                flatten_map_(idx_flatten, 0) = idx;
-                flatten_map_(idx_flatten, 1) = it;
                 map_2D2flatten(idx, it) = idx_flatten;
                 idx_flatten++;
               }
@@ -547,7 +541,7 @@ public:
 
     // Deep copy
     map_.updateDevice();
-    flatten_map_.updateDevice();
+    //flatten_map_.updateDevice();
   }
 
   void set(Config *conf, std::vector<Halo> &list, const std::string name, const int nb_process, const int pid) {
@@ -562,8 +556,6 @@ public:
 
     xmin_      = RangeView2D("halo_xmin",  nb_halos_, DIMENSION);
     xmax_      = RangeView2D("halo_xmax",  nb_halos_, DIMENSION);
-    lxmin_     = RangeView2D("halo_lxmin", nb_halos_, DIMENSION);
-    lxmax_     = RangeView2D("halo_lxmax", nb_halos_, DIMENSION);
     bc_in_min_ = RangeView2D("bc_in_min",  nb_halos_, DIMENSION);
     bc_in_max_ = RangeView2D("bc_in_max",  nb_halos_, DIMENSION);
 
@@ -584,9 +576,7 @@ public:
       for(int j = 0; j < DIMENSION; j++) {
         xmin_(i, j)  = halo->xmin_[j]; 
         xmax_(i, j)  = halo->xmax_[j];
-        lxmin_(i, j) = halo->lxmin_[j]; 
-        lxmax_(i, j) = halo->lxmax_[j]; 
-        int lxmin = lxmin_(i, j) - HALO_PTS, lxmax = lxmax_(i, j) + HALO_PTS;
+        int lxmin =  halo->lxmin_[j]- HALO_PTS, lxmax = halo->lxmax_[j] + HALO_PTS;
         bc_in_min_(i, j) = (xmin_(i, j) <= lxmin && lxmin <= xmax_(i, j)) ? lxmin : VUNDEF;
         bc_in_max_(i, j) = (xmin_(i, j) <= lxmax && lxmax <= xmax_(i, j)) ? lxmax : VUNDEF;
       }

@@ -20,7 +20,7 @@ elseif(BACKEND STREQUAL "OPENMP")
     set_source_files_properties(${SOURCES} PROPERTIES LANGUAGE CUDA)
 
     find_package(MPI REQUIRED COMPONENTS CXX)
-    target_compile_options(heat3d_mpi PUBLIC --expt-relaxed-constexpr --extended-lambda -fopenmp)
+    target_compile_options(heat3d_mpi PUBLIC --expt-relaxed-constexpr --extended-lambda ${OpenMP_CXX_FLAGS})
 else()
     message(FATAL_ERROR "No parallel backend specified. One of CUDA, HIP and OPENMP must be On.")
 endif()
