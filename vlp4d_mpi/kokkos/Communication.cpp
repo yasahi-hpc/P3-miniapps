@@ -404,7 +404,7 @@ void Distrib::Isend(int &creq, std::vector<MPI_Request> &req) {
   for(int i = 0; i < nb_halos; i++) {
     if(i == pid_) {
       // Then local copy
-      Kokkos::parallel_for("copy", size_local_copy, local_copy(send_buffers_, recv_buffers_));
+      Kokkos::parallel_for("copy", size_local_copy, local_copy_functor(send_buffers_, recv_buffers_));
     } else {
       // Then MPI communication
       float64 *head  = send_buffers_->head(i);
@@ -437,25 +437,25 @@ void Distrib::boundary_condition_(RealOffsetView4D &halo_fn, Halos *send_buffers
   int orcsum = 0;
   const int total_size0 = send_buffers->total_size_orc_.at(orcsum);
   if(total_size0 > 0) {
-    Kokkos::parallel_for("bc0", total_size0, boundary_condition_orc0(halo_fn, send_buffers));
+    Kokkos::parallel_for("bc0", total_size0, boundary_condition_orc0_functor(halo_fn, send_buffers));
   }
 
   orcsum = 1;
   const int total_size1 = send_buffers->total_size_orc_.at(orcsum);
   if(total_size1 > 0) {
-    Kokkos::parallel_for("bc1", total_size1, boundary_condition_orc1(halo_fn, send_buffers));
+    Kokkos::parallel_for("bc1", total_size1, boundary_condition_orc1_functor(halo_fn, send_buffers));
   }
 
   orcsum = 2;
   const int total_size2 = send_buffers->total_size_orc_.at(orcsum);
   if(total_size2 > 0) {
-    Kokkos::parallel_for("bc2", total_size2, boundary_condition_orc2(halo_fn, send_buffers));
+    Kokkos::parallel_for("bc2", total_size2, boundary_condition_orc2_functor(halo_fn, send_buffers));
   }
 
   orcsum = 3;
   const int total_size3 = send_buffers->total_size_orc_.at(orcsum);
   if(total_size3 > 0) {
-    Kokkos::parallel_for("bc3", total_size3, boundary_condition_orc3(halo_fn, send_buffers));
+    Kokkos::parallel_for("bc3", total_size3, boundary_condition_orc3_functor(halo_fn, send_buffers));
   }
 }
 
@@ -465,41 +465,18 @@ void Distrib::boundary_condition_(RealOffsetView4D &halo_fn, Halos *send_buffers
   @param[in] send_list
   @param[in] recv_list
   @param[inout] halo_fn
-    Indentical to fn?
  */
 void Distrib::packAndBoundary(Config *conf, RealOffsetView4D halo_fn) {
   if(spline_) {
-    /* Older version
-    const int nx_send  = send_buffers_->nhalo_max_[0];
-    const int ny_send  = send_buffers_->nhalo_max_[1];
-    const int nvx_send = send_buffers_->nhalo_max_[2];
-    const int nvy_send = send_buffers_->nhalo_max_[3];
-    const int nb_send_halos = send_buffers_->nb_halos_;
     const int total_size = send_buffers_->total_size_;
-    MDPolicyType_4D mdpolicy4d({{0, 0, 0, 0}},
-                               {{nx_send, ny_send, nvx_send, nb_send_halos}},
-                               {{TILE_SIZE0, TILE_SIZE1, TILE_SIZE2, TILE_SIZE3}}
-                              );
-
-    Kokkos::parallel_for("pack", mdpolicy4d, pack(conf, halo_fn, send_buffers_));
-
-    #if defined( KOKKOS_ENABLE_CUDA )
-      Kokkos::parallel_for("boundary_condition", mdpolicy4d, boundary_condition(conf, halo_fn, send_buffers_));
-    #else
-      Kokkos::parallel_for("boundary_condition", nb_send_halos, boundary_condition(conf, halo_fn, send_buffers_));
-    #endif
-    Kokkos::parallel_for("merged_pack", total_size, merged_pack(send_buffers_));
-    */
-
-    const int total_size = send_buffers_->total_size_;
-    Kokkos::parallel_for("pack", total_size, pack_(halo_fn, send_buffers_));
+    Kokkos::parallel_for("pack", total_size, pack_functor(halo_fn, send_buffers_));
     boundary_condition_(halo_fn, send_buffers_);
   }
 }
 
 void Distrib::unpack(RealOffsetView4D halo_fn) {
   int total_size = recv_buffers_->total_size_;
-  Kokkos::parallel_for("merged_unpack", total_size, merged_unpack(halo_fn, recv_buffers_));
+  Kokkos::parallel_for("merged_unpack", total_size, unpack_functor(halo_fn, recv_buffers_));
 }
 
 
