@@ -16,6 +16,33 @@ Detailed descriptions of the test cases can be found in
   Section 2 and 3 Two stream Instability and Beam focusing pb -> TSI20
 - [Crouseilles & al. Beam Dynamics Newsletter no 41 (2006).](http://icfa-bd.kek.jp/Newsletter41.pdf )  
   Section 3.3, Beam focusing pb.
+  
+# Numerical settings
+## Boundary conditions
+For the sake of simplicity, all directions are, for the moment, handled with periodic boundary conditions. The Poisson equation is treated with 2D Fourier transforms. Vlasov equation is solved with a semi-Lagrangian scheme.
+
+## Time integral scheme
+### vlp4d
+In the non-MPI version, the 4D advection operator is split into four 1D operators with Lagrangian interpolation. The time integral scheme is as follows.
+
+- 1D advection along ![Adv_x](https://latex.codecogs.com/svg.latex?x(\Delta~t/2))
+- 1D advection along ![Adv_y](https://latex.codecogs.com/svg.latex?y(\Delta~t/2))
+- Poisson solver: compute electric fields ![E_x](https://latex.codecogs.com/svg.latex?E_x) and ![E_y](https://latex.codecogs.com/svg.latex?E_y)
+- 1D advection along ![Adv_vx](https://latex.codecogs.com/svg.latex?v_x(\Delta~t))
+- 1D advection along ![Adv_vy](https://latex.codecogs.com/svg.latex?v_y(\Delta~t))
+- 1D advection along ![Adv_x](https://latex.codecogs.com/svg.latex?x(\Delta~t/2))
+- 1D advection along ![Adv_y](https://latex.codecogs.com/svg.latex?y(\Delta~t/2))
+
+### vlp4d_mpi
+In the MPI version, the 4D advection operator is solved with Spline interpolation. The time integral scheme is as follows.
+- Halo excahnge on ![P2P](https://latex.codecogs.com/svg.latex?f^{n}) (P2P communications)  
+- Compute spline coefficient along ![Spline_exy](https://latex.codecogs.com/svg.latex?\left(x,y\right)) directions
+- 2D advection along ![Adv2D](https://latex.codecogs.com/svg.latex?x,y\left(\Delta~t/2\right))
+- Poisson solver: compute electric fields ![E_x](https://latex.codecogs.com/svg.latex?E_x) and ![E_y](https://latex.codecogs.com/svg.latex?E_y)
+- Compute spline coefficient along ![Spline_exy](https://latex.codecogs.com/svg.latex?\left(v_x,v_y\right)) directions
+- 4D advection along ![Dt](https://latex.codecogs.com/svg.latex?\left(x,y,v_{x},v_{y}\right)) directions for ![Dt](https://latex.codecogs.com/svg.latex?\Delta~t)
+  
+# Parallelization
 
 # Run
 ## vlp4d
