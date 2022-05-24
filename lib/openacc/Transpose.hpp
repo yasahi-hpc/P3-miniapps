@@ -4,7 +4,7 @@
 #if defined( ENABLE_OPENACC )
   #include "OpenACC_Transpose.hpp"
 #else
-  #include "OpenMP_Transpose.hpp"
+  #include "../OpenMP_Transpose.hpp"
 #endif
 
 #endif
