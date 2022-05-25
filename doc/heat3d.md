@@ -22,6 +22,88 @@ With the boundary and initial conditions given above, we have the analytical sol
 The numerical solution is checked against this solution.
 
 # Parallelization
+heat3d application is parallelized with _stdpar_, OpenMP, OpenACC, OpenMP4.5, Kokkos, thrust, CUDA and HIP. 
+Since our main focus is _stdpar_, we briefly describe the parallel kernels and data structures. 
+To represent the 3D variable ![u](https://latex.codecogs.com/svg.latex?u), we use the 3D data structure `View` consisting of 
+`std::vector` and `stdex::mdspan` (see [implementation](https://github.com/yasahi-hpc/P3-miniapps/blob/main/lib/stdpar/View.hpp) for detail). 
+The parallel computations are performed with `std::for_each_n` and `std::transform_reduce`.
+
+## Data structure
+We define ![u](https://latex.codecogs.com/svg.latex?u) in the following manner.
+```c++
+u  = RealView3D("u", std::array<size_t, 3>{nx_halo, ny_halo, nz_halo}, std::array<int, 3>{-1, -1, -1});
+```
+Where the second and third arguments are extents and the starting indices of this view, respectively. 
+For both CPUs and GPUs, we employ Fortran style data layout (`stdex::layout_left`). 
+In the host code, the data `u` can be accessed through its `operator()` like
+```c++
+for(int iz=0; iz<nz; iz++) {
+    for(int iy=0; iy<ny; iy++) {
+      for(int ix=0; ix<nx; ix++) {
+        const real_type xtmp = static_cast<real_type>(ix - nx/2) * dx;
+        const real_type ytmp = static_cast<real_type>(iy - ny/2) * dy;
+        const real_type ztmp = static_cast<real_type>(iz - nz/2) * dz;
+
+        x(ix) = xtmp;
+        y(iy) = ytmp;
+        z(iz) = ztmp;
+        u(ix, iy, iz) = conf.umax
+          * cos(xtmp / Lx * 2.0 * M_PI + ytmp / Ly * 2.0 * M_PI + ztmp / Lz * 2.0 * M_PI); 
+      }
+    }
+  }
+```
+We need to access the data through `mdspan` in the accelerated region.
+
+## Parallel operations
+Since the multi-dimensional parallel operations are not fully supported before cartesian-product in c++23, 
+we have wrapped `std::for_each_n` and `std::transform_reduce` manually. 
+The 3D heat equation can be performed as 
+```c++
+Iterate_policy<3> policy3d({0, 0, 0}, {nx, ny, nz});
+Impl::for_each(policy3d, heat_functor(conf, u, un));
+```
+with the `heat_functor` defined by
+```c++
+struct heat_functor {
+  using mdspan3d_type = RealView3D::mdspan_type;
+  mdspan3d_type u_, un_;
+  float64 coef_;
+ 
+  heat_functor(Config &conf, RealView3D &u, RealView3D &un) {
+    u_  = u.mdspan();
+    un_ = un.mdspan();
+ 
+    coef_ = conf.Kappa * conf.dt / (conf.dx*conf.dx);
+  }
+
+  void operator()(const int ix, const int iy, const int iz) const {
+    un_(ix, iy, iz) = u_(ix, iy, iz)
+                    + coef_ * ( u_(ix+1, iy, iz) + u_(ix-1, iy, iz)
+                              + u_(ix, iy+1, iz) + u_(ix, iy-1, iz)
+                              + u_(ix, iy, iz+1) + u_(ix, iy, iz-1)
+                              - 6. * u_(ix, iy, iz) );
+  }
+};
+```
+As explained, we accessed the data `u` and `un` through `mdspan`, which are captured by _values_ in the functor for `std::for_each_n`.
+
+In the end, the numerical solution is compared against this analytical solution, where we perform parallel reduction with `std::transform_reduce`. 
+```c++
+float64 l2loc = 0.0;
+auto _u  = u.mdspan();
+auto _un = un.mdspan();
+
+auto L2norm_kernel = [=] (const int ix, const int iy, const int iz) {
+  auto diff = _un(ix, iy, iz) - _u(ix, iy, iz);
+  return diff * diff;
+};
+
+Iterate_policy<3> policy3d({0, 0, 0}, {conf.nx, conf.ny, conf.nz});
+Impl::transform_reduce(policy3d, std::plus<float64>(), L2norm_kernel, l2loc);
+```
+
+For both cases, we firstly define the parallel operations over `nx * ny * nz`. The 3D indices are computed from flattend 1D index manually inside `Impl::for_each` and `Impl::transform_reduce`. 
 
 # Run
 ## heat3d
