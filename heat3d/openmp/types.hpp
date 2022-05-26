@@ -4,7 +4,7 @@
 #include <complex>
 #include <omp.h>
 #include <experimental/mdspan>
-#include "OpenMP_View.hpp"
+#include "View.hpp"
 
 namespace stdex = std::experimental;
 

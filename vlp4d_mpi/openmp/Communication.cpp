@@ -348,6 +348,9 @@ void Distrib::bookHalo(Config *conf) {
   // Halo size large enough to store 
   send_buffers_ = new Halos();
   recv_buffers_ = new Halos();
+  #if defined(ENABLE_OPENMP_OFFLOAD)
+    #pragma omp target enter data map(alloc: send_buffers_[0:1], recv_buffers_[0:1])
+  #endif
   send_buffers_->set(conf, send_list_, "send", nbp_, pid_);
   recv_buffers_->set(conf, recv_list_, "recv", nbp_, pid_);
   
