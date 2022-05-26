@@ -2,19 +2,18 @@
 #define __TYPES_HPP__
 
 #include <complex>
+#include <omp.h>
 #include <experimental/mdspan>
 #include "View.hpp"
 
 namespace stdex = std::experimental;
 
 // Directive to force vectorization
-#if defined( ENABLE_OPENACC )
-  #include <openacc.h>
+#if defined( ENABLE_OPENMP_OFFLOAD )
   using default_layout = stdex::layout_left;
-  #define LOOP_SIMD _Pragma("acc loop vector independent")
+  #define LOOP_SIMD
   #define SIMD_WIDTH 1
 #else
-  #include <omp.h>
   using default_layout = stdex::layout_left;
   #define SIMD_WIDTH 8
   //constexpr int SIMD_WIDTH = 8; // slower on A64FX
