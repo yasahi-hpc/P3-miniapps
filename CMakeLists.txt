@@ -8,6 +8,11 @@ add_subdirectory(lib)
 
 set(APPLICATION AUTO CACHE STRING "CHOICE OF APPLICATION")
 
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
+
 if(APPLICATION STREQUAL "heat3d")
     add_subdirectory(heat3d)
 elseif(APPLICATION STREQUAL "heat3d_mpi")
