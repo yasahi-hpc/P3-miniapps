@@ -3,7 +3,7 @@
 
 void allocate_inside_function(RealView2D& reference_to_a_View, const int n, const int m) {
   // Set values on device via move assign
-  reference_to_a_View = RealView2D("simple", 16, 16);
+  reference_to_a_View = RealView2D("simple", n, m);
   #if defined(ENABLE_OPENACC)
     #pragma acc data present(reference_to_a_View)
     #pragma acc parallel loop independent collapse(2)

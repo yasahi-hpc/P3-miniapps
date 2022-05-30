@@ -3,7 +3,7 @@
 
 void allocate_inside_function(RealView2D& reference_to_a_View, const int n, const int m) {
   // Set values on device via move assign
-  reference_to_a_View = RealView2D("simple", 16, 16);
+  reference_to_a_View = RealView2D("simple", n, m);
   #if defined( ENABLE_OPENMP_OFFLOAD )
     #pragma omp target teams distribute parallel for simd collapse(2)
   #endif
