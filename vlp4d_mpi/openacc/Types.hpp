@@ -3,7 +3,7 @@
 
 #include <complex>
 #include <experimental/mdspan>
-#include "OpenACC_View.hpp"
+#include "View.hpp"
 
 namespace stdex = std::experimental;
 
@@ -70,5 +70,12 @@ using ComplexView2D = View2D<complex128>;
 
 using IntView1D = View1D<int>;
 using IntView2D = View2D<int>;
+
+// shape type
+template <size_t ND>
+using shape_nd = std::array<size_t, ND>;
+
+template <size_t ND>
+using range_nd = std::array<int, ND>;
 
 #endif

@@ -329,7 +329,7 @@ void init(const char *file, Config *conf, Distrib &comm, RealView4D &fn, RealVie
   Urbnode *mynode = comm.node();
   
   shape_nd<DIMENSION> shape_halo;
-  shape_nd<DIMENSION> nxmin_halo;
+  range_nd<DIMENSION> nxmin_halo;
   for(int i=0; i<DIMENSION; i++)
     nxmin_halo[i] = mynode->xmin_[i] - HALO_PTS;
   for(int i=0; i<DIMENSION; i++)

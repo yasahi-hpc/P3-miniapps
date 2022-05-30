@@ -401,23 +401,23 @@ namespace Spline {
 
     if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( ENABLE_OPENMP_OFFLOAD )
-        RealView4D fn_trans("fn_trans", {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
-        RealView4D fn_tmp("fn_tmp",   {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
+        RealView4D fn_trans("fn_trans", shape_nd<DIMENSION>{nvx,nvy,nx,ny}, range_nd<DIMENSION>{nvx_min,nvy_min,nx_min,ny_min});
+        RealView4D fn_tmp("fn_tmp", shape_nd<DIMENSION>{nvx,nvy,nx,ny}, range_nd<DIMENSION>{nvx_min,nvy_min,nx_min,ny_min});
 
         transpose->forward(fn.data(), fn_trans.data());
         computeCoeff<layout_type>(fn_trans, fn_tmp);
         transpose->backward(fn_trans.data(), fn.data());
       #else
-        RealView4D fn_tmp("fn_tmp", {nx,ny,nvx,nvy}, {nx_min,ny_min,nvx_min,nvy_min});
+        RealView4D fn_tmp("fn_tmp", shape_nd<DIMENSION>{nx,ny,nvx,nvy}, range_nd<DIMENSION>{nx_min,ny_min,nvx_min,nvy_min});
         computeCoeff<layout_type>(fn, fn_tmp);
       #endif
     } else {
       #if defined( ENABLE_OPENMP_OFFLOAD )
-        RealView4D fn_tmp("fn_tmp", {nx,ny,nvx,nvy}, {nx_min,ny_min,nvx_min,nvy_min});
+        RealView4D fn_tmp("fn_tmp", shape_nd<DIMENSION>{nx,ny,nvx,nvy}, range_nd<DIMENSION>{nx_min,ny_min,nvx_min,nvy_min});
         computeCoeff<layout_type>(fn, fn_tmp);
       #else
-        RealView4D fn_trans("fn_trans", {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
-        RealView4D fn_tmp("fn_tmp",   {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
+        RealView4D fn_trans("fn_trans", shape_nd<DIMENSION>{nvx,nvy,nx,ny}, range_nd<DIMENSION>{nvx_min,nvy_min,nx_min,ny_min});
+        RealView4D fn_tmp("fn_tmp", shape_nd<DIMENSION>{nvx,nvy,nx,ny}, range_nd<DIMENSION>{nvx_min,nvy_min,nx_min,ny_min});
         transpose->forward(fn.data(), fn_trans.data());
         computeCoeff<layout_type>(fn_trans, fn_tmp);
         transpose->backward(fn_trans.data(), fn.data());
@@ -445,24 +445,24 @@ namespace Spline {
 
     if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( ENABLE_OPENMP_OFFLOAD )
-        RealView4D fn_tmp("fn_tmp", {nx,ny,nvx,nvy}, {nx_min,ny_min,nvx_min,nvy_min});
+        RealView4D fn_tmp("fn_tmp", shape_nd<DIMENSION>{nx,ny,nvx,nvy}, range_nd<DIMENSION>{nx_min,ny_min,nvx_min,nvy_min});
         computeCoeff<layout_type>(fn, fn_tmp);
       #else
-        RealView4D fn_trans("fn_trans", {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
-        RealView4D fn_tmp("fn_tmp",   {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
+        RealView4D fn_trans("fn_trans", shape_nd<DIMENSION>{nvx,nvy,nx,ny}, range_nd<DIMENSION>{nvx_min,nvy_min,nx_min,ny_min});
+        RealView4D fn_tmp("fn_tmp", shape_nd<DIMENSION>{nvx,nvy,nx,ny}, range_nd<DIMENSION>{nvx_min,nvy_min,nx_min,ny_min});
         transpose->forward(fn.data(), fn_trans.data());
         computeCoeff<layout_type>(fn_trans, fn_tmp);
         transpose->backward(fn_trans.data(), fn.data());
       #endif
     } else {
       #if defined( ENABLE_OPENMP_OFFLOAD )
-        RealView4D fn_trans("fn_trans", {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
-        RealView4D fn_tmp("fn_tmp",   {nvx,nvy,nx,ny}, {nvx_min,nvy_min,nx_min,ny_min});
+        RealView4D fn_trans("fn_trans", shape_nd<DIMENSION>{nvx,nvy,nx,ny}, range_nd<DIMENSION>{nvx_min,nvy_min,nx_min,ny_min});
+        RealView4D fn_tmp("fn_tmp", shape_nd<DIMENSION>{nvx,nvy,nx,ny}, range_nd<DIMENSION>{nvx_min,nvy_min,nx_min,ny_min});
         transpose->forward(fn.data(), fn_trans.data());
         computeCoeff<layout_type>(fn_trans, fn_tmp);
         transpose->backward(fn_trans.data(), fn.data());
       #else
-        RealView4D fn_tmp("fn_tmp",  {nx,ny,nvx,nvy}, {nx_min,ny_min,nvx_min,nvy_min});
+        RealView4D fn_tmp("fn_tmp", shape_nd<DIMENSION>{nx,ny,nvx,nvy}, range_nd<DIMENSION>{nx_min,ny_min,nvx_min,nvy_min});
         computeCoeff<layout_type>(fn, fn_tmp);
       #endif
     }

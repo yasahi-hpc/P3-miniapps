@@ -321,7 +321,7 @@ namespace Advection {
     const int xmin[2]   = {dom->local_nxmin_[0], dom->local_nxmin_[1]};
     const int xmax[2]   = {dom->local_nxmax_[0], dom->local_nxmax_[1]};
     shape_nd<DIMENSION> shape_halo;
-    shape_nd<DIMENSION> nxmin_halo;
+    range_nd<DIMENSION> nxmin_halo;
     for(int i=0; i<DIMENSION; i++)
       nxmin_halo[i] = dom->local_nxmin_[i] - HALO_PTS;
     for(int i=0; i<DIMENSION; i++)

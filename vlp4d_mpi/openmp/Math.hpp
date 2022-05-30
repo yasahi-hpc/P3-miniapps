@@ -52,8 +52,8 @@ namespace Impl {
   */
 
   void deep_copy(RealView4D &a, const RealView4D &b) {
-    shape_nd<4> shape = a.strides_meta();
-    shape_nd<4> offset = a.offsets();
+    shape_nd<4> shape = a.extents();
+    range_nd<4> offset = a.offsets();
 
     int n0 = shape[0], n1 = shape[1], n2 = shape[2], n3 = shape[3];
     int n0_start = offset[0], n1_start = offset[1], n2_start = offset[2], n3_start = offset[3];

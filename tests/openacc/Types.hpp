@@ -2,20 +2,22 @@
 #define __TYPES_HPP__
 
 #include <complex>
-#include <omp.h>
 #include <experimental/mdspan>
 #include "View.hpp"
 
 namespace stdex = std::experimental;
 
-// Directives to force vectorization
-#if defined ( ENABLE_OPENMP_OFFLOAD )
+// Directive to force vectorization
+#if defined( ENABLE_OPENACC )
+  #include <openacc.h>
   using default_layout = stdex::layout_left;
-  #define LOOP_SIMD
+  #define LOOP_SIMD _Pragma("acc loop vector independent")
   #define SIMD_WIDTH 1
 #else
+  #include <omp.h>
   using default_layout = stdex::layout_left;
   #define SIMD_WIDTH 8
+  //constexpr int SIMD_WIDTH = 8; // slower on A64FX
   
   #if defined(SIMD)
     #if defined(FUJI)
@@ -65,9 +67,9 @@ using RealView4D = View4D<float64>;
 
 using ComplexView1D = View1D<complex128>;
 using ComplexView2D = View2D<complex128>;
+using ComplexView3D = View3D<complex128>;
 
-// shape type
-template <size_t ND>
-using shape_nd = std::array<size_t, ND>;
+using IntView1D = View1D<int>;
+using IntView2D = View2D<int>;
 
 #endif
