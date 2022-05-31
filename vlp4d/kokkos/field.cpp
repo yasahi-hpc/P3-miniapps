@@ -1,5 +1,6 @@
 #include "field.hpp"
 #include "tiles.hpp"
+#include "index.h"
 
 void lu_solve_poisson(Config *conf, Efield *ef);
 
@@ -14,6 +15,7 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
   // See https://github.com/kokkos/kokkos/issues/695
   RealView2D rho = ef->rho_;
 
+  /*
   MDPolicy<2> integral_policy2d({{0, 0}},
                                 {{nx, ny}},
                                 {{TILE_SIZE0, TILE_SIZE1}}
@@ -27,6 +29,21 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
     }
     rho(ix, iy) = sum * dvx * dvy;
   });
+  */
+
+  // For some reason, the following version is significantly faster on both GPUs and CPUs
+  Kokkos::parallel_for("integral", nx*ny, KOKKOS_LAMBDA (const int& ixy) {
+    int2 idx_2D = Index::int2coord_2D(ixy, nx, ny);
+    int ix = idx_2D.x, iy = idx_2D.y;
+    float64 sum = 0.;
+    for(int ivy=0; ivy<nvy; ivy++) {
+      for(int ivx=0; ivx<nvx; ivx++) {
+        sum += fn(ix, iy, ivx, ivy);
+      }
+    }
+    rho(ix, iy) = sum * dvx * dvy;
+  });
+
   Kokkos::fence();
 };
 
