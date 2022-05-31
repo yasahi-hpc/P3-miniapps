@@ -282,9 +282,9 @@ public:
     //assert( left.extents() == right_buffer.extents() );
 
     int nx = left.extent(0), ny = left.extent(1);
-    MDPolicy<2> pack_policy2d({{0, 0}},
-                              {{nx, ny}},
-                              {{TILE_SIZE0, TILE_SIZE1}}
+    MDPolicy<2> pack_policy2d({0, 0},
+                              {nx, ny},
+                              {TILE_SIZE0, TILE_SIZE1}
                              );
  
     Kokkos::parallel_for("pack", pack_policy2d, KOKKOS_LAMBDA (const int ix, const int iy) {
@@ -306,9 +306,9 @@ public:
 
     int nx = left.extent(0), ny = left.extent(1);
 
-    MDPolicy<2> unpack_policy2d({{0, 0}},
-                                {{nx, ny}},
-                                {{TILE_SIZE0, TILE_SIZE1}}
+    MDPolicy<2> unpack_policy2d({0, 0},
+                                {nx, ny},
+                                {TILE_SIZE0, TILE_SIZE1}
                                );
  
     Kokkos::parallel_for("unpack", unpack_policy2d,
