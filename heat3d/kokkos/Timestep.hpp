@@ -11,9 +11,9 @@ void step(Config &conf, View3DType &u, View3DType &un, std::vector<Timer*> &time
   const float64 coef = conf.Kappa * conf.dt / (conf.dx*conf.dx);
   
   timers[Heat]->begin();
-  MDPolicy<3> heat_policy3d({{0, 0, 0}},
-                            {{nx, ny, nz}},
-                            {{TILE_SIZE0, TILE_SIZE1, TILE_SIZE2}}
+  MDPolicy<3> heat_policy3d({0, 0, 0},
+                            {nx, ny, nz},
+                            {TILE_SIZE0, TILE_SIZE1, TILE_SIZE2}
                            );
 
   auto heat_eq = KOKKOS_LAMBDA (const int ix, const int iy, const int iz) {
