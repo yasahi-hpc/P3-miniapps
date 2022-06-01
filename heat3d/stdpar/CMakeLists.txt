@@ -18,3 +18,6 @@ elseif(BACKEND STREQUAL "OPENMP")
 else()
     message(FATAL_ERROR "No parallel backend specified. One of CUDA, and OPENMP must be On.")
 endif()
+
+# Macro
+target_compile_definitions(heat3d PUBLIC $<$<BOOL:${ACCESS_VIA_RAW_POINTERS}>: ACCESS_VIA_RAW_POINTERS>)
