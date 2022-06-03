@@ -13,13 +13,10 @@ module use /work/opt/local/x86_64/cores/nvidia/22.5/Linux_x86_64/22.5/comm_libs/
 module load hpcx-ompi
 module list
 
+# With this setting, GPU direct communications work for managed buffers
 export UCX_MEMTYPE_CACHE=n
 export UCX_IB_GPU_DIRECT_RDMA=no
 export UCX_RNDV_FRAG_MEM_TYPE=cuda
 
-#mpiexec -machinefile $PJM_O_NODEINF -np $PJM_MPI_PROC -npernode 8 -mca use_eager_rdma 1 \
-#mpiexec -machinefile $PJM_O_NODEINF -np $PJM_MPI_PROC -npernode 8 -mca btl_openib_want_cuda_gdr 1 \
 mpiexec -machinefile $PJM_O_NODEINF -np $PJM_MPI_PROC -npernode 8 \
     ./wrapper.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 2 --py 2 --pz 2 --nx 256 --ny 256 --nz 256 --nbiter 1000 --freq_diag 0
-#mpiexec -machinefile $PJM_O_NODEINF -np $PJM_MPI_PROC -npernode 8 -mca mpi_common_cuda_gpu_mem_check_workaround 1 \
-#    ./wrapper.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 2 --py 2 --pz 2 --nx 256 --ny 256 --nz 256 --nbiter 1000 --freq_diag 0

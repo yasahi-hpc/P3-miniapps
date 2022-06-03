@@ -637,7 +637,8 @@ private:
 public:
   Distrib() = delete;
   Distrib(int &argc, char **argv) : spline_(true), recv_buffers_(nullptr), send_buffers_(nullptr) {
-    int required = MPI_THREAD_SERIALIZED;
+    //int required = MPI_THREAD_SERIALIZED;
+    int required = MPI_THREAD_SINGLE;
     int provided;
 
     // Initialize MPI
