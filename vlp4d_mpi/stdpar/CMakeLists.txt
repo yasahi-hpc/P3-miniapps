@@ -16,3 +16,5 @@ else()
     target_link_libraries(vlp4d_mpi PUBLIC std::mdspan MPI::MPI_CXX math_lib)
     target_compile_options(vlp4d_mpi PUBLIC -O3 -stdpar=multicore -mp)
 endif()
+
+target_compile_definitions(vlp4d_mpi PUBLIC LONG_ENOUGH_BUFFER)
