@@ -45,7 +45,8 @@ int main (int argc, char *argv[]) {
   timers[Total]->begin();
   field_rho(&conf, fn, ef);
   field_reduce(&conf, ef);
-  field_poisson(&conf, ef, dg, iter);
+  field_poisson(&conf, ef, iter);
+  dg->compute(&conf, ef, iter);
   dg->computeL2norm(&conf, fn, iter);
 
   // Main time step loop
@@ -62,7 +63,7 @@ int main (int argc, char *argv[]) {
   }
   timers[Total]->end();
 
-  finalize(&ef, &dg, &spline);
+  finalize(&conf, comm, &ef, &dg, &spline);
 
   if(comm.master()) {
     printTimers(timers);
