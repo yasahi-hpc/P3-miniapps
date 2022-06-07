@@ -28,3 +28,6 @@ endif()
 
 # Compiler options
 target_compile_options(vlp4d_mpi PUBLIC -O3)
+
+# Macro
+target_compile_definitions(vlp4d_mpi PUBLIC $<$<BOOL:${NO_ERROR_CHECK}>: NO_ERROR_CHECK>)
