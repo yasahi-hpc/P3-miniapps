@@ -10,6 +10,6 @@
 
 void init(const char *file, Config *conf, Distrib &comm, RealOffsetView4D &fn, RealOffsetView4D &fnp1, RealOffsetView4D &fn_tmp, Efield **ef, Diags **dg, Spline **spline, std::vector<Timer*> &timers);
 void initValues(Config *conf, RealOffsetView4D &fn, RealOffsetView4D &fnp1);
-void finalize(Efield **ef, Diags **dg, Spline **spline);
+void finalize(Config *conf, Distrib &comm, Efield **ef, Diags **dg, Spline **spline);
 
 #endif

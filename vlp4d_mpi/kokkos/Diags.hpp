@@ -22,7 +22,7 @@ public:
 
   void compute(Config *conf, Efield *ef, int iter);
   void computeL2norm(Config *conf, RealOffsetView4D fn, int iter);
-  void save(Config *conf, Distrib &comm, int cur_iter);
+  void save(Config *conf, Distrib &comm);
 };
 
 #endif
