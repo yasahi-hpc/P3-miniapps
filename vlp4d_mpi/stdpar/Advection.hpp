@@ -7,6 +7,7 @@
 #include "Types.hpp"
 #include "Math.hpp"
 #include "Parallel_For.hpp"
+#include "Parallel_Reduce.hpp"
 #include <cmath>
 using std::max; using std::min;
 
@@ -17,8 +18,8 @@ namespace Advection {
   void print_fxvx(Config *conf, Distrib &comm, const RealView4D &fn, int iter);
 
   // Internal functions
-  static void testError(std::vector<int> &err) {
-    if(err[0] != 0) {
+  static void testError(int &err) {
+    if(err != 0) {
       fprintf(stderr, "Time step is too large, exiting\n");
       exit(0);
     }
@@ -119,9 +120,6 @@ namespace Advection {
     // Allocate 4D data structures with Offsets
     Impl::deep_copy(fn_tmp, fn);
 
-    std::vector<int> err(1, 0);
-    auto *ptr_err = err.data();
-
     auto _fn = fn.mdspan();
     auto _fn_tmp = fn_tmp.mdspan();
 
@@ -133,6 +131,8 @@ namespace Advection {
       const float64 depx = dt * vx;
       const float64 depy = dt * vy;
       const float64 xstar[2] = {x - depx, y - depy};
+
+      int err = 0;
 
       #ifdef LAG_ORDER
         #ifdef LAG_ODD
@@ -154,10 +154,12 @@ namespace Advection {
         lag_basis(d_prev1, coefx);
         lag_basis(d_prev2, coefy);
 
+        #if ! defined(NO_ERROR_CHECK)
         if(ipos1 < xmin[0] - HALO_PTS || ipos1 > xmax[0] + HALO_PTS - LAG_ORDER)
-          ptr_err[0] += 1;
+          err += 1;
         if(ipos2 < xmin[1] - HALO_PTS || ipos2 > xmax[1] + HALO_PTS - LAG_ORDER)
-          ptr_err[0] += 1;
+          err += 1;
+        #endif
 
         for(int k2 = 0; k2 <= LAG_ORDER; k2++) {
           for(int k1 = 0; k1 <= LAG_ORDER; k1++) {
@@ -184,8 +186,10 @@ namespace Advection {
         const float64 etay1 = 1. - etay0 - etay2 - etay3;
         const float64 etay[4] = {etay0, etay1, etay2, etay3};
  
-        if(ipos1 < xmin[0] - 1 || ipos1 > xmax[0]) ptr_err[0] += 1;
-        if(ipos2 < xmin[1] - 1 || ipos2 > xmax[1]) ptr_err[0] += 1;
+        #if ! defined(NO_ERROR_CHECK)
+          if(ipos1 < xmin[0] - 1 || ipos1 > xmax[0]) err += 1;
+          if(ipos2 < xmin[1] - 1 || ipos2 > xmax[1]) err += 1;
+        #endif
         float64 ftmp = 0.;
  
         for(int k2 = 0; k2 <= 3; k2++) {
@@ -198,14 +202,20 @@ namespace Advection {
       #endif
 
       _fn(ix, iy, ivx, ivy) = ftmp;
+
+      #if ! defined(NO_ERROR_CHECK)
+        return err;
+      #endif
     };
 
     Iterate_policy<4> policy4d({nx_min, ny_min, nvx_min, nvy_min},
                                {nx_max, ny_max, nvx_max, nvy_max});
-    Impl::for_each(policy4d, advect_2d);
-
-    #if ! defined(NO_ERROR_CHECK)
-      testError(err);
+    #if defined(NO_ERROR_CHECK)
+      Impl::for_each(policy4d, advect_2d);
+    #else
+      int error = 0;
+      Impl::transform_reduce(policy4d, std::plus<int>(), advect_2d, error);
+      testError(error);
     #endif
   }
 
@@ -233,9 +243,6 @@ namespace Advection {
       locrxmindx[j] = dom->minPhy_[j] + dom->local_nxmin_[j] * dom->dx_[j] - dom->dx_[j];
       locrxmaxdx[j] = dom->minPhy_[j] + dom->local_nxmax_[j] * dom->dx_[j] + dom->dx_[j];
     }
-     
-    std::vector<int> err(1, 0);
-    auto *ptr_err = err.data();
 
     Impl::deep_copy(tmp_fn, fn);
 
@@ -376,21 +383,27 @@ namespace Advection {
       int indices[4] = {ix, iy, ivx, ivy};
 
       computeFeet(xstar, indices);
+      int err = 0;
       #if ! defined(NO_ERROR_CHECK)
         for(int j = 0; j < DIMENSION; j++) {
-          ptr_err[0] += (xstar[j] < locrxmindx[j] || xstar[j] > locrxmaxdx[j]);
+          err += (xstar[j] < locrxmindx[j] || xstar[j] > locrxmaxdx[j]);
         }
       #endif
 
       _fn(ix, iy, ivx, ivy) = interp_4d(xstar);
+      #if ! defined(NO_ERROR_CHECK)
+        return err;
+      #endif
     };
 
     Iterate_policy<4> policy4d({nx_min, ny_min, nvx_min, nvy_min},
                                {nx_max, ny_max, nvx_max, nvy_max});
-    Impl::for_each(policy4d, advect_4d);
-
-    #if ! defined(NO_ERROR_CHECK)
-      testError(err);
+    #if defined(NO_ERROR_CHECK)
+      Impl::for_each(policy4d, advect_4d);
+    #else
+      int error = 0;
+      Impl::transform_reduce(policy4d, std::plus<int>(), advect_4d, error);
+      testError(error);
     #endif
   }
 
