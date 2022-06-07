@@ -7,7 +7,7 @@
 #PJM --mpi proc=1
 
 module purge
-module load nvidia/21.3 nvmpi/21.3 fftw/3.3.9
+module load nvidia/22.5 nvmpi/22.5 fftw/3.3.9
 
 export OMP_NUM_THREADS=36
 export OMP_PROC_BIND=true

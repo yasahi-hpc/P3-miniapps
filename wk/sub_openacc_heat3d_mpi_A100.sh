@@ -8,6 +8,7 @@
 
 module purge
 module load nvidia/22.5 nvmpi/22.5
+#module load nvidia/22.5 hpcx-ompi cmake/3.22.2
 
 export UCX_MEMTYPE_CACHE=n
 export UCX_IB_GPU_DIRECT_RDMA=no
