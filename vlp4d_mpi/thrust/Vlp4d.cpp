@@ -43,7 +43,7 @@ int main (int argc, char *argv[]) {
   timers[Total]->begin();
   field_rho(&conf, fn, ef);
   field_reduce(&conf, ef);
-  field_poisson(&conf, ef, iter);
+  field_poisson(&conf, ef);
   dg->compute(&conf, ef, iter);
   dg->computeL2norm(&conf, fn, iter);
 
