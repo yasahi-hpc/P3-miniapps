@@ -42,8 +42,9 @@ void onetimestep(Config *conf, Distrib &comm, RealView4D &fn, RealView4D &fnp1,
 
   timers[Splinecoeff_xy]->begin();
   Spline::computeCoeff_xy(conf, transpose, fn);
-  Impl::deep_copy(fnp1, fn);
   timers[Splinecoeff_xy]->end();
+
+  Impl::deep_copy(fnp1, fn);
 
   timers[Advec2D]->begin();
   Advection::advect_2D_xy(conf, fn, 0.5 * dom->dt_);
