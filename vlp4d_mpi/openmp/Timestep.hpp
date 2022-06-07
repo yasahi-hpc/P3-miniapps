@@ -58,8 +58,12 @@ void onetimestep(Config *conf, Distrib &comm, RealView4D &fn, RealView4D &fnp1,
   timers[TimerEnum::AllReduce]->end();
 
   timers[TimerEnum::Fourier]->begin();
-  field_poisson(conf, ef, dg, iter);
+  field_poisson(conf, ef);
   timers[TimerEnum::Fourier]->end();
+
+  timers[Diag]->begin();
+  dg->compute(conf, ef, iter);
+  timers[Diag]->end();
 
   timers[Splinecoeff_vxvy]->begin();
   Spline::computeCoeff_vxvy(conf, transpose, fnp1);
@@ -78,15 +82,15 @@ void onetimestep(Config *conf, Distrib &comm, RealView4D &fn, RealView4D &fnp1,
   timers[TimerEnum::AllReduce]->end();
 
   timers[TimerEnum::Fourier]->begin();
-  field_poisson(conf, ef, dg, iter);
+  field_poisson(conf, ef);
   timers[TimerEnum::Fourier]->end();
 
   timers[Diag]->begin();
+  dg->compute(conf, ef, iter);
   dg->computeL2norm(conf, fnp1, iter);
 
   if(iter % dom->ifreq_ == 0) {
     if(dom->fxvx_) Advection::print_fxvx(conf, comm, fnp1, iter);
-    dg->save(conf, comm, iter);
   }
   timers[Diag]->end();
 }
