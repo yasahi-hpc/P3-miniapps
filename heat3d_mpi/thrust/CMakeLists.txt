@@ -26,3 +26,6 @@ else()
 endif()
 
 target_link_libraries(heat3d_mpi PUBLIC MPI::MPI_CXX math_lib)
+
+# Macro
+target_compile_definitions(heat3d_mpi PUBLIC $<$<BOOL:${ACCESS_VIA_RAW_POINTERS}>: ACCESS_VIA_RAW_POINTERS>)
