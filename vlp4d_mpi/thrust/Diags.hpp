@@ -22,7 +22,7 @@ public:
 
   void compute(Config *conf, Efield *ef, int iter);
   void computeL2norm(Config *conf, RealView4D &fn, int iter);
-  void save(Config *conf, Distrib &comm, int cur_iter);
+  void save(Config *conf, Distrib &comm);
 
 private:
   DISALLOW_COPY_AND_ASSIGN(Diags);
