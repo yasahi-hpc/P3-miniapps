@@ -18,3 +18,6 @@ else()
 endif()
 
 target_compile_definitions(vlp4d_mpi PUBLIC LONG_ENOUGH_BUFFER)
+
+# Macro
+target_compile_definitions(vlp4d_mpi PUBLIC $<$<BOOL:${NO_ERROR_CHECK}>: NO_ERROR_CHECK>)
