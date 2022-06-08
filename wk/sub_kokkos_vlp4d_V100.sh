@@ -10,4 +10,3 @@ module purge
 module load cuda/11.0 gnu/7.4.0
 
 ../build/vlp4d/kokkos/vlp4d SLD10_large.dat
-#../build/heat3D/kokkos/heat3D

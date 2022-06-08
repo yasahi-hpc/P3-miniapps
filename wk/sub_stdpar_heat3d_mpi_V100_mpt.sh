@@ -8,7 +8,10 @@ cd $PBS_O_WORKDIR
 . /etc/profile.d/modules.sh
 
 module purge
-module load cuda/11.0 gnu/7.4.0 nvidia/22.1 openmpi-gdr/4.1.0
+module load cuda/11.0 gnu/7.4.0 nvidia/22.1 mpt/2.23-ga
+
+export MPI_SHEPHERD=1
+export MPI_USE_CUDA=1
 
 #mpirun -np 1 ./wrapper_mpt.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 1 --py 1 --pz 1 --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0
-mpirun -np 2 ./wrapper.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0
+mpirun -np 2 ./wrapper_mpt.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0
