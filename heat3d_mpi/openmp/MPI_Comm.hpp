@@ -8,6 +8,7 @@
 #include "../Timer.hpp"
 #include "Types.hpp"
 #include "Config.hpp"
+#include "Utils.hpp"
 
 constexpr int UP     = 0;
 constexpr int DOWN   = 1;
@@ -74,10 +75,6 @@ struct Halo {
   }
 
   const std::string name() const noexcept {return name_;}
-  RealView2D left_buffer() const { return left_buffer_; }
-  RealView2D right_buffer() const { return right_buffer_; }
-  RealView2D &left_buffer() { return left_buffer_; }
-  RealView2D &right_buffer() { return right_buffer_; }
   size_t size() const { return left_buffer_.size(); }
   int_type left_rank() const { return left_rank_; }
   int_type right_rank() const { return right_rank_; }
@@ -86,6 +83,9 @@ struct Halo {
   MPI_Comm communicator() const { return communicator_; }
   MPI_Datatype type() const { return mpi_data_type_; }
   bool is_comm() const {return is_comm_; }
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(Halo);
 };
 
 
@@ -200,7 +200,7 @@ private:
     assert(topology_size == size_);
 
     // Create a Cartesian Communicator
-    int ndims = 3;
+    constexpr int ndims = 3;
     int periods[ndims] = {1, 1, 1}; // Periodic in all directions
     int reorder = 1;
     int old_rank = rank_;
