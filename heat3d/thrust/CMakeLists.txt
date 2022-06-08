@@ -1,15 +1,13 @@
 file(GLOB SOURCES "*.cpp")
 
 # Find libraries
-find_package(mdspan CONFIG REQUIRED)
-
 add_executable(heat3d ${SOURCES})
 
 # Compiler version
 target_compile_features(heat3d PUBLIC cxx_std_17)
 
 # Link mdspan
-target_link_libraries(heat3d PUBLIC std::mdspan math_lib)
+target_link_libraries(heat3d PUBLIC math_lib)
 
 set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 
