@@ -16,7 +16,9 @@
 #endif
 
 #if defined( ENABLE_OPENMP_OFFLOAD )
-  #include <accelmath.h>
+  #if defined( ENABLE_CUDA )
+    #include <accelmath.h>
+  #endif
 /*
   #pragma omp declare target
   inline double fmod(double x, double y);
