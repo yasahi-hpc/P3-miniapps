@@ -9,11 +9,11 @@ template <typename RealType> using Complex = Impl::complex<RealType>;
 
 namespace Impl {
   template <typename RealType, class LayoutPolicy = layout_left,
-            std::enable_if_t<std::is_same_v<RealType, float           > ||
-                             std::is_same_v<RealType, double          > ||
-                             std::is_same_v<RealType, Complex<float>  > ||
-                             std::is_same_v<RealType, Complex<double> >
-                             , std::nullptr_t> = nullptr
+            typename std::enable_if<std::is_same<RealType, float           >::value ||
+                                    std::is_same<RealType, double          >::value ||
+                                    std::is_same<RealType, Complex<float>  >::value ||
+                                    std::is_same<RealType, Complex<double> >::value
+                                    , std::nullptr_t>::type = nullptr
   >
   struct Transpose {
     private:
@@ -28,7 +28,7 @@ namespace Impl {
       Transpose() = delete;
     
       Transpose(int row, int col) : row_(row), col_(col) {
-        if(std::is_same_v<array_layout, layout_right>) {
+        if(std::is_same<array_layout, layout_right>::value) {
           row_ = col;
           col_ = row;
         }
@@ -51,7 +51,7 @@ namespace Impl {
     private:
       // float32 specialization
       template <typename RType=RealType,
-                std::enable_if_t<std::is_same_v<RType, float>, std::nullptr_t> = nullptr>
+                typename std::enable_if<std::is_same<RType, float>::value, std::nullptr_t>::type = nullptr>
       void cublasTranspose_(RType *dptr_in, RType *dptr_out, int row, int col) {
         constexpr float alpha = 1.0;
         constexpr float beta  = 0.0;
@@ -72,7 +72,7 @@ namespace Impl {
 
       // float64 specialization
       template <typename RType=RealType,
-                std::enable_if_t<std::is_same_v<RType, double>, std::nullptr_t> = nullptr>
+                typename std::enable_if<std::is_same<RType, double>::value, std::nullptr_t>::type = nullptr>
       void cublasTranspose_(RType *dptr_in, RType *dptr_out, int row, int col) {
         constexpr double alpha = 1.;
         constexpr double beta  = 0.;
@@ -93,7 +93,7 @@ namespace Impl {
 
       // complex64 specialization
       template <typename RType=RealType,
-                std::enable_if_t<std::is_same_v<RType, Complex<float> >, std::nullptr_t> = nullptr>
+                typename std::enable_if<std::is_same<RType, Complex<float> >::value, std::nullptr_t>::type = nullptr>
       void cublasTranspose_(RType *dptr_in, RType *dptr_out, int row, int col) {
         const cuComplex alpha = make_cuComplex(1.0, 0.0);
         const cuComplex beta  = make_cuComplex(0.0, 0.0);
@@ -114,7 +114,7 @@ namespace Impl {
 
       // complex128 specialization
       template <typename RType=RealType,
-                std::enable_if_t<std::is_same_v<RType, Complex<double> >, std::nullptr_t> = nullptr>
+                typename std::enable_if<std::is_same<RType, Complex<double> >::value, std::nullptr_t>::type = nullptr>
       void cublasTranspose_(RType *dptr_in, RType *dptr_out, int row, int col) {
         const cuDoubleComplex alpha = make_cuDoubleComplex(1., 0.);
         const cuDoubleComplex beta  = make_cuDoubleComplex(0., 0.);
