@@ -731,6 +731,7 @@ public:
                      [=] MDSPAN_FORCE_INLINE_FUNCTION (const int idx) {
                        _recv_buf_flatten(idx + recv_offset) = _send_buf_flatten(idx + send_offset);
                      });
+      synchronize();
     }
   }
 

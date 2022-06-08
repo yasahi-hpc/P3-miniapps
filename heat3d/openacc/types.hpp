@@ -14,7 +14,7 @@ namespace stdex = std::experimental;
   #define LOOP_SIMD _Pragma("acc loop vector independent")
   #define SIMD_WIDTH 1
 #else
-  using default_layout = stdex::layout_right;
+  using default_layout = stdex::layout_left;
   #define SIMD_WIDTH 8
   
   #if defined(SIMD)

@@ -9,6 +9,6 @@
 #include "Spline.hpp"
 
 void init(const char *file, Config *conf, Distrib &comm, RealView4D &fn, RealView4D &fnp1, RealView4D &fn_tmp, Efield **ef, Diags **dg, Spline **spline, std::vector<Timer*> &timers);
-void finalize(Efield **ef, Diags **dg, Spline **spline);
+void finalize(Config *conf, Distrib &comm, Efield **ef, Diags **dg, Spline **spline);
 
 #endif

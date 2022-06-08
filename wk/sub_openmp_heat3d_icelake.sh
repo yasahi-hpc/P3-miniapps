@@ -6,7 +6,8 @@
 #PJM -g jh220031a
 #PJM --mpi proc=1
 
-module load intel
+module purge
+module load intel impi/2021.2.0 fftw/3.3.9
 
 export OMP_NUM_THREADS=36
-../build/heat3D/openmp/heat3D
+../build/heat3d/openmp/heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0

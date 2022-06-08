@@ -372,7 +372,10 @@ void init(const char *file, Config *conf, Distrib &comm, RealView4D &fn, RealVie
   initcase(conf, fn);
 }
 
-void finalize(Efield **ef, Diags **dg, Impl::Transpose<float64, default_layout> **transpose) {
+void finalize(Config *conf, Distrib &comm, Efield **ef, Diags **dg, Impl::Transpose<float64, default_layout> **transpose) {
+  // Store to csv
+  (*dg)->save(conf, comm);
+
   delete *ef;
   delete *dg;
   delete *transpose;

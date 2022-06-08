@@ -383,8 +383,10 @@ void initValues(Config *conf, RealOffsetView4D &fn, RealOffsetView4D &fnp1) {
   initcase(conf, fn);
 }
 
-void finalize(Efield **ef, Diags **dg, Spline **spline) {
-  // Store diagnostics
+void finalize(Config *conf, Distrib &comm, Efield **ef, Diags **dg, Spline **spline) {
+  // Store to csv
+  (*dg)->save(conf, comm);
+
   delete *ef;
   delete *dg;
   delete *spline;

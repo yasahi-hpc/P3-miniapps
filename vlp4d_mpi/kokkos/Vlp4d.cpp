@@ -73,7 +73,7 @@ int main (int argc, char* argv[]) {
     #if defined( TILE_SIZE_TUNING )
       field_rho(&conf, fn, ef);
       field_reduce(&conf, ef);
-      field_poisson(&conf, ef, dg, iter);
+      field_poisson(&conf, ef);
 
       comm.exchangeHalo(&conf, fn, timers);
 
@@ -91,7 +91,8 @@ int main (int argc, char* argv[]) {
 
     field_rho(&conf, fn, ef);
     field_reduce(&conf, ef);
-    field_poisson(&conf, ef, dg, iter);
+    field_poisson(&conf, ef);
+    dg->compute(&conf, ef, iter);
     dg->computeL2norm(&conf, fn, iter);
 
     Kokkos::fence();
@@ -112,7 +113,7 @@ int main (int argc, char* argv[]) {
     }
     Kokkos::fence();
     timers[Total]->end();
-    finalize(&ef, &dg, &spline);
+    finalize(&conf, comm, &ef, &dg, &spline);
     comm.cleanup();
   }
   Kokkos::finalize();

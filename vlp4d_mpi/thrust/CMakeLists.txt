@@ -33,3 +33,6 @@ else()
 endif()
 
 target_link_libraries(vlp4d_mpi PUBLIC MPI::MPI_CXX math_lib)
+
+# Macro
+target_compile_definitions(vlp4d_mpi PUBLIC $<$<BOOL:${NO_ERROR_CHECK}>: NO_ERROR_CHECK>)

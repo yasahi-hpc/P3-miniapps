@@ -45,8 +45,12 @@ void onetimestep(Config *conf, Distrib &comm, RealOffsetView4D fn, RealOffsetVie
   timers[TimerEnum::AllReduce]->end();
 
   timers[TimerEnum::Fourier]->begin();
-  field_poisson(conf, ef, dg, iter);
+  field_poisson(conf, ef);
   timers[TimerEnum::Fourier]->end();
+
+  timers[Diag]->begin();
+  dg->compute(conf, ef, iter);
+  timers[Diag]->end();
 
   timers[Splinecoeff_vxvy]->begin();
   spline->computeCoeff_vxvy(conf, fnp1);
@@ -65,15 +69,15 @@ void onetimestep(Config *conf, Distrib &comm, RealOffsetView4D fn, RealOffsetVie
   timers[TimerEnum::AllReduce]->end();
 
   timers[TimerEnum::Fourier]->begin();
-  field_poisson(conf, ef, dg, iter);
+  field_poisson(conf, ef);
   timers[TimerEnum::Fourier]->end();
 
   timers[Diag]->begin();
+  dg->compute(conf, ef, iter);
   dg->computeL2norm(conf, fnp1, iter);
 
   if(iter % dom->ifreq_ == 0) {
     if(dom->fxvx_) Advection::print_fxvx(conf, comm, fnp1, iter);
-    dg->save(conf, comm, iter);
   }
   Kokkos::fence();
   timers[Diag]->end();
@@ -107,8 +111,12 @@ void onetimestep(Config *conf, Distrib &comm, TileSizeTuning &tuning, RealOffset
   timers[TimerEnum::AllReduce]->end();
 
   timers[TimerEnum::Fourier]->begin();
-  field_poisson(conf, ef, dg, iter);
+  field_poisson(conf, ef);
   timers[TimerEnum::Fourier]->end();
+
+  timers[Diag]->begin();
+  dg->compute(conf, ef, iter);
+  timers[Diag]->end();
 
   timers[Splinecoeff_vxvy]->begin();
   spline->computeCoeff_vxvy(conf, fnp1, tuning.bestTileSize("coeff_vxvy"));
@@ -127,15 +135,15 @@ void onetimestep(Config *conf, Distrib &comm, TileSizeTuning &tuning, RealOffset
   timers[TimerEnum::AllReduce]->end();
 
   timers[TimerEnum::Fourier]->begin();
-  field_poisson(conf, ef, dg, iter);
+  field_poisson(conf, ef);
   timers[TimerEnum::Fourier]->end();
 
   timers[Diag]->begin();
+  dg->compute(conf, ef, iter);
   dg->computeL2norm(conf, fnp1, iter);
 
   if(iter % dom->ifreq_ == 0) {
     if(dom->fxvx_) Advection::print_fxvx(conf, comm, fnp1, iter); // [May be done]
-    dg->save(conf, comm, iter);
   }
   Kokkos::fence();
   timers[Diag]->end();

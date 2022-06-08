@@ -9,6 +9,6 @@
 #include "Transpose.hpp"
 
 void init(const char *file, Config *conf, Distrib &comm, RealView4D &fn, RealView4D &fnp1, Efield **ef, Diags **dg, Impl::Transpose<float64, default_layout> **transpose, std::vector<Timer*> &timers);
-void finalize(Efield **ef, Diags **dg, Impl::Transpose<float64, default_layout> **transpose);
+void finalize(Config *conf, Distrib &comm, Efield **ef, Diags **dg, Impl::Transpose<float64, default_layout> **transpose);
 
 #endif

@@ -58,6 +58,11 @@ struct Parser {
           local_rank = atoi(str);
           device_ = local_rank % ngpu_;
         }
+
+        if((str = getenv("MPT_LRANK")) != NULL) {
+          local_rank = atoi(str);
+          device_ = local_rank % ngpu_;
+        }
                                  
         continue;
       }

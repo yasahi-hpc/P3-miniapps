@@ -5,9 +5,9 @@
 #PBS -P CityLBM@PG22010
 
 cd $PBS_O_WORKDIR
+. /etc/profile.d/modules.sh
 
 module purge
-module load cuda/11.0 nvidia/22.1
+module load cuda/11.0 gnu/7.4.0 nvidia/22.1 openmpi-gdr/4.1.0
 
 ../build/vlp4d/stdpar/vlp4d SLD10_large.dat
-#../build/heat3D/stdpar/heat3D

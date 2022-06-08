@@ -9,5 +9,4 @@ cd $PBS_O_WORKDIR
 module purge
 module load cuda/11.0 gnu/7.4.0
 
-#../build/vlp4d/stdpar/vlp4d SLD10_large.dat
-../build/heat3D/kokkos/heat3D
+../build/heat3d/kokkos/heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0

@@ -90,7 +90,7 @@ void Diags::computeL2norm(Config *conf, RealView4D &fn, int iter) {
   l2norm_(iter) = sqrt(l2glob * dom->dx_[0] * dom->dx_[1] * dom->dx_[2] * dom->dx_[3]);
 }
 
-void Diags::save(Config *conf, Distrib &comm, int cur_iter) {
+void Diags::save(Config *conf, Distrib &comm) {
   const Domain* dom = &conf->dom_;
 
   char filename[16];
@@ -99,8 +99,8 @@ void Diags::save(Config *conf, Distrib &comm, int cur_iter) {
     {
       sprintf(filename, "nrj.out");
 
-      FILE *fileid = fopen(filename, (last_iter_ == 0 ? "w": "a"));
-      for(int iter=last_iter_; iter<= cur_iter; ++iter)
+      FILE *fileid = fopen(filename, "w");
+      for(int iter=0; iter<=dom->nbiter_; ++iter)
         fprintf(fileid, "%17.13e %17.13e %17.13e %17.13e %17.13e\n", iter * dom->dt_, nrj_(iter), nrjx_(iter), nrjy_(iter), mass_(iter));
 
       fclose(fileid);
@@ -109,8 +109,8 @@ void Diags::save(Config *conf, Distrib &comm, int cur_iter) {
     {
       sprintf(filename, "l2norm.out");
 
-      FILE *fileid = fopen(filename, (last_iter_ == 0 ? "w": "a"));
-      for(int iter=last_iter_; iter<= cur_iter; ++iter)
+      FILE *fileid = fopen(filename, "w");
+      for(int iter=0; iter<=dom->nbiter_; ++iter)
         fprintf(fileid, "%17.13e %17.13e\n", iter * dom->dt_, l2norm_(iter));
 
       fclose(fileid);

@@ -19,7 +19,7 @@ namespace stdex = std::experimental;
  * A Case Study of Porting HPGMG from CUDA to OpenMP Target Offload. 10.1007/978-3-030-58144-2_3.
  * url: https://crd.lbl.gov/assets/Uploads/p24-daley.pdf
  */
-inline void omp_attach(void **ptr) {
+static inline void omp_attach(void **ptr) {
   #if defined( ENABLE_OPENMP_OFFLOAD )
     void *dptr = *ptr;
     if(dptr) {
@@ -34,7 +34,7 @@ inline void omp_attach(void **ptr) {
   #endif
 }
 
-inline void omp_detach(void **ptr) {
+static inline void omp_detach(void **ptr) {
   /*
   #if defined( ENABLE_OPENMP_OFFLOAD )
     void *dptr = *ptr;
