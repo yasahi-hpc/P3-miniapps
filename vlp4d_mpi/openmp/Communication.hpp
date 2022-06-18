@@ -8,8 +8,10 @@
 #include <string>
 #include "Types.hpp"
 #include "Config.hpp"
+#include "Utils.hpp"
 #include "../Index.hpp"
 #include "../Timer.hpp"
+
 
 static constexpr int VUNDEF = -100000;
 
@@ -98,6 +100,9 @@ public:
       #pragma omp target exit data map(delete: this[0:1])
     #endif
   }
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(Halos);
 
 public:
   float64* head(const int i) {

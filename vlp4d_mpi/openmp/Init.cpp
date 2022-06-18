@@ -84,7 +84,7 @@ void import(const char *f, Config *conf) {
   fclose(stream);
   for(int i = 0; i < DIMENSION; i++) {
     if(dom->nxmax_[i] < (MMAX + 2)) {
-      fprintf(stderr, "Error: dimension %lu is to small (ie lower to %u): %u\n", i, MMAX + 2, dom->nxmax_[i]);
+      fprintf(stderr, "Error: dimension %d is to small (ie lower to %u): %lu\n", i, MMAX + 2, dom->nxmax_[i]);
     }
   }
 };
@@ -93,10 +93,10 @@ void print(Config *conf) {
   Domain* dom = &(conf->dom_);
 
   printf("** Definition of mesh\n");
-  printf("Number of points in  x with the coarse mesh : %d\n", dom->nxmax_[0]);
-  printf("Number of points in  y with the coarse mesh : %d\n", dom->nxmax_[1]);
-  printf("Number of points in Vx with the coarse mesh : %d\n", dom->nxmax_[2]);
-  printf("Number of points in Vy with the coarse mesh : %d\n", dom->nxmax_[3]);
+  printf("Number of points in  x with the coarse mesh : %lu\n", dom->nxmax_[0]);
+  printf("Number of points in  y with the coarse mesh : %lu\n", dom->nxmax_[1]);
+  printf("Number of points in Vx with the coarse mesh : %lu\n", dom->nxmax_[2]);
+  printf("Number of points in Vy with the coarse mesh : %lu\n", dom->nxmax_[3]);
             
   printf("\n** Defintion of the geometry of the domain\n");
   printf("Minimal value of Ex : %lf\n", dom->minPhy_[0]);

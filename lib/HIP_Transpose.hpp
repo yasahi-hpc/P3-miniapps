@@ -51,11 +51,17 @@ namespace Impl {
 
       // Out-place transpose
       void forward(ScalarType *dptr_in, ScalarType *dptr_out) {
+        #if defined(ENABLE_OPENMP_OFFLOAD)
+          #pragma omp target data use_device_ptr(dptr_in, dptr_out)
+        #endif
         rocblasTranspose_(dptr_in, dptr_out, row_, col_);
         SafeHIPCall( hipDeviceSynchronize() );
       }
 
       void backward(ScalarType *dptr_in, ScalarType *dptr_out) {
+        #if defined(ENABLE_OPENMP_OFFLOAD)
+          #pragma omp target data use_device_ptr(dptr_in, dptr_out)
+        #endif
         rocblasTranspose_(dptr_in, dptr_out, col_, row_);
         SafeHIPCall( hipDeviceSynchronize() );
       }
@@ -110,8 +116,13 @@ namespace Impl {
       template <typename SType=ScalarType,
                 std::enable_if_t<std::is_same_v<SType, Complex<float> >, std::nullptr_t> = nullptr>
       void rocblasTranspose_(SType *dptr_in, SType *dptr_out, int row, int col) {
-        const rocblas_float_complex alpha(1.0);
-        const rocblas_float_complex beta(0.0);
+        #if defined(ENABLE_OPENMP_OFFLOAD)
+          rocblas_float_complex alpha; alpha.x = 1.0;
+          rocblas_float_complex beta;
+        #else
+          const rocblas_float_complex alpha(1.0);
+          const rocblas_float_complex beta(0.0);
+        #endif
         SafeHIPCall( 
           rocblas_cgeam(handle_,                     // handle
                         rocblas_operation_transpose, // transa
@@ -133,8 +144,13 @@ namespace Impl {
       template <typename SType=ScalarType, 
                 std::enable_if_t<std::is_same_v<SType, Complex<double> >, std::nullptr_t> = nullptr>
       void rocblasTranspose_(SType *dptr_in, SType *dptr_out, int row, int col) {
-        const rocblas_double_complex alpha(1.0);
-        const rocblas_double_complex beta(0.0);
+        #if defined(ENABLE_OPENMP_OFFLOAD)
+          rocblas_double_complex alpha; alpha.x = 1.0;
+          rocblas_double_complex beta;
+        #else
+          const rocblas_double_complex alpha(1.0);
+          const rocblas_double_complex beta(0.0);
+        #endif
         SafeHIPCall( 
           rocblas_zgeam(handle_,                     // handle
                         rocblas_operation_transpose, // transa
