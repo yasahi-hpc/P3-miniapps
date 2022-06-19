@@ -388,6 +388,7 @@ namespace Advection {
     int local_start_[4];
     int local_end_[4];
     int nxmax_[4];
+    int nx_[4];
 
     advect_4D_functor(Config *conf, Efield *ef, RealOffsetView4D fn, RealOffsetView4D fn_tmp, float64 dt, Kokkos::Experimental::ScatterView<int*> scatter_error)
       : conf_(conf), ef_(ef), fn_(fn), fn_tmp_(fn_tmp), scatter_error_(scatter_error), dt_(dt) {
@@ -409,6 +410,7 @@ namespace Advection {
         rxwidth_[k]    = dom->maxPhy_[k] - dom->minPhy_[k];
         inv_dx_[k]     = 1. / dom->dx_[k];
         dx_[k]         = dom->dx_[k];
+        nx_[k]         = local_end_[k] + 1 - local_start_[k];
       }
 
       ex_ = ef_->ex_;
@@ -573,7 +575,7 @@ namespace Advection {
 
               fn_(ix, iy, ivx, ivy) = interp_4D(fn_tmp_, xstar);
             }
-          #else
+          #else // #if defined (LAYOUT_LEFT)
             const int ix = i0, iy = i1, ivx = i2;
             const int nvy_min = local_start_[3], nvy_max = local_end_[3]+1;
             LOOP_IVDEP
@@ -590,25 +592,58 @@ namespace Advection {
 
               fn_(ix, iy, ivx, ivy) = interp_4D(fn_tmp_, xstar);
             }
-          #endif
+          #endif // #if defined (LAYOUT_LEFT)
         }
-      #else
-        KOKKOS_INLINE_FUNCTION
-        void operator()(const int ix, const int iy, const int ivx, const int ivy, int &lerror) const {
-          float64 xstar[4];
-          int indices[4] = {ix, iy, ivx, ivy};
-          computeFeet(xstar, indices);
+      #else // #if defined(SIMD)
+        #if defined (LOOP_1D)
+          KOKKOS_INLINE_FUNCTION
+          void operator()(const int idx, int &lerror) const {
+            #if defined( KOKKOS_ENABLE_CUDA ) || defined( KOKKOS_ENABLE_HIP ) || defined (LAYOUT_LEFT)
+              const int ix   = idx % nx_[0] + local_start_[0];
+              const int i123 = idx / nx_[0];
+              const int iy   = i123%nx_[1] + local_start_[1];
+              const int i23  = i123/nx_[1];
+              const int ivx  = i23%nx_[2] + local_start_[2];
+              const int ivy  = i23/nx_[2] + local_start_[3];
+            #else
+              const int ivy  = idx % nx_[3] + local_start_[3];
+              const int i012 = idx / nx_[3];
+              const int ivx  = i012%nx_[2] + local_start_[2];
+              const int i01  = i012/nx_[2];
+              const int iy   = i01%nx_[1] + local_start_[1];
+              const int ix   = i01/nx_[1] + local_start_[0];
+            #endif
 
-          int tmp_error = 0;
-          for(int j = 0; j < 4; j++) {
-            tmp_error += (xstar[j] < locrxmindx_[j] || xstar[j] > locrxmaxdx_[j]);
+            float64 xstar[4];
+            int indices[4] = {ix, iy, ivx, ivy};
+            computeFeet(xstar, indices);
+
+            int tmp_error = 0;
+            for(int j = 0; j < 4; j++) {
+              tmp_error += (xstar[j] < locrxmindx_[j] || xstar[j] > locrxmaxdx_[j]);
+            }
+            lerror = tmp_error;
+
+            fn_(ix, iy, ivx, ivy) = interp_4D(fn_tmp_, xstar);
           }
-          lerror = tmp_error;
+        #else
+          KOKKOS_INLINE_FUNCTION
+          void operator()(const int ix, const int iy, const int ivx, const int ivy, int &lerror) const {
+            float64 xstar[4];
+            int indices[4] = {ix, iy, ivx, ivy};
+            computeFeet(xstar, indices);
 
-          fn_(ix, iy, ivx, ivy) = interp_4D(fn_tmp_, xstar);
-        }
-      #endif
-    #else
+            int tmp_error = 0;
+            for(int j = 0; j < 4; j++) {
+              tmp_error += (xstar[j] < locrxmindx_[j] || xstar[j] > locrxmaxdx_[j]);
+            }
+            lerror = tmp_error;
+
+            fn_(ix, iy, ivx, ivy) = interp_4D(fn_tmp_, xstar);
+          }
+        #endif
+      #endif // #if defined(SIMD)
+    #else // #if defined(NO_SCATTER_VIEWS)
       #if defined(SIMD)
         KOKKOS_INLINE_FUNCTION
         void operator()(const int i0, const int i1, const int i2) const {
@@ -630,7 +665,7 @@ namespace Advection {
 
               fn_(ix, iy, ivx, ivy) = interp_4D(fn_tmp_, xstar);
             }
-          #else
+          #else // #if defined (LAYOUT_LEFT)
             const int ix = i0, iy = i1, ivx = i2;
             const int nvy_min = local_start_[3], nvy_max = local_end_[3]+1;
             LOOP_IVDEP
@@ -647,9 +682,9 @@ namespace Advection {
 
               fn_(ix, iy, ivx, ivy) = interp_4D(fn_tmp_, xstar);
             }
-          #endif
+          #endif // #if defined (LAYOUT_LEFT)
         }
-      #else
+      #else // #if defined(SIMD)
         KOKKOS_INLINE_FUNCTION
         void operator()(const int ix, const int iy, const int ivx, const int ivy) const {
           float64 xstar[4];
@@ -665,8 +700,8 @@ namespace Advection {
 
           fn_(ix, iy, ivx, ivy) = interp_4D(fn_tmp_, xstar);
         }
-      #endif
-    #endif
+      #endif // #if defined(SIMD)
+    #endif // #if defined(NO_SCATTER_VIEWS)
   };
 
   void advect_2D_xy(Config *conf, RealOffsetView4D fn, RealOffsetView4D fn_tmp, float64 dt, const std::vector<int> &tiles) {
@@ -745,7 +780,12 @@ namespace Advection {
 
     #if defined(NO_SCATTER_VIEWS)
       int err = 0;
-      Kokkos::parallel_reduce("advect_4d", advect_4d_policy, advect_4D_functor(conf, ef, fn, tmp_fn, dt, scatter_error), err);
+      #if defined (LOOP_1D)
+        int n = (nx_max+1-nx_min) * (ny_max+1-ny_min) * (nvx_max+1 - nvx_min) * (nvy_max+1-nvy_min);
+        Kokkos::parallel_reduce("advect_4d", n, advect_4D_functor(conf, ef, fn, tmp_fn, dt, scatter_error), err);
+      #else
+        Kokkos::parallel_reduce("advect_4d", advect_4d_policy, advect_4D_functor(conf, ef, fn, tmp_fn, dt, scatter_error), err);
+      #endif
       testError(err);
     #elif defined(NO_ERROR_CHECK)
       Kokkos::parallel_for("advect_4d", advect_4d_policy, advect_4D_functor(conf, ef, fn, tmp_fn, dt, scatter_error));
