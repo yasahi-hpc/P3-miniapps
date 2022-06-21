@@ -53,7 +53,7 @@ for(int iz=0; iz<nz; iz++) {
     }
   }
 ```
-We need to access the data through `mdspan` in the accelerated region.
+We need to access the data through `mdspan` in the accelerated region. Which can be accessed by the `mdspan()` method.
 
 ## Parallel operations
 Since the multi-dimensional parallel operations are not fully supported before cartesian-product in c++23, 
@@ -110,7 +110,7 @@ For both cases, we firstly define the parallel operations over `nx * ny * nz`. T
 ### Example Compile Command (with stdpar for Nvidia GPUs)
 ```
 mkdir build && cd build
-cmake -DCMAKE_CXX_COMPILER=nvc++ -DCMAKE_BUILD_TYPE=Release -DPROGRAMMING_MODEL=STDPAR -DBACKEND=CUDA -DAPPLICATION=heat3d ..
+cmake -DCMAKE_CXX_COMPILER=nvc++ -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DPROGRAMMING_MODEL=STDPAR -DBACKEND=CUDA -DAPPLICATION=heat3d ..
 cmake --build .
 ```
 
@@ -128,6 +128,9 @@ You can set the problem size (resolution), the number of iteration and the frequ
 For example, we have executed the following command to make the animation.  
 ```./heat3d --nx 512 --ny 512 --nz 512 --nbiter 50000 --freq_diag 1000```
 
+### Expected output (stdout)
+
+
 ## heat3d_mpi
 ### Example Compile Command (with stdpar for Nvidia GPUs)
 ```
@@ -136,8 +139,26 @@ cmake -DCMAKE_CXX_COMPILER=nvc++ -DCMAKE_BUILD_TYPE=Release -DPROGRAMMING_MODEL=
 cmake --build .
 ```
 
-### Example Run Command
-```./heat3d_mpi --px 2 --py 2 --pz 2 --nx 256 --ny 256 --nz 256 --nbiter 1000 --freq_diag 10```  
+### Example Run Command (in a job script)
+To enforce the device to device MPI communication, it is important to set the environmental variable 
+```bash
+export UCX_RNDV_FRAG_MEM_TYPE=cuda
+```
+This environmental variable is avilable with HPC-X (OpenMPI 4.1.4 + UCX 1.13.0) under [Nvidia HPC SDK v22.5](https://docs.nvidia.com/hpc-sdk/archive/22.5/index.html) (or later).
+
+```bash
+export UCX_RNDV_FRAG_MEM_TYPE=cuda
+mpirun -np 2 ./wrapper.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 2 --py 2 --pz 2 --nx 256 --ny 256 --nz 256 --nbiter 1000 --freq_diag 10
+```  
+
+GPU mapping inside a node should be made before ```MPI_Init``` with ```wrapper.sh``` (for OpenMPI).
+```bash
+#!/bin/sh
+
+NGPUS=`nvidia-smi -L | wc -l`
+export CUDA_VISIBLE_DEVICES=$((OMPI_COMM_WORLD_LOCAL_RANK % NGPUS))
+exec $*
+```
 
 ### Input parameters
 You can set the problem size (resolution), the MPI domain decomposition, the number of iteration and the frequency of diagnostics.  
@@ -155,4 +176,30 @@ the total number of grid points in each direction are `nx * px`, `ny * py`, and 
 It should be noted that the total MPI processes `nb_procs` must be eqaul to `px * py * pz`.
 If we set `px = 1`, then MPI communication along x direction is suppressed and replaced by swapping halo regions. 
 
+### Expected output (stdout)
+With the run command 
+```bash
+./heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0
+```
+, you will get the following standard output (performed on V100 GPUs). 
+
+```
+Parallelization (px, py, pz) = 1, 1, 2
+Local (nx, ny, nz) = 512, 512, 256
+Global (nx, ny, nz) = 512, 512, 512
+
+L2_norm: 0.00355178
+STDPAR backend
+Elapsed time: 3.62221 [s]
+Bandwidth/GPU: 296.433 [GB/s]
+Flops/GPU: 166.744 [GFlops]
+
+total 3.62221 [s], 1 calls
+MainLoop 3.62217 [s], 1000 calls
+Heat 3.20131 [s], 1000 calls
+HaloPack 0.101119 [s], 3000 calls
+HaloUnpack 0.172946 [s], 3000 calls
+HaloComm 0.146246 [s], 3000 calls
+IO 0 [s], 0 calls
+```
 
