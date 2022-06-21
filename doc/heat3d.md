@@ -107,6 +107,23 @@ For both cases, we firstly define the parallel operations over `nx * ny * nz`. T
 
 # Run
 ## heat3d
+You may find the sourcde codes for each programming model under `heat3d` directory.
+```
+---/
+ |
+ └──heat3d/
+    |--kokkos/
+    |--openacc/
+    |--openmp/
+    |--stdpar/
+    |--thrust/
+    |--CMakeLists.txt
+    |--Helper.hpp
+    |--Parser.hpp
+    └──Timer.hpp
+```
+      
+
 ### Example Compile Command (with stdpar for Nvidia GPUs)
 ```
 mkdir build && cd build
@@ -151,6 +168,22 @@ IO 0 [s], 0 calls
 ```
 
 ## heat3d_mpi
+You may find the sourcde codes for each programming model under `heat3d_mpi` directory.
+```
+---/
+ |
+ └──heat3d_mpi/
+    |--kokkos/
+    |--openacc/
+    |--openmp/
+    |--stdpar/
+    |--thrust/
+    |--CMakeLists.txt
+    |--Helper.hpp
+    |--Parser.hpp
+    └──Timer.hpp
+```
+
 ### Example Compile Command (with stdpar for Nvidia GPUs)
 ```
 mkdir build && cd build
@@ -220,4 +253,3 @@ HaloUnpack 0.172946 [s], 3000 calls
 HaloComm 0.146246 [s], 3000 calls
 IO 0 [s], 0 calls
 ```
-
