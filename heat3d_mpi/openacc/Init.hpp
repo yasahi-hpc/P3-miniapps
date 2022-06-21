@@ -103,6 +103,8 @@ void initialize(Config &conf, Comm &comm,
                 RealView3D &u, RealView3D &un
                ) {
   using real_type = RealView1D::value_type;
+  using shape3d_type = std::array<size_t, 3>;
+  using range3d_type = std::array<int, 3>;
   x = RealView1D("x", conf.nx);
   y = RealView1D("y", conf.ny);
   z = RealView1D("z", conf.nz);
@@ -111,8 +113,8 @@ void initialize(Config &conf, Comm &comm,
   const size_t ny_halo = conf.ny+2;
   const size_t nz_halo = conf.nz+2;
 
-  u  = RealView3D("u",  shape_nd<3>{nx_halo, ny_halo, nz_halo}, shape_nd<3>{-1, -1, -1});
-  un = RealView3D("un", shape_nd<3>{nx_halo, ny_halo, nz_halo}, shape_nd<3>{-1, -1, -1});
+  u  = RealView3D("u",  shape3d_type{nx_halo, ny_halo, nz_halo}, range3d_type{-1, -1, -1});
+  un = RealView3D("un", shape3d_type{nx_halo, ny_halo, nz_halo}, range3d_type{-1, -1, -1});
 
   auto cart_rank = comm.cart_rank();
   auto topology  = comm.topology();

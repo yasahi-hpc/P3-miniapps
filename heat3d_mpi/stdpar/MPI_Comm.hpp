@@ -136,7 +136,8 @@ public:
 
   Comm(int &argc, char **argv, const std::vector<size_t> &shape, const std::vector<int> &topology)
     : shape_(shape), topology_(topology), halo_width_(1) {
-    int required = MPI_THREAD_MULTIPLE;
+    int required = MPI_THREAD_SINGLE;
+    //int required = MPI_THREAD_MULTIPLE;
     int provided;
     ::MPI_Init_thread(&argc, &argv, required, &provided);
     ::MPI_Comm_size(MPI_COMM_WORLD, &size_);

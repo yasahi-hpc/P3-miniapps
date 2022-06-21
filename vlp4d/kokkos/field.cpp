@@ -1,7 +1,8 @@
 #include "field.hpp"
 #include "tiles.hpp"
+#include "index.h"
 
-void lu_solve_poisson(Config *conf, Efield *ef, Diags *dg, int iter);
+void lu_solve_poisson(Config *conf, Efield *ef);
 
 void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
   const Domain *dom = &(conf->dom_);
@@ -14,6 +15,7 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
   // See https://github.com/kokkos/kokkos/issues/695
   RealView2D rho = ef->rho_;
 
+  /*
   MDPolicy<2> integral_policy2d({{0, 0}},
                                 {{nx, ny}},
                                 {{TILE_SIZE0, TILE_SIZE1}}
@@ -27,10 +29,25 @@ void field_rho(Config *conf, RealView4D &fn, Efield *ef) {
     }
     rho(ix, iy) = sum * dvx * dvy;
   });
+  */
+
+  // For some reason, the following version is significantly faster on both GPUs and CPUs
+  Kokkos::parallel_for("integral", nx*ny, KOKKOS_LAMBDA (const int& ixy) {
+    int2 idx_2D = Index::int2coord_2D(ixy, nx, ny);
+    int ix = idx_2D.x, iy = idx_2D.y;
+    float64 sum = 0.;
+    for(int ivy=0; ivy<nvy; ivy++) {
+      for(int ivx=0; ivx<nvx; ivx++) {
+        sum += fn(ix, iy, ivx, ivy);
+      }
+    }
+    rho(ix, iy) = sum * dvx * dvy;
+  });
+
   Kokkos::fence();
 };
 
-void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
+void field_poisson(Config *conf, Efield *ef) {
   const Domain *dom = &(conf->dom_);
   int nx = dom->nxmax_[0], ny = dom->nxmax_[1];
   int nvx = dom->nxmax_[2], nvy = dom->nxmax_[3];
@@ -63,16 +80,16 @@ void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
         Kokkos::parallel_for("poisson", poisson_policy2d, KOKKOS_LAMBDA (const int ix, const int iy) {
           rho(ix, iy) -= 1.;
         });
-        lu_solve_poisson(conf, ef, dg, iter);
+        lu_solve_poisson(conf, ef);
         break;
     default:
-        lu_solve_poisson(conf, ef, dg, iter);
+        lu_solve_poisson(conf, ef);
         break;
   }
+  Kokkos::fence();
 };
 
-void lu_solve_poisson(Config *conf, Efield *ef, Diags *dg, int iter) {
+void lu_solve_poisson(Config *conf, Efield *ef) {
   const Domain *dom = &(conf->dom_);
   ef->solve_poisson_fftw(dom->maxPhy_[0], dom->maxPhy_[1]);
-  dg->compute(conf, ef, iter);
 };

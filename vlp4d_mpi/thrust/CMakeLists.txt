@@ -26,10 +26,13 @@ elseif(BACKEND STREQUAL "OPENMP")
 
     find_package(MPI REQUIRED COMPONENTS CXX)
 
-    target_compile_options(vlp4d_mpi PUBLIC --expt-relaxed-constexpr --extended-lambda -fopenmp)
-    target_compile_definitions(vlp4d_mpi PUBLIC LONG_ENOUGH_BUFFER)
+    target_compile_options(vlp4d_mpi PUBLIC --expt-relaxed-constexpr --extended-lambda ${OpenMP_CXX_FLAGS})
+    target_compile_definitions(vlp4d_mpi PUBLIC)
 else()
     message(FATAL_ERROR "No parallel backend specified. One of CUDA, HIP and OPENMP must be On.")
 endif()
 
 target_link_libraries(vlp4d_mpi PUBLIC MPI::MPI_CXX math_lib)
+
+# Macro
+target_compile_definitions(vlp4d_mpi PUBLIC $<$<BOOL:${NO_ERROR_CHECK}>: NO_ERROR_CHECK>)

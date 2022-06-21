@@ -48,7 +48,7 @@ void tileSizeTuning(Config *conf, Distrib &comm, TileSizeTuning &tuning, RealOff
   // Run fields
   field_rho(conf, fn, ef);
   field_reduce(conf, ef);
-  field_poisson(conf, ef, dg, iter);
+  field_poisson(conf, ef);
 
   // Tuning for Spline_vxvy
   Impl::deep_copy(fnp1, fn);

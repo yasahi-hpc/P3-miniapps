@@ -35,14 +35,16 @@ public:
 enum TimerEnum : int {Total,
                       MainLoop,
                       Heat,
+                      IO,
                       Nb_timers};
 
 static void defineTimers(std::vector<Timer*> &timers) {
   // Set timers
   timers.resize(Nb_timers);
-  timers[Total]                 = new Timer("total");
-  timers[MainLoop]              = new Timer("MainLoop");
-  timers[TimerEnum::Heat]       = new Timer("Heat");
+  timers[Total]           = new Timer("total");
+  timers[MainLoop]        = new Timer("MainLoop");
+  timers[TimerEnum::Heat] = new Timer("Heat");
+  timers[TimerEnum::IO]   = new Timer("IO");
 }
 
 static void printTimers(std::vector<Timer*> &timers) {

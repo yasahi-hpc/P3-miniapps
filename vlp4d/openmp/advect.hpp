@@ -318,7 +318,7 @@ namespace Advection {
     Domain* dom = &(conf->dom_);
     char filename[128];
     printf("print_fxvx %d\n", iter);
-    sprintf(filename, "fxvx%04d.out", iter);
+    sprintf(filename, "data/vlp4d/fxvx_it%06d.csv", iter);
     FILE* fileid = fopen(filename, "w");
   
     const size_t ivy = dom->nxmax_[3] / 2;
@@ -326,9 +326,13 @@ namespace Advection {
   
     fn.updateSelf(); 
     for(size_t ivx = 0; ivx < dom->nxmax_[2]; ivx++) {
-      for(size_t ix = 0; ix < dom->nxmax_[0]; ix++)
-        fprintf(fileid, "%4lu %4lu %20.13le\n", ix, ivx, fn(ix, iy, ivx, ivy));
-      fprintf(fileid, "\n");
+      for(size_t ix = 0; ix < dom->nxmax_[0]; ix++) {
+        if(ix == dom->nxmax_[0]-1) {
+          fprintf(fileid, "%20.13le\n", fn(ix, iy, ivx, ivy));
+        } else {
+          fprintf(fileid, "%20.13le, ", fn(ix, iy, ivx, ivy));
+        }
+      }
     }
   
     fclose(fileid);

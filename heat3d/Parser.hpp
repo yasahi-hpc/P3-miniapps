@@ -9,6 +9,7 @@
 struct Parser {
   std::vector<size_t> shape_;
   int nbiter_ = 1000;
+  int freq_diag_ = 10;
   int num_threads_ = 1;
   int teams_ = 1;
   int device_ = 0;
@@ -38,6 +39,11 @@ struct Parser {
 
       if((strcmp(argv[i], "-nbiter") == 0) || (strcmp(argv[i], "--nbiter") == 0)) {
         nbiter_ = atoi(argv[++i]);
+        continue;
+      }
+
+      if((strcmp(argv[i], "-freq_diag") == 0) || (strcmp(argv[i], "--freq_diag") == 0)) {
+        freq_diag_ = atoi(argv[++i]);
         continue;
       }
 

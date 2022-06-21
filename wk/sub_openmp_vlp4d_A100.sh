@@ -6,6 +6,8 @@
 #PJM -g jh220031a
 #PJM --mpi proc=1
 
-module load nvidia/22.2 nvmpi/22.2
+module purge
+module load nvidia/22.5 nvmpi/22.5
 
+#../build/vlp4d/openmp/vlp4d TSI20.dat
 ../build/vlp4d/openmp/vlp4d SLD10_large.dat

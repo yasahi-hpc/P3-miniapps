@@ -10,13 +10,21 @@
 void step(Config &conf, RealView3D &u, RealView3D &un, std::vector<Timer*> &timers);
 
 void step(Config &conf, RealView3D &u, RealView3D &un, std::vector<Timer*> &timers) {
-  auto heat3d_kernel = [&]() {
-    const int3 begin = make_int3(0, 0, 0);
-    const int3 end   = make_int3(conf.nx, conf.ny, conf.nz);
-    Impl::for_each<default_iterate_layout>(begin, end, heat_functor(conf, u, un));
-    synchronize();
-  };
-  exec_with_timer(heat3d_kernel, timers[Heat]);
+  #if defined(ACCESS_VIA_RAW_POINTERS) 
+    auto heat3d_kernel = [&]() {
+      Impl::for_each(conf.nx*conf.ny*conf.nz, heat_1d_functor<default_iterate_layout>(conf, u, un));
+      synchronize();
+    };
+    exec_with_timer(heat3d_kernel, timers[Heat]);
+  #else
+    auto heat3d_kernel = [&]() {
+      const int3 begin = make_int3(0, 0, 0);
+      const int3 end   = make_int3(conf.nx, conf.ny, conf.nz);
+      Impl::for_each<default_iterate_layout>(begin, end, heat_functor(conf, u, un));
+      synchronize();
+    };
+    exec_with_timer(heat3d_kernel, timers[Heat]);
+  #endif
 }
 
 #endif

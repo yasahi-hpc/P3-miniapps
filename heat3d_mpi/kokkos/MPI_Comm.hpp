@@ -23,20 +23,20 @@ constexpr int BOTTOM = 5;
 template <typename RealType> using Complex = Kokkos::complex<RealType>;
 
 template <typename T,
-          std::enable_if_t<std::is_same_v<T, int             > ||
-                           std::is_same_v<T, float           > ||
-                           std::is_same_v<T, double          > ||
-                           std::is_same_v<T, Complex<float>  > ||
-                           std::is_same_v<T, Complex<double> > 
-                           , std::nullptr_t> = nullptr
+          typename std::enable_if<std::is_same<T, int             >::value ||
+                                  std::is_same<T, float           >::value ||
+                                  std::is_same<T, double          >::value ||
+                                  std::is_same<T, Complex<float>  >::value ||
+                                  std::is_same<T, Complex<double> >::value 
+                                  , std::nullptr_t>::type = nullptr
 >
 MPI_Datatype get_mpi_data_type() {
   MPI_Datatype type;
-  if(std::is_same_v<T, int             >) type = MPI_INT;
-  if(std::is_same_v<T, float           >) type = MPI_FLOAT;
-  if(std::is_same_v<T, double          >) type = MPI_DOUBLE;
-  if(std::is_same_v<T, Complex<float>  >) type = MPI_COMPLEX;
-  if(std::is_same_v<T, Complex<double> >) type = MPI_DOUBLE_COMPLEX;
+  if(std::is_same<T, int             >::value) type = MPI_INT;
+  if(std::is_same<T, float           >::value) type = MPI_FLOAT;
+  if(std::is_same<T, double          >::value) type = MPI_DOUBLE;
+  if(std::is_same<T, Complex<float>  >::value) type = MPI_COMPLEX;
+  if(std::is_same<T, Complex<double> >::value) type = MPI_DOUBLE_COMPLEX;
 
   return type;
 }
@@ -282,9 +282,9 @@ public:
     //assert( left.extents() == right_buffer.extents() );
 
     int nx = left.extent(0), ny = left.extent(1);
-    MDPolicy<2> pack_policy2d({{0, 0}},
-                              {{nx, ny}},
-                              {{TILE_SIZE0, TILE_SIZE1}}
+    MDPolicy<2> pack_policy2d({0, 0},
+                              {nx, ny},
+                              {TILE_SIZE0, TILE_SIZE1}
                              );
  
     Kokkos::parallel_for("pack", pack_policy2d, KOKKOS_LAMBDA (const int ix, const int iy) {
@@ -306,9 +306,9 @@ public:
 
     int nx = left.extent(0), ny = left.extent(1);
 
-    MDPolicy<2> unpack_policy2d({{0, 0}},
-                                {{nx, ny}},
-                                {{TILE_SIZE0, TILE_SIZE1}}
+    MDPolicy<2> unpack_policy2d({0, 0},
+                                {nx, ny},
+                                {TILE_SIZE0, TILE_SIZE1}
                                );
  
     Kokkos::parallel_for("unpack", unpack_policy2d,

@@ -6,7 +6,7 @@
 #elif defined( ENABLE_HIP )
   #include "OpenMP_HIP_FFT.hpp"
 #else
-  #include "OpenMP_FFT.hpp"
+  #include "../OpenMP_FFT.hpp"
 #endif
 
 #endif

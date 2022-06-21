@@ -34,8 +34,8 @@ static constexpr int DIMENSION = 4;
 struct Domain {
   shape_nd<DIMENSION> nxmax_; // Number of points on the finest grid
   shape_nd<DIMENSION> local_nx_;    // Number of points on the local grid
-  shape_nd<DIMENSION> local_nxmax_; // Maximum of local grid
-  shape_nd<DIMENSION> local_nxmin_; // Minimum of local grid
+  range_nd<DIMENSION> local_nxmax_; // Maximum of local grid
+  range_nd<DIMENSION> local_nxmin_; // Minimum of local grid
   int nbiter_, ifreq_; // Number of iteration and diagnostic frequency
   int idcase_; // Identifier of the test to run
 

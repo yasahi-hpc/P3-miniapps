@@ -231,6 +231,10 @@ void performance(Config &conf, Comm &comm, double seconds) {
     std::string backend = "THRUST";
   #endif
 
+  #if defined(ACCESS_VIA_RAW_POINTERS)
+    std::cout << "Access via raw pointers" << std::endl;
+  #endif
+
   std::cout << backend + " backend" << std::endl;
   std::cout << "Elapsed time: " << seconds << " [s]" << std::endl;
   std::cout << "Bandwidth/" + arch + ": " << GBytes / seconds / comm.size() << " [GB/s]" << std::endl;

@@ -23,7 +23,8 @@ void Diags::compute(Config *conf, Efield *ef, int iter) {
   RealView2D ey  = ef->ey_;
   RealView2D rho = ef->rho_;
 
-  // Use Scatter view for reduction
+  /*
+  // Use Scatter view for reduction (not a great idea)
   using ScalarsView = Kokkos::View<float64*, execution_space>;
   ScalarsView sums("sum", 4);
   auto scatter_sums = Kokkos::Experimental::create_scatter_view(sums);
@@ -50,6 +51,25 @@ void Diags::compute(Config *conf, Efield *ef, int iter) {
   float64 it_nrj    = h_sums(1);
   float64 it_nrjx   = h_sums(2);
   float64 it_nrjy   = h_sums(3);
+  */
+
+  float64 iter_mass = 0.0, it_nrj = 0.0, it_nrjx = 0.0, it_nrjy = 0.0;
+  MDPolicy<2> moment_policy2d({{0, 0}},
+                              {{nx, ny}},
+                              {{TILE_SIZE0, TILE_SIZE1}}
+                             );
+
+  Kokkos::parallel_reduce("moments", moment_policy2d,
+    KOKKOS_LAMBDA (const int& ix, const int& iy, float64& liter_mass, float64& lit_nrj, float64& lit_nrjx, float64& lit_nrjy) {
+    const float64 eex = ex(ix, iy);
+    const float64 eey = ey(ix, iy);
+
+    liter_mass += rho(ix, iy);
+    lit_nrj  += eex * eex + eey * eey;
+    lit_nrjx += eex * eex;
+    lit_nrjy += eey * eey;
+  }, iter_mass, it_nrj, it_nrjx, it_nrjy);
+
 
   it_nrj = sqrt(it_nrj * dom->dx_[0] * dom->dx_[1]);
   it_nrj = it_nrj > 1.e-30 ? log(it_nrj) : -1.e9;
@@ -82,7 +102,7 @@ void Diags::computeL2norm(Config *conf, RealOffsetView4D fn, int iter) {
   l2norm_(iter) = sqrt(l2glob * dom->dx_[0] * dom->dx_[1] * dom->dx_[2] * dom->dx_[3]);
 }
 
-void Diags::save(Config *conf, Distrib &comm, int cur_iter) {
+void Diags::save(Config *conf, Distrib &comm) {
   const Domain* dom = &conf->dom_;
 
   char filename[16];
@@ -91,8 +111,8 @@ void Diags::save(Config *conf, Distrib &comm, int cur_iter) {
     {
       sprintf(filename, "nrj.out");
 
-      FILE *fileid = fopen(filename, (last_iter_ == 0 ? "w": "a"));
-      for(int iter=last_iter_; iter<= cur_iter; ++iter)
+      FILE *fileid = fopen(filename, "w");
+      for(int iter=0; iter<=dom->nbiter_; ++iter)
         fprintf(fileid, "%17.13e %17.13e %17.13e %17.13e %17.13e\n", iter * dom->dt_, nrj_(iter), nrjx_(iter), nrjy_(iter), mass_(iter));
 
       fclose(fileid);
@@ -101,8 +121,8 @@ void Diags::save(Config *conf, Distrib &comm, int cur_iter) {
     {
       sprintf(filename, "l2norm.out");
 
-      FILE *fileid = fopen(filename, (last_iter_ == 0 ? "w": "a"));
-      for(int iter=last_iter_; iter<= cur_iter; ++iter)
+      FILE *fileid = fopen(filename, "w");
+      for(int iter=0; iter<=dom->nbiter_; ++iter)
         fprintf(fileid, "%17.13e %17.13e\n", iter * dom->dt_, l2norm_(iter));
 
       fclose(fileid);

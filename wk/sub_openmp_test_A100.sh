@@ -6,8 +6,6 @@
 #PJM -g jh220031a
 #PJM --mpi proc=1
 
-module load intel
+module load nvidia/22.2 nvmpi/22.2
 
-export OMP_NUM_THREADS=36
-export OMP_PROC_BIND=true
-../build/heat3D/kokkos/heat3D --kokkos-threads=36
+../build/tests/openmp/google_tests

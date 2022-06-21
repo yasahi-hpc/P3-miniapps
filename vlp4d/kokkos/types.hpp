@@ -38,31 +38,6 @@ template < size_t DIM > using MDPolicy = Kokkos::MDRangePolicy< Kokkos::Rank<DIM
 template <size_t DIM> using coord_t = std::array<int, DIM>;
 template <size_t DIM> using shape_t = std::array<int, DIM>;
 
-struct double_pair {
-  double x, y;
-  KOKKOS_INLINE_FUNCTION
-  double_pair(double xinit, double yinit) 
-    : x(xinit), y(yinit) {};
-
-  KOKKOS_INLINE_FUNCTION
-  double_pair()
-    : x(0.), y(0.) {};
-
-  KOKKOS_INLINE_FUNCTION
-  double_pair& operator += (const double_pair& src) {
-    x += src.x;
-    y += src.y;
-    return *this;
-  }
-
-  KOKKOS_INLINE_FUNCTION
-  volatile double_pair& operator += (const volatile double_pair& src) volatile {
-    x += src.x;
-    y += src.y;
-    return *this;
-  }
-};
-
 #if ! ( defined( KOKKOS_ENABLE_CUDA ) || defined( KOKKOS_ENABLE_HIP ) )
 struct int2 {
   int x, y;

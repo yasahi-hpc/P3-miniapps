@@ -4,7 +4,7 @@
 #include <complex>
 #include <omp.h>
 #include <experimental/mdspan>
-#include "OpenMP_View.hpp"
+#include "View.hpp"
 
 namespace stdex = std::experimental;
 
@@ -65,5 +65,9 @@ using RealView4D = View4D<float64>;
 
 using ComplexView1D = View1D<complex128>;
 using ComplexView2D = View2D<complex128>;
+
+// shape type
+template <size_t ND>
+using shape_nd = std::array<size_t, ND>;
 
 #endif

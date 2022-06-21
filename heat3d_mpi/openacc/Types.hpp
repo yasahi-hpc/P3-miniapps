@@ -2,9 +2,8 @@
 #define __TYPES_HPP__
 
 #include <complex>
-#include <omp.h>
 #include <experimental/mdspan>
-#include "OpenACC_View.hpp"
+#include "View.hpp"
 
 namespace stdex = std::experimental;
 

@@ -33,7 +33,9 @@ void import(const char *f, Config *conf) {
     do
       tmp = fgetc(stream);
     while(tmp != ':');
-    fscanf(stream, " %d\n", &(dom->nxmax_[i]));
+    int nx_tmp;
+    fscanf(stream, " %d\n", &nx_tmp);
+    dom->nxmax_[i] = nx_tmp;
   }
 
   for(size_t i = 0; i < DIMENSION; i++) {

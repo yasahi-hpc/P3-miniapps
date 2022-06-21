@@ -7,6 +7,6 @@
 #include "types.hpp"
 
 void field_rho(Config *conf, RealView4D &fn, Efield *ef);
-void field_poisson(Config *conf, Efield *ef, Diags *dg, int iter);
+void field_poisson(Config *conf, Efield *ef);
 
 #endif

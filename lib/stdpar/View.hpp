@@ -182,7 +182,7 @@ private:
     ends_ = rhs.end();
 
     vector_ = rhs.vector_; // not a move
-    mdspan_ = mdspan_type(vector_.data() + total_offset_, extents);
+    mdspan_ = mdspan_type(vector_.data() + total_offset_, rhs.extents());
   }
 
   void deep_copy(View &&rhs) {

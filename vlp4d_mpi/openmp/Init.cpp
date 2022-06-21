@@ -33,7 +33,9 @@ void import(const char *f, Config *conf) {
     do
       tmp = fgetc(stream);
     while(tmp != ':');
-    fscanf(stream, " %d\n", &(dom->nxmax_[i]));
+    int nx_tmp;
+    fscanf(stream, " %d\n", &nx_tmp);
+    dom->nxmax_[i] = nx_tmp;
   }
 
   for(int i = 0; i < DIMENSION; i++) {
@@ -329,7 +331,7 @@ void init(const char *file, Config *conf, Distrib &comm, RealView4D &fn, RealVie
   Urbnode *mynode = comm.node();
   
   shape_nd<DIMENSION> shape_halo;
-  shape_nd<DIMENSION> nxmin_halo;
+  range_nd<DIMENSION> nxmin_halo;
   for(int i=0; i<DIMENSION; i++)
     nxmin_halo[i] = mynode->xmin_[i] - HALO_PTS;
   for(int i=0; i<DIMENSION; i++)
@@ -370,7 +372,10 @@ void init(const char *file, Config *conf, Distrib &comm, RealView4D &fn, RealVie
   initcase(conf, fn);
 }
 
-void finalize(Efield **ef, Diags **dg, Impl::Transpose<float64, default_layout> **transpose) {
+void finalize(Config *conf, Distrib &comm, Efield **ef, Diags **dg, Impl::Transpose<float64, default_layout> **transpose) {
+  // Store to csv
+  (*dg)->save(conf, comm);
+
   delete *ef;
   delete *dg;
   delete *transpose;

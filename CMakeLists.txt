@@ -7,6 +7,12 @@ list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/cmake")
 add_subdirectory(lib)
 
 set(APPLICATION AUTO CACHE STRING "CHOICE OF APPLICATION")
+set(PROGRAMMING_MODEL AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
+
+include(CTest)
+if(BUILD_TESTING AND (NOT (PROGRAMMING_MODEL STREQUAL "KOKKOS")))
+    add_subdirectory(tests)
+endif()
 
 if(APPLICATION STREQUAL "heat3d")
     add_subdirectory(heat3d)

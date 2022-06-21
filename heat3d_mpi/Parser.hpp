@@ -10,6 +10,7 @@ struct Parser {
   std::vector<size_t> shape_;
   std::vector<int> topology_;
   int nbiter_ = 1000;
+  int freq_diag_ = 10;
   int num_threads_ = 1;
   int teams_ = 1;
   int device_ = 0;
@@ -58,6 +59,11 @@ struct Parser {
         continue;
       }
 
+      if((strcmp(argv[i], "-freq_diag") == 0) || (strcmp(argv[i], "--freq_diag") == 0)) {
+        freq_diag_ = atoi(argv[++i]);
+        continue;
+      }
+
       if((strcmp(argv[i], "-t") == 0) || (strcmp(argv[i], "--num_threads") == 0)) {
         num_threads_ = atoi(argv[++i]);
         continue;
@@ -93,6 +99,11 @@ struct Parser {
         }
 
         if((str = getenv("OMPI_COMM_WORLD_LOCAL_RANK")) != NULL) {
+          local_rank = atoi(str);
+          device_ = local_rank % ngpu_;
+        }
+
+        if((str = getenv("MPT_LRANK")) != NULL) {
           local_rank = atoi(str);
           device_ = local_rank % ngpu_;
         }
