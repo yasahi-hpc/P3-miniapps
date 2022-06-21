@@ -129,7 +129,26 @@ For example, we have executed the following command to make the animation.
 ```./heat3d --nx 512 --ny 512 --nz 512 --nbiter 50000 --freq_diag 1000```
 
 ### Expected output (stdout)
+With the run command 
+```bash
+./heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0
+```
+, you will get the following standard output (performed on V100 GPUs).
+```
+(nx, ny, nz) = 512, 512, 512
 
+L2_norm: 0.00355178
+Programming model: stdpar
+Backend: CUDA
+Elapsed time: 6.53835 [s]
+Bandwidth: 328.444 [GB/s]
+Flops: 184.75 [GFlops]
+
+total 6.53835 [s], 1 calls
+MainLoop 6.53832 [s], 1000 calls
+Heat 6.53817 [s], 1000 calls
+IO 0 [s], 0 calls
+```
 
 ## heat3d_mpi
 ### Example Compile Command (with stdpar for Nvidia GPUs)
@@ -144,8 +163,7 @@ To enforce the device to device MPI communication, it is important to set the en
 ```bash
 export UCX_RNDV_FRAG_MEM_TYPE=cuda
 ```
-This environmental variable is avilable with HPC-X (OpenMPI 4.1.4 + UCX 1.13.0) under [Nvidia HPC SDK v22.5](https://docs.nvidia.com/hpc-sdk/archive/22.5/index.html) (or later).
-
+This environmental variable is avilable with HPC-X (OpenMPI 4.1.4 + UCX 1.13.0) under [Nvidia HPC SDK v22.5](https://docs.nvidia.com/hpc-sdk/archive/22.5/index.html) (or later). The run command in a job script is as follows:
 ```bash
 export UCX_RNDV_FRAG_MEM_TYPE=cuda
 mpirun -np 2 ./wrapper.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 2 --py 2 --pz 2 --nx 256 --ny 256 --nz 256 --nbiter 1000 --freq_diag 10
