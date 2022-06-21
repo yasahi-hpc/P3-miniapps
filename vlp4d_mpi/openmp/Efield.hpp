@@ -4,6 +4,7 @@
 #include "Types.hpp"
 #include "Config.hpp"
 #include "FFT.hpp"
+#include "Utils.hpp"
 
 struct Efield {
   using value_type = RealView2D::value_type;
@@ -32,6 +33,9 @@ public:
   ~Efield();
 
   void solve_poisson_fftw(float64 xmax, float64 ymax);
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(Efield);
 };
 
 #endif

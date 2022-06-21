@@ -6,7 +6,7 @@ namespace Impl {
     #include <Kokkos_Core.hpp>
     template <typename RealType>
     using complex = Kokkos::complex<RealType>;
-  #elif defined(ENABLE_STDPAR)
+  #elif defined(ENABLE_STDPAR) || defined( ENABLE_OPENMP_OFFLOAD )
     #include <complex>
     template <typename RealType>
     using complex = std::complex<RealType>;
