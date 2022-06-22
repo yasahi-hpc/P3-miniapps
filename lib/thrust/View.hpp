@@ -77,7 +77,7 @@ public:
     // Cast to size_t explicitly
     std::array<size_type, extents_type::rank()> _extents;
     std::transform(extents.begin(), extents.end(), _extents.begin(),
-                   [](const int_type e) -> size_type { return static_cast<size_type>(e);} );
+                   [](const SizeType e) -> size_type { return static_cast<size_type>(e);} );
     init(_extents, offsets);
   }
 
