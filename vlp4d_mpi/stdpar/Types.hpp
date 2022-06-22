@@ -52,18 +52,19 @@ using complex64 = std::complex<float32>;
 using complex128 = std::complex<float64>;
 
 using Real = float64;
+using size_type = uint64; // Not working with uint32
 
 template <size_t ND>
 using shape_nd = std::array<int, ND>;
 
 template < typename ScalarType > 
-using View1D = View<ScalarType, stdex::dextents< 1 >, default_layout >;
+using View1D = View<ScalarType, stdex::dextents< size_type, 1 >, default_layout >;
 template < typename ScalarType > 
-using View2D = View<ScalarType, stdex::dextents< 2 >, default_layout >;
+using View2D = View<ScalarType, stdex::dextents< size_type, 2 >, default_layout >;
 template < typename ScalarType > 
-using View3D = View<ScalarType, stdex::dextents< 3 >, default_layout >;
+using View3D = View<ScalarType, stdex::dextents< size_type, 3 >, default_layout >;
 template < typename ScalarType > 
-using View4D = View<ScalarType, stdex::dextents< 4 >, default_layout >;
+using View4D = View<ScalarType, stdex::dextents< size_type, 4 >, default_layout >;
 
 using RealView1D = View1D<Real>;
 using RealView2D = View2D<Real>;
