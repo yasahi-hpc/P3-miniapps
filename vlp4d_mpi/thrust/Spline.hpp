@@ -11,7 +11,7 @@ struct Spline {
 
 private:
   RealView4D fn_trans_, fn_tmp_, fn_trans_tmp_;
-  size_t nx_, ny_, nvx_, nvy_;
+  size_type nx_, ny_, nvx_, nvy_;
   int nx_min_, ny_min_, nvx_min_, nvy_min_;
 
 public:
@@ -27,14 +27,14 @@ public:
     const int nvx_max = dom->local_nxmax_[2] + HALO_PTS + 1;
     const int nvy_max = dom->local_nxmax_[3] + HALO_PTS + 1;
 
-    nx_  = static_cast<size_t>(nx_max  - nx_min_);
-    ny_  = static_cast<size_t>(ny_max  - ny_min_);
-    nvx_ = static_cast<size_t>(nvx_max - nvx_min_);
-    nvy_ = static_cast<size_t>(nvy_max - nvy_min_);
+    nx_  = static_cast<size_type>(nx_max  - nx_min_);
+    ny_  = static_cast<size_type>(ny_max  - ny_min_);
+    nvx_ = static_cast<size_type>(nvx_max - nvx_min_);
+    nvy_ = static_cast<size_type>(nvy_max - nvy_min_);
 
     // Something is wrong with Transpose kernel
     // Device Synchronization mandatory
-    using shape_4d = std::array<size_t, 4>;
+    using shape_4d = std::array<size_type, 4>;
     using range_4d = std::array<int, 4>;
     fn_trans_     = RealView4D("fn_trans", shape_4d{nvx_,nvy_,nx_,ny_}, range_4d{nvx_min_,nvy_min_,nx_min_,ny_min_});
     fn_trans_tmp_ = RealView4D("fn_trans_tmp", shape_4d{nvx_,nvy_,nx_,ny_}, range_4d{nvx_min_,nvy_min_,nx_min_,ny_min_});

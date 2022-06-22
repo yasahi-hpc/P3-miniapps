@@ -107,11 +107,11 @@ void initialize(Config &conf, Comm &comm,
   y = RealView1D("y", conf.ny);
   z = RealView1D("z", conf.nz);
  
-  const size_t nx_halo = conf.nx+2;
-  const size_t ny_halo = conf.ny+2;
-  const size_t nz_halo = conf.nz+2;
+  const size_type nx_halo = conf.nx+2;
+  const size_type ny_halo = conf.ny+2;
+  const size_type nz_halo = conf.nz+2;
 
-  using shape_3d = std::array<size_t, 3>;
+  using shape_3d = std::array<size_type, 3>;
   using range_3d = std::array<int, 3>;
 
   u  = RealView3D("u",  shape_3d{nx_halo, ny_halo, nz_halo}, range_3d{-1, -1, -1});

@@ -55,8 +55,11 @@ struct Halo {
        int_type left_tag, int_type right_tag, MPI_Comm communicator, bool is_comm)
     : name_(name), left_rank_(left_rank), right_rank_(right_rank),
     left_tag_(left_tag), right_tag_(right_tag), communicator_(communicator), is_comm_(is_comm) {
-    left_buffer_  = RealView2D(name + "_left_buffer", shape);
-    right_buffer_ = RealView2D(name + "_right_buffer", shape);
+    std::array<size_type, 2> _shape;
+    std::transform(shape.begin(), shape.end(), _shape.begin(),
+                   [](const size_t i) -> size_type { return static_cast<size_type>(i);});
+    left_buffer_  = RealView2D(name + "_left_buffer", _shape);
+    right_buffer_ = RealView2D(name + "_right_buffer", _shape);
     left_buffer_.fill(); 
     right_buffer_.fill();
     assert(left_buffer_.size() == right_buffer_.size() );
