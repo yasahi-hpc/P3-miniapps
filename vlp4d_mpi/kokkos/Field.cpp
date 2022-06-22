@@ -83,6 +83,7 @@ void field_poisson(Config *conf, Efield *ef) {
         lu_solve_poisson(conf, ef);
         break;
   }
+  Kokkos::fence();
 };
 
 void lu_solve_poisson(Config *conf, Efield *ef) {
