@@ -69,23 +69,16 @@ public:
   }
 
   // Offset View
+  template <typename SizeType>
   View(const std::string name,
-       const std::array<size_type, extents_type::rank()> extents,
-       const std::array<int_type, extents_type::rank()> offsets
-      ) : name_(name), is_empty_(false), offsets_(offsets) {
- 
-    init(extents, offsets);
-  }
-
-  View(const std::string name,
-       const std::array<int_type, extents_type::rank()>& extents,
+       const std::array<SizeType, extents_type::rank()>& extents,
        const std::array<int_type, extents_type::rank()>& offsets
       ) : name_(name), is_empty_(false), offsets_(offsets) {
     // Cast to size_t explicitly
-    std::array<size_type, extents_type::rank()> extents_;
-    std::transform(extents.begin(), extents.end(), extents_.begin(),
+    std::array<size_type, extents_type::rank()> _extents;
+    std::transform(extents.begin(), extents.end(), _extents.begin(),
                    [](const int_type e) -> size_type { return static_cast<size_type>(e);} );
-    init(extents_, offsets);
+    init(_extents, offsets);
   }
 
   ~View() {}
