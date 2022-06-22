@@ -36,7 +36,7 @@ namespace Spline {
           const float64 alpha = sqrt3 - 2;
           const float64 beta  = sqrt3 * (1 - alpha * alpha);
           #if defined( LONG_ENOUGH_BUFFER )
-            float64 tmp1d[LONG_WIDTH];
+            float64 tmp1d[LONG_BUFFER_WIDTH];
           #endif
           // row update
           for(int i3 = i3start-1; i3 <= i3end + 1; i3++) {
@@ -122,7 +122,7 @@ namespace Spline {
           const float64 alpha = sqrt3 - 2;
           const float64 beta  = sqrt3 * (1 - alpha * alpha);
           #if defined( LONG_ENOUGH_BUFFER )
-            float64 tmp1d[LONG_WIDTH];
+            float64 tmp1d[LONG_BUFFER_WIDTH];
           #endif
 
           // row update
@@ -220,7 +220,7 @@ namespace Spline {
           const float64 alpha = sqrt3 - 2;
           const float64 beta  = sqrt3 * (1 - alpha * alpha);
           #if defined( LONG_ENOUGH_BUFFER )
-            float64 tmp1d[LONG_WIDTH];
+            float64 tmp1d[LONG_BUFFER_WIDTH];
           #endif
           // row update
           for(int i1 = i1start-1; i1 <= i1end + 1; i1++) {
@@ -304,7 +304,7 @@ namespace Spline {
           const float64 alpha = sqrt3 - 2;
           const float64 beta  = sqrt3 * (1 - alpha * alpha);
           #if defined( LONG_ENOUGH_BUFFER )
-            float64 tmp1d[LONG_WIDTH];
+            float64 tmp1d[LONG_BUFFER_WIDTH];
           #endif
           // row update
           for(int i3 = i3start-1; i3 <= i3end + 1; i3++) {
@@ -398,10 +398,6 @@ namespace Spline {
     const size_t ny  = static_cast<size_t>(ny_max - ny_min);
     const size_t nvx = static_cast<size_t>(nvx_max - nvx_min);
     const size_t nvy = static_cast<size_t>(nvy_max - nvy_min);
-    //const int nx  = nx_max - nx_min;
-    //const int ny  = ny_max - ny_min;
-    //const int nvx = nvx_max - nvx_min;
-    //const int nvy = nvy_max - nvy_min;
 
     if(std::is_same_v<layout_type, stdex::layout_left>) {
       #if defined( ENABLE_OPENMP_OFFLOAD )
