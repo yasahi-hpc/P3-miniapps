@@ -13,5 +13,5 @@ module load cuda/11.0 gnu/7.4.0 mpt/2.23-ga
 export MPI_SHEPHERD=1
 export MPI_USE_CUDA=1
 
-mpirun -np 2 ../build/heat3d_mpi/kokkos/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0 --num_threads 1 --teams 1 --device 0 --num_gpus 4 --device_map 1
-#mpirun -np 1 ../build/heat3d_mpi/kokkos/heat3d_mpi --px 1 --py 1 --pz 1 --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0 --num_threads 1 --teams 1 --device 0 --num_gpus 4 --device_map 1
+mpirun -np 2 ../build/miniapps/heat3d_mpi/kokkos/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0 --num_threads 1 --teams 1 --device 0 --num_gpus 4 --device_map 1
+#mpirun -np 1 ../build/miniapps/heat3d_mpi/kokkos/heat3d_mpi --px 1 --py 1 --pz 1 --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0 --num_threads 1 --teams 1 --device 0 --num_gpus 4 --device_map 1
