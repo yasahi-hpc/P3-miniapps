@@ -1,10 +1,5 @@
 add_library(math_lib INTERFACE)
 
-# Find libraries
-find_package(mdspan CONFIG REQUIRED)
-
-set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
-
 if(BACKEND STREQUAL "CUDA")
     find_package(OpenACC REQUIRED)
     find_package(CUDAToolkit COMPONENTS cufft)
