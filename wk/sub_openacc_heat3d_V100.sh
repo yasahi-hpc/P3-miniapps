@@ -6,7 +6,7 @@
 
 cd $PBS_O_WORKDIR
 
-module load cuda/11.0 nvidia/22.1
+module purge
+module load cuda/11.0 gnu/7.4.0 nvidia/22.3
 
-#../build/vlp4d/stdpar/vlp4d SLD10_large.dat
-../build/heat3D/openacc/heat3D
+../build/miniapps/heat3d/openacc/heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0
