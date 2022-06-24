@@ -12,4 +12,4 @@ module load nvidia/22.5 nvmpi/22.5 fftw/3.3.9
 export OMP_NUM_THREADS=36
 export OMP_PROC_BIND=true
 
-../build/vlp4d/stdpar/vlp4d SLD10_large.dat
+../build/miniapps/vlp4d/stdpar/vlp4d SLD10_large.dat

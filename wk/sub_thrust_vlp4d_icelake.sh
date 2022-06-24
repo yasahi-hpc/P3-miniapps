@@ -14,4 +14,4 @@ module load ompi-cuda/4.1.1-11.2
 export OMP_NUM_THREADS=36
 export OMP_PROC_BIND=true
 
-../build/vlp4d/thrust/vlp4d SLD10_large.dat
+../build/miniapps/vlp4d/thrust/vlp4d SLD10_large.dat

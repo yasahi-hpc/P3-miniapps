@@ -1,8 +1,5 @@
 file(GLOB SOURCES "*.cpp")
 
-# Find libraries
-find_package(GTest REQUIRED CONFIG)
-
 add_executable(google_tests ${SOURCES})
 
 set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")

@@ -1,0 +1,6 @@
+[submodule "ext_lib/mdspan"]
+	path = ext_lib/mdspan
+	url = https://github.com/kokkos/mdspan
+[submodule "ext_lib/googletest"]
+	path = ext_lib/googletest
+	url = https://github.com/google/googletest

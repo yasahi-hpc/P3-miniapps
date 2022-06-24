@@ -12,4 +12,4 @@ module load intel/2021.2.0 impi/2021.2.0 fftw/3.3.9
 export OMP_NUM_THREADS=36
 export OMP_PROC_BIND=true
 
-../build/vlp4d/kokkos/vlp4d --kokkos-threads=36 SLD10_large.dat
+../build/miniapps/vlp4d/kokkos/vlp4d --kokkos-threads=36 SLD10_large.dat

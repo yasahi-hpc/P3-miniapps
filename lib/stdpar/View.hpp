@@ -55,21 +55,6 @@ public:
   }
   
   // Kokkos like constructor
-  //template <typename... I, 
-  //           std::enable_if_t<
-  //             std::is_integral_v< 
-  //               std::tuple_element_t<0, std::tuple<I...>>
-  //             >, std::nullptr_t> = nullptr>
-  //template <typename... I, 
-  //           std::enable_if_t<
-  //             std::is_integral_v< 
-  //               typename Traits<I...>::first
-  //             >, std::nullptr_t> = nullptr>
-  //template <typename... I, std::enable_if_t<std::conjunction<>, std::nullptr_t> = nullptr>
-  //template <typename... I, std::enable_if_t<std::conjunction<std::is_integral_v<(I...) >, std::nullptr_t> = nullptr>
-  //template <typename... I>
-  //template <typename... I, std::enable_if_t<std::conjunction<std::is_integral_v<I>..., std::nullptr_t> = nullptr>
-      
   template <typename... I, 
              std::enable_if_t<
                std::is_integral_v< 
@@ -82,23 +67,16 @@ public:
   }
 
   // Offset View
+  template <typename SizeType>
   View(const std::string name,
-       const std::array<size_type, extents_type::rank()>& extents,
-       const std::array<int_type, extents_type::rank()>& offsets
-      ) : name_(name), is_empty_(false), offsets_(offsets) {
- 
-    init(extents, offsets);
-  }
-
-  View(const std::string name,
-       const std::array<int_type, extents_type::rank()>& extents,
+       const std::array<SizeType, extents_type::rank()>& extents,
        const std::array<int_type, extents_type::rank()>& offsets
       ) : name_(name), is_empty_(false), offsets_(offsets) {
     // Cast to size_t explicitly
-    std::array<size_type, extents_type::rank()> extents_;
-    std::transform(extents.begin(), extents.end(), extents_.begin(), 
-                   [](const int_type e) -> size_type { return static_cast<size_type>(e);} );
-    init(extents_, offsets);
+    std::array<size_type, extents_type::rank()> _extents;
+    std::transform(extents.begin(), extents.end(), _extents.begin(), 
+                   [](const SizeType e) -> size_type { return static_cast<size_type>(e);} );
+    init(_extents, offsets);
   }
 
   ~View() {}

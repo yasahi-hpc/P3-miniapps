@@ -69,23 +69,16 @@ public:
   }
 
   // Offset View
+  template <typename SizeType>
   View(const std::string name,
-       const std::array<size_type, extents_type::rank()> extents,
-       const std::array<int_type, extents_type::rank()> offsets
-      ) : name_(name), is_empty_(false), offsets_(offsets) {
- 
-    init(extents, offsets);
-  }
-
-  View(const std::string name,
-       const std::array<int_type, extents_type::rank()>& extents,
+       const std::array<SizeType, extents_type::rank()>& extents,
        const std::array<int_type, extents_type::rank()>& offsets
       ) : name_(name), is_empty_(false), offsets_(offsets) {
     // Cast to size_t explicitly
-    std::array<size_type, extents_type::rank()> extents_;
-    std::transform(extents.begin(), extents.end(), extents_.begin(),
-                   [](const int_type e) -> size_type { return static_cast<size_type>(e);} );
-    init(extents_, offsets);
+    std::array<size_type, extents_type::rank()> _extents;
+    std::transform(extents.begin(), extents.end(), _extents.begin(),
+                   [](const SizeType e) -> size_type { return static_cast<size_type>(e);} );
+    init(_extents, offsets);
   }
 
   ~View() {}
@@ -241,10 +234,10 @@ public:
   constexpr int rank_dynamic() noexcept { return extents_type::rank_dynamic(); }
   constexpr size_type size() const noexcept { return host_mdspan_.size(); }
   constexpr extents_type extents() const noexcept { return host_mdspan_.extents(); }
-  constexpr size_type extent(size_t r) const noexcept { return host_mdspan_.extents().extent(r); }
+  constexpr size_type extent(size_type r) const noexcept { return host_mdspan_.extents().extent(r); }
   int_type total_offset() const noexcept { return total_offset_; }
   std::array<int_type, extents_type::rank()> offsets() const noexcept { return offsets_; }
-  int_type offset(size_t r) const noexcept { return offsets_[r]; }
+  int_type offset(size_type r) const noexcept { return offsets_[r]; }
 
   value_type *data() { return device_mdspan_.data() - total_offset_; }
   const value_type *data() const { return device_mdspan_.data() - total_offset_; }
@@ -262,8 +255,8 @@ public:
 
   std::array<int_type, extents_type::rank()> begin() const noexcept { return offsets_; }
   std::array<int_type, extents_type::rank()> end() const noexcept { return ends_; }
-  int_type begin(size_t r) const noexcept { return offsets_[r]; }
-  int_type end(size_t r) const noexcept { return ends_[r]; }
+  int_type begin(size_type r) const noexcept { return offsets_[r]; }
+  int_type end(size_type r) const noexcept { return ends_[r]; }
 
   inline void setName(const std::string &name) { name_ = name; }
   inline void setIsEmpty(bool is_empty) { is_empty_ = is_empty; }

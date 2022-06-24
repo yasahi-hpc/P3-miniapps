@@ -9,4 +9,4 @@ cd $PBS_O_WORKDIR
 module purge
 module load cuda/11.0 gnu/7.4.0
 
-../build/vlp4d/thrust/vlp4d SLD10_large.dat
+../build/miniapps/vlp4d/thrust/vlp4d SLD10_large.dat
