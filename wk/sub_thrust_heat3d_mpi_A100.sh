@@ -15,6 +15,6 @@ export UCX_MEMTYPE_CACHE=n
 export UCX_IB_GPU_DIRECT_RDMA=no
 
 #mpiexec -machinefile $PJM_O_NODEINF -np $PJM_MPI_PROC -npernode 1 \
-#    ../build/heat3d_mpi/thrust/heat3d_mpi --px 1 --py 1 --pz 1 --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0
+#    ../build/miniapps/heat3d_mpi/thrust/heat3d_mpi --px 1 --py 1 --pz 1 --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0
 mpiexec -machinefile $PJM_O_NODEINF -np $PJM_MPI_PROC -npernode 2 \
-    ../build/heat3d_mpi/thrust/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0
+    ../build/miniapps/heat3d_mpi/thrust/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0

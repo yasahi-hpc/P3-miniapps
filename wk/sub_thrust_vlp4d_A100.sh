@@ -10,4 +10,4 @@ module load gcc/8.3.1
 module load cuda/11.2
 module load ompi-cuda/4.1.1-11.2
 
-../build/vlp4d/thrust/vlp4d SLD10_large.dat
+../build/miniapps/vlp4d/thrust/vlp4d SLD10_large.dat

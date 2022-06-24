@@ -5,8 +5,9 @@
 #PBS -P CityLBM@PG22010
 
 cd $PBS_O_WORKDIR
+. /etc/profile.d/modules.sh
 
 module purge
 module load cuda/11.0 gnu/7.4.0
 
-../build/heat3d/thrust/heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0
+../build/miniapps/heat3d/thrust/heat3d --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0

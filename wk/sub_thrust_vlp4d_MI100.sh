@@ -12,4 +12,4 @@
 #SBATCH -e ./stderr_%J
 
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-ROCR_VISIBLE_DEVICES=1,2,3 srun ../build/vlp4d/thrust/vlp4d SLD10_large.dat
+ROCR_VISIBLE_DEVICES=1,2,3 srun ../build/miniapps/vlp4d/thrust/vlp4d SLD10_large.dat
