@@ -14,15 +14,5 @@ if(BUILD_TESTING AND (NOT (PROGRAMMING_MODEL STREQUAL "KOKKOS")))
     add_subdirectory(tests)
 endif()
 
-if(APPLICATION STREQUAL "heat3d")
-    add_subdirectory(heat3d)
-elseif(APPLICATION STREQUAL "heat3d_mpi")
-    add_subdirectory(heat3d_mpi)
-elseif(APPLICATION STREQUAL "vlp4d")
-    add_subdirectory(vlp4d)
-elseif(APPLICATION STREQUAL "vlp4d_mpi")
-    add_subdirectory(vlp4d_mpi)
-else()
-    # Default is heat3D
-    add_subdirectory(heat3d)
-endif()
+# Mini applications
+add_subdirectory(miniapps)

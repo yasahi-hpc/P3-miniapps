@@ -1,0 +1,12 @@
+if(APPLICATION STREQUAL "heat3d")
+    add_subdirectory(heat3d)
+elseif(APPLICATION STREQUAL "heat3d_mpi")
+    add_subdirectory(heat3d_mpi)
+elseif(APPLICATION STREQUAL "vlp4d")
+    add_subdirectory(vlp4d)
+elseif(APPLICATION STREQUAL "vlp4d_mpi")
+    add_subdirectory(vlp4d_mpi)
+else()
+    # Default is heat3d
+    add_subdirectory(heat3d)
+endif()
