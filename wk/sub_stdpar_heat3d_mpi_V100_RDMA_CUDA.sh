@@ -10,5 +10,7 @@ cd $PBS_O_WORKDIR
 module purge
 module load cuda/11.0 gnu/7.4.0 nvidia/22.3 openmpi-gdr/4.1.4
  
+export UCX_RNDV_FRAG_MEM_TYPE=cuda
+
 #mpirun -np 1 ./wrapper_mpt.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 1 --py 1 --pz 1 --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0
 mpirun -np 2 ./wrapper.sh ../build/heat3d_mpi/stdpar/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0
