@@ -16,4 +16,4 @@ export OMP_NUM_THREADS=36
 export OMP_PROC_BIND=true
 
 mpiexec.hydra -n 2 \
-    ../build/heat3d_mpi/openmp/heat3d_mpi --px 2 --py 1 --pz 1 --nx 256 --ny 512 --nz 512 --nbiter 1000
+    ../build/miniapps/heat3d_mpi/openmp/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0
