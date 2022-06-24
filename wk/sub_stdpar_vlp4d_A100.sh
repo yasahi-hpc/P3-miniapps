@@ -8,4 +8,4 @@
 
 module load nvidia/22.5 nvmpi/22.5
 
-../build/vlp4d/stdpar/vlp4d SLD10_large.dat
+../build/miniapps/vlp4d/stdpar/vlp4d SLD10_large.dat
