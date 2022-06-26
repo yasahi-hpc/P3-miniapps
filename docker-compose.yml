@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  nvidia_sdk_env:
+    build:
+      context: docker/nvidia_sdk
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/work'
+    working_dir: /work
+
+  amd_env:
+    build:
+      context: docker/amd
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/work'
+    working_dir: /work
