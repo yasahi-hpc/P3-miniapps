@@ -59,6 +59,7 @@ void Efield::solve_poisson_fftw(float64 xmax, float64 ymax) {
   int nx2  = fft_->nx2();
   int nx2h = fft_->nx2h();
   float64 normcoeff = fft_->normcoeff();
+  const complex128 I = complex128(0., 1.);
 
   // Forward 2D FFT (Real to complex)
   fft_->rfft2(rho_.data(), rho_hat_.data());
