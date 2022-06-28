@@ -19,7 +19,6 @@ jobs:
       matrix:
         mini-app: ['heat3d', 'heat3d_mpi', 'vlp4d', 'vlp4d_mpi']
         programming-model: ['OPENMP', 'OPENACC', 'STDPAR']
-        backend: ['CUDA', 'OPENMP']
 
     steps:
     - uses: actions/checkout@v3
@@ -34,7 +33,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: > 
         docker-compose run nvidia_sdk_env cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=nvc++
-        -DBUILD_TESTING=OFF -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }} -DAPPLICATION=${{ matrix.mini-app }}
+        -DBUILD_TESTING=OFF -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=CUDA -DAPPLICATION=${{ matrix.mini-app }}
 
     - name: Build
       # Build your program with the given configuration
