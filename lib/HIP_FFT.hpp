@@ -94,6 +94,9 @@ namespace Impl {
       int nb_batches() {return nb_batches_;}
 
       void rfft2(RealType *dptr_in, Complex<RealType> *dptr_out) {
+        #if defined(ENABLE_OPENMP_OFFLOAD)
+          #pragma omp target data use_device_ptr(dptr_in, dptr_out)
+        #endif
         rc_ = rocfft_execute(forward_plan_,            // plan
                              (void**)&dptr_in,         // in_buffer
                              (void**)&dptr_out,        // out_buffer
@@ -103,6 +106,9 @@ namespace Impl {
       }
 
       void irfft2(Complex<RealType> *dptr_in, RealType *dptr_out) {
+        #if defined(ENABLE_OPENMP_OFFLOAD)
+          #pragma omp target data use_device_ptr(dptr_in, dptr_out)
+        #endif
         rc_ = rocfft_execute(backward_plan_,            // plan
                              (void**)&dptr_in,          // in_buffer
                              (void**)&dptr_out,         // out_buffer
