@@ -19,7 +19,7 @@ jobs:
       matrix:
         mini-app: ['heat3d', 'heat3d_mpi', 'vlp4d', 'vlp4d_mpi']
         programming-model: ['OPENMP', 'OPENACC', 'STDPAR']
-        backend: ['CUDA', 'OPENMP']
+        backend: ['CUDA']
 
     steps:
     - uses: actions/checkout@v3
