@@ -301,6 +301,8 @@ void init(const char *file, Config *conf, RealView4D &fn, RealView4D &fnp1, Efie
   *dg = new Diags(conf);
 
   initcase(conf, fn);
+  fn.updateDevice();
+  fnp1.updateDevice();
 }
 
 void finalize(Config *conf, Efield **ef, Diags **dg) {

@@ -32,8 +32,9 @@ Efield::Efield(Config *conf, shape_nd<2> dim) {
     filter_(ix) = 1./k2;
   }
 
-  // Deep copy to GPUs 
-  //fliter_.updateDevice();
+  filter_.updateDevice();
+  rho_.updateDevice(); ex_.updateDevice(); ey_.updateDevice(); phi_.updateDevice();
+  rho_hat_.updateDevice(); ex_hat_.updateDevice(); ey_hat_.updateDevice();
 }
 
 Efield::~Efield() {
