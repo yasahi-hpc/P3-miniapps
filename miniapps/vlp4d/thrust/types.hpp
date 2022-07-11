@@ -31,7 +31,7 @@ using complex64 = thrust::complex<float32>;
 using complex128 = thrust::complex<float64>;
 
 using Real = float64;
-using size_type = uint32_t;
+using size_type = uint64_t; // working with uint32_t
 
 template <size_t ND>
 using shape_nd = std::array<int, ND>;

@@ -39,7 +39,7 @@ using float32 = float;
 using float64 = double;
 
 using Real = float64;
-using size_type = uint32;
+using size_type = uint64; // working with uint32
 
 template < class ScalarType >
 using View1D = View<ScalarType, stdex::dextents< size_type, 1 >, default_layout >;
