@@ -10,4 +10,4 @@ cd $PBS_O_WORKDIR
 module purge
 module load cuda/11.0 gnu/7.4.0 nvidia/22.1 openmpi-gdr/4.1.0
 
-../build/vlp4d/openmp/vlp4d SLD10_large.dat
+../build/miniapps/vlp4d/openmp/vlp4d SLD10_large.dat
