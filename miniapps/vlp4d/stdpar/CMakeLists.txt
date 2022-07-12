@@ -10,6 +10,7 @@ if(BACKEND STREQUAL "CUDA")
     target_link_options(vlp4d PUBLIC -stdpar=gpu -cudalib=cufft)
 else()
     target_compile_options(vlp4d PUBLIC -O3 -stdpar=multicore -mp)
+    target_compile_definitions(vlp4d PUBLIC SIMD)
 endif()
 
 target_link_libraries(vlp4d PUBLIC math_lib)
