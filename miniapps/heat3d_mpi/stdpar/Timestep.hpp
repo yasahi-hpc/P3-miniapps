@@ -12,7 +12,7 @@ void step(Config &conf, Comm &comm, RealView3D &u, RealView3D &un, std::vector<T
 void step(Config &conf, Comm &comm, RealView3D &u, RealView3D &un, std::vector<Timer*> &timers) {
   comm.exchangeHalos(u, timers);
   
-  #if defined(ACCESS_VIA_RAW_POINTERS)
+  #if defined(RANGE_POLICY_1D)
     auto heat3d_kernel = [&]() {
       Iterate_policy<1> policy1d(conf.nx*conf.ny*conf.nz);
       Impl::for_each(policy1d, heat_1d_functor<default_iterate_layout>(conf, u, un));

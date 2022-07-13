@@ -24,3 +24,4 @@ endif()
 
 # Macro
 target_compile_definitions(heat3d_mpi PUBLIC $<$<BOOL:${ACCESS_VIA_RAW_POINTERS}>: ACCESS_VIA_RAW_POINTERS>)
+target_compile_definitions(heat3d_mpi PUBLIC $<$<BOOL:${RANGE_POLICY_1D}>: RANGE_POLICY_1D>)
