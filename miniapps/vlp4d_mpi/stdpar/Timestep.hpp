@@ -37,9 +37,9 @@ void onetimestep(Config *conf, Distrib &comm, RealView4D &fn, RealView4D &fnp1, 
   // extra points located in the halo region)
   comm.exchangeHalo(conf, fn, timers);
 
-  timers[Splinecoeff_xy]->begin();
+  timers[TimerEnum::Splinecoeff_xy]->begin();
   spline->computeCoeff_xy(fn);
-  timers[Splinecoeff_xy]->end();
+  timers[TimerEnum::Splinecoeff_xy]->end();
 
   Impl::deep_copy(fnp1, fn);
 
@@ -63,9 +63,9 @@ void onetimestep(Config *conf, Distrib &comm, RealView4D &fn, RealView4D &fnp1, 
   dg->compute(conf, ef, iter);
   timers[Diag]->end();
 
-  timers[Splinecoeff_vxvy]->begin();
+  timers[TimerEnum::Splinecoeff_vxvy]->begin();
   spline->computeCoeff_vxvy(fnp1);
-  timers[Splinecoeff_vxvy]->end();
+  timers[TimerEnum::Splinecoeff_vxvy]->end();
 
   timers[Advec4D]->begin();
   Advection::advect_4D(conf, ef, fnp1, fn, dom->dt_);
