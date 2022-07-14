@@ -40,21 +40,6 @@ MPI_Datatype get_mpi_data_type() {
 struct Halo {
   using value_type = RealView2D::value_type;
   using int_type = int;
-  /*
-  using mpi_data_type
-    = typename std::conditional_t<
-        std::is_same_v<value_type, Complex<double>>, MPI_DOUBLE_COMPLEX, 
-        typename std::conditional_t< 
-          std::is_same_v<value_type, Complex<float>>, MPI_COMPLEX,
-          typename std::conditional_t< 
-            std::is_same_v<value_type, double>, MPI_DOUBLE,
-            typename std::conditional_t< 
-              std::is_same_v<value_type, float>, MPI_FLOAT, MPI_INT
-            >,
-          >,
-        >,
-      >;
-  */
   std::string name_;
   RealView2D left_buffer_, right_buffer_;
   size_t size_;
@@ -292,21 +277,6 @@ private:
   /* Pack data to send buffers
    */
   template < class mdspan2d_type >
-  void pack(const Halo &halo, const mdspan2d_type &left, const mdspan2d_type &right) {
-    auto left_buffer = halo.left_buffer().mdspan();
-    auto right_buffer = halo.right_buffer().mdspan();
-    assert( left.extents() == right.extents() );
-    assert( left.extents() == left_buffer.extents() );
-    assert( left.extents() == right_buffer.extents() );
-
-    Iterate_policy<2> policy2d({0, 0}, {left.extent(0), left.extent(1)});
-    Impl::for_each(policy2d, 
-                   [=](const int ix, const int iy) {
-                     left_buffer(ix, iy)  = left(ix, iy);
-                     right_buffer(ix, iy) = right(ix, iy);
-                   });
-  }
-  template < class mdspan2d_type >
   void pack(const Halo *halo, const mdspan2d_type &left, const mdspan2d_type &right) {
     auto left_buffer = halo->left_buffer().mdspan();
     auto right_buffer = halo->right_buffer().mdspan();
@@ -324,21 +294,6 @@ private:
 
   /* Unpack data from recv buffers
    */
-  template < class mdspan2d_type >
-  void unpack(const mdspan2d_type &left, const mdspan2d_type &right, const Halo &halo) {
-    auto left_buffer = halo->left_buffer().mdspan();
-    auto right_buffer = halo->right_buffer().mdspan();
-    assert( left.extents() == right.extents() );
-    assert( left.extents() == left_buffer.extents() );
-    assert( left.extents() == right_buffer.extents() );
-
-    Iterate_policy<2> policy2d({0, 0}, {left.extent(0), left.extent(1)});
-    Impl::for_each(policy2d, 
-                   [=](const int ix, const int iy) {
-                     left(ix, iy) = left_buffer(ix, iy);
-                     right(ix, iy) = right_buffer(ix, iy);
-                   });
-  }
   template < class mdspan2d_type >
   void unpack(const mdspan2d_type &left, const mdspan2d_type &right, const Halo *halo) {
     auto left_buffer = halo->left_buffer().mdspan();

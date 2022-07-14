@@ -142,10 +142,9 @@ void initialize(Config &conf, Comm &comm,
     }
   }
 
-  std::vector<Timer*> timers;
-
-  // Boundary conditions
-  comm.exchangeHalos(u, timers);
+  // Let compiler knows following variables are on device
+  u.updateDevice();
+  un.updateDevice();
 }
 
 void finalize(Config &conf, Comm &comm, float64 time,
