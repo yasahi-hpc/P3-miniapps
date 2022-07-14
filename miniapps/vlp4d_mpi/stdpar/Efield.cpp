@@ -44,6 +44,8 @@ Efield::Efield(Config *conf, shape_nd<2> dim)
     filter_(ix) = 1./k2;
   }
   filter_.updateDevice();
+  rho_.updateDevice(); rho_loc_.updateDevice(); ex_.updateDevice(); ey_.updateDevice(); phi_.updateDevice();
+  rho_hat_.updateDevice(); ex_hat_.updateDevice(); ey_hat_.updateDevice();
 }
 
 Efield::~Efield() {

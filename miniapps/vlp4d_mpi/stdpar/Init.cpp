@@ -370,6 +370,8 @@ void init(const char *file, Config *conf, Distrib &comm, RealView4D &fn, RealVie
   fn = RealView4D("fn", shape_halo, nxmin_halo);
   fn.fill(0);
   initcase(conf, fn);
+  fn.updateDevice();
+  fnp1.updateDevice();
 }
 
 void finalize(Config *conf, Distrib &comm, Efield **ef, Diags **dg, Spline **spline) {
