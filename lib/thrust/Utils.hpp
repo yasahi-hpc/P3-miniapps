@@ -8,7 +8,7 @@
     ClassName(const ClassName&); \
     void operator=(const ClassName&);
 
-#if defined(__CUDACC__)
+#if defined(__CUDACC__) && defined( ENABLE_CUDA )
   inline void synchronize() {
     cudaDeviceSynchronize();
   }
@@ -22,7 +22,7 @@
     cudaGetDevice(&id);
     printf("Process%d running on GPU%d\n", rank, id);
   }
-#elif defined(__HIPCC__)
+#elif defined(__HIPCC__) && defined( ENABLE_HIP )
   #include <hip/hip_runtime.h>
   inline void synchronize() {
     [[maybe_unused]] hipError_t err = hipDeviceSynchronize();
