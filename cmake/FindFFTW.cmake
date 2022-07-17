@@ -210,7 +210,7 @@ if( FFTW_ROOT )
         FFTW_DOUBLE_LIB
         NAMES "fftw3" libfftw3-3
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -218,7 +218,7 @@ if( FFTW_ROOT )
         FFTW_DOUBLE_THREADS_LIB
         NAMES "fftw3_threads"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -226,7 +226,7 @@ if( FFTW_ROOT )
         FFTW_DOUBLE_OPENMP_LIB
         NAMES "fftw3_omp"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -234,7 +234,7 @@ if( FFTW_ROOT )
         FFTW_DOUBLE_MPI_LIB
         NAMES "fftw3_mpi"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -242,7 +242,7 @@ if( FFTW_ROOT )
         FFTW_FLOAT_LIB
         NAMES "fftw3f" libfftw3f-3
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -250,7 +250,7 @@ if( FFTW_ROOT )
         FFTW_FLOAT_THREADS_LIB
         NAMES "fftw3f_threads"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -258,7 +258,7 @@ if( FFTW_ROOT )
         FFTW_FLOAT_OPENMP_LIB
         NAMES "fftw3f_omp"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -266,7 +266,7 @@ if( FFTW_ROOT )
         FFTW_FLOAT_MPI_LIB
         NAMES "fftw3f_mpi"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -274,7 +274,7 @@ if( FFTW_ROOT )
         FFTW_LONGDOUBLE_LIB
         NAMES "fftw3l" libfftw3l-3
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -282,7 +282,7 @@ if( FFTW_ROOT )
         FFTW_LONGDOUBLE_THREADS_LIB
         NAMES "fftw3l_threads"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -290,7 +290,7 @@ if( FFTW_ROOT )
         FFTW_LONGDOUBLE_OPENMP_LIB
         NAMES "fftw3l_omp"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
@@ -298,7 +298,7 @@ if( FFTW_ROOT )
         FFTW_LONGDOUBLE_MPI_LIB
         NAMES "fftw3l_mpi"
         PATHS ${FFTW_ROOT}
-        PATH_SUFFIXES "lib" "lib64"
+        PATH_SUFFIXES "lib" "lib64" "lib/x86_64-linux-gnu"
         NO_DEFAULT_PATH
         )
 
