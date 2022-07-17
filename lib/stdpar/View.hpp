@@ -209,8 +209,8 @@ public:
   int_type total_offset() const noexcept { return total_offset_; }
   std::array<int_type, extents_type::rank()> offsets() const noexcept { return offsets_; }
 
-  value_type *data() { return mdspan_.data() - total_offset_; }
-  const value_type *data() const { return mdspan_.data() - total_offset_; }
+  value_type *data() { return mdspan_.data_handle() - total_offset_; }
+  const value_type *data() const { return mdspan_.data_handle() - total_offset_; }
   mdspan_type mdspan() const { return mdspan_; }
   mdspan_type &mdspan() { return mdspan_; }
 
