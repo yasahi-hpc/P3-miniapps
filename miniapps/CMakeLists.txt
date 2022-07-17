@@ -7,6 +7,9 @@ elseif(APPLICATION STREQUAL "vlp4d")
 elseif(APPLICATION STREQUAL "vlp4d_mpi")
     add_subdirectory(vlp4d_mpi)
 else()
-    # Default is heat3d
+    # Default: all miniapps
     add_subdirectory(heat3d)
+    add_subdirectory(heat3d_mpi)
+    add_subdirectory(vlp4d)
+    add_subdirectory(vlp4d_mpi)
 endif()
