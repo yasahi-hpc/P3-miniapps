@@ -40,7 +40,7 @@ using complex64 = std::complex<float32>;
 using complex128 = std::complex<float64>;
 
 using Real = float64;
-using size_type = uint32_t;
+using size_type = uint64_t; // uint32_t
 
 template <size_t ND>
 using shape_nd = std::array<int, ND>;

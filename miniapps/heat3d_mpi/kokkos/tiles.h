@@ -3,8 +3,8 @@
 
 #if defined( KOKKOS_ENABLE_CUDA )
   constexpr int TILE_SIZE0 = 32;
-  constexpr int TILE_SIZE1 = 4;
-  constexpr int TILE_SIZE2 = 2;
+  constexpr int TILE_SIZE1 = 8;
+  constexpr int TILE_SIZE2 = 1;
   constexpr int TILE_SIZE3 = 1;
 #elif defined( KOKKOS_ENABLE_HIP )
   constexpr int TILE_SIZE0 = 64;

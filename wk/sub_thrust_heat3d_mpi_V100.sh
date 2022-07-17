@@ -10,5 +10,7 @@ cd $PBS_O_WORKDIR
 module purge
 module load cuda/11.0 gnu/7.4.0 mpt/2.23-ga
 
-#mpirun -np 2 ../build/miniapps/heat3d_mpi/thrust/heat3d_mpi --px 1 --py 1 --pz 2 --nx 512 --ny 512 --nz 256 --nbiter 1000 --freq_diag 0
+export MPI_SHEPHERD=1
+export MPI_USE_CUDA=1
+
 mpirun -np 1 ../build/miniapps/heat3d_mpi/thrust/heat3d_mpi --px 1 --py 1 --pz 1 --nx 512 --ny 512 --nz 512 --nbiter 1000 --freq_diag 0

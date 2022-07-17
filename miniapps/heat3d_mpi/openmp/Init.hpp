@@ -213,11 +213,14 @@ void performance(Config &conf, Comm &comm, double seconds) {
   double GFlops = static_cast<double>(n) * size * static_cast<double>(conf.nbiter) * 9 / 1.e9;
 
   #if defined(ENABLE_OPENMP_OFFLOAD)
+    std::string backend = "OPENMP_OFFLOAD";
     std::string arch = "GPU";
   #else
+    std::string backend = "OPENMP";
     std::string arch = "CPU";
   #endif
 
+  std::cout << "Backend: " + backend << std::endl;
   std::cout << "Elapsed time: " << seconds << " [s]" << std::endl;
   std::cout << "Bandwidth/" + arch + ": " << GBytes / seconds / comm.size() << " [GB/s]" << std::endl;
   std::cout << "Flops/" + arch + ": " << GFlops / seconds / comm.size() << " [GFlops]\n" << std::endl;

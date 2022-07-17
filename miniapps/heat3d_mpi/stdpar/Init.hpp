@@ -142,10 +142,9 @@ void initialize(Config &conf, Comm &comm,
     }
   }
 
-  std::vector<Timer*> timers;
-
-  // Boundary conditions
-  comm.exchangeHalos(u, timers);
+  // Let compiler knows following variables are on device
+  u.updateDevice();
+  un.updateDevice();
 }
 
 void finalize(Config &conf, Comm &comm, float64 time,
@@ -208,8 +207,13 @@ void performance(Config &conf, Comm &comm, double seconds) {
     std::string arch = "CPU";
   #endif
 
-  #if defined(ACCESS_VIA_RAW_POINTERS)
-    std::cout << "Access via raw pointers" << std::endl;
+  #if defined(RANGE_POLICY_1D)
+    std::cout << "1D Range policy" << std::endl;
+    #if defined(ACCESS_VIA_RAW_POINTERS)
+      std::cout << "Access via raw pointers" << std::endl;
+    #endif
+  #else
+    std::cout << "3D Range policy" << std::endl;
   #endif
 
   std::cout << backend + " backend" << std::endl;
