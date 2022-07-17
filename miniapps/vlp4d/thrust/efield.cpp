@@ -60,7 +60,7 @@ void Efield::solve_poisson_fftw(float64 xmax, float64 ymax) {
   auto filter = filter_.mdspan();
 
   // Forward 2D FFT (Real to Complex)
-  fft_->rfft2(rho.data(), rho_hat.data());
+  fft_->rfft2(rho_.data(), rho_hat_.data());
 
   // Solve Poisson equation in Fourier space
   // In order to avoid zero division in vectorized way
@@ -99,7 +99,7 @@ void Efield::solve_poisson_fftw(float64 xmax, float64 ymax) {
   Impl::for_each(begin, end, solve_poisson);
 
   // Backward 2D FFT (Complex to Real)
-  fft_->irfft2(rho_hat.data(), rho.data());
-  fft_->irfft2(ex_hat.data(),  ex.data());
-  fft_->irfft2(ey_hat.data(),  ey.data());
+  fft_->irfft2(rho_hat_.data(), rho_.data());
+  fft_->irfft2(ex_hat_.data(),  ex_.data());
+  fft_->irfft2(ey_hat_.data(),  ey_.data());
 }
