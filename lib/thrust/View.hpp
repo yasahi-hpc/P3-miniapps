@@ -239,12 +239,12 @@ public:
   std::array<int_type, extents_type::rank()> offsets() const noexcept { return offsets_; }
   int_type offset(size_type r) const noexcept { return offsets_[r]; }
 
-  value_type *data() { return device_mdspan_.data() - total_offset_; }
-  const value_type *data() const { return device_mdspan_.data() - total_offset_; }
-  value_type *host_data() { return host_mdspan_.data() - total_offset_; }
-  const value_type *host_data() const { return host_mdspan_.data() - total_offset_; }
-  value_type *device_data() { return device_mdspan_.data() - total_offset_; }
-  const value_type *device_data() const { return device_mdspan_.data() - total_offset_; }
+  value_type *data() { return device_mdspan_.data_handle() - total_offset_; }
+  const value_type *data() const { return device_mdspan_.data_handle() - total_offset_; }
+  value_type *host_data() { return host_mdspan_.data_handle() - total_offset_; }
+  const value_type *host_data() const { return host_mdspan_.data_handle() - total_offset_; }
+  value_type *device_data() { return device_mdspan_.data_handle() - total_offset_; }
+  const value_type *device_data() const { return device_mdspan_.data_handle() - total_offset_; }
 
   mdspan_type mdspan() const { return device_mdspan_; }
   mdspan_type &mdspan() { return device_mdspan_; }
