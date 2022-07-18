@@ -230,9 +230,9 @@ void test_swap() {
 
 TEST( VIEW, DEFAULT_CONSTRUCTOR ) {
   RealView2D empty; 
-  RealView2D simple("simple", std::array<size_t, 2>{2, 3}); // Simple constructor
+  RealView2D simple("simple", std::array<size_type, 2>{2, 3}); // Simple constructor
   RealView2D Kokkos_like("kokkos_like", 2, 3); // Kokkos like constructor
-  RealView2D offset_view("offset_view", std::array<size_t, 2>{3, 4}, std::array<int, 2>{-1, -1}); // Offset view
+  RealView2D offset_view("offset_view", std::array<size_type, 2>{3, 4}, std::array<int, 2>{-1, -1}); // Offset view
   RealView2D offset_view_int("offset_view", std::array<int, 2>{3, 4}, std::array<int, 2>{-1, -1}); // Offset view
 }
 
