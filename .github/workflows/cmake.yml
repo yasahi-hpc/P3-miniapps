@@ -32,12 +32,17 @@ jobs:
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: > 
-        docker-compose run nvidia_sdk_env cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=nvc++
-        -DBUILD_TESTING=OFF -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
+        docker-compose run nvidia_sdk_env cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=nvc++
+        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
 
     - name: Build
       # Build your program with the given configuration
-      run: docker-compose run nvidia_sdk_env cmake --build build --config ${{env.BUILD_TYPE}}
+      run: docker-compose run nvidia_sdk_env cmake --build . --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      # Execute tests defined by the CMake configuration. Testing on CPU only
+      if: ${{ matrix.backend == 'OPENMP' }}
+      run: docker-compose run nvidia_sdk_env ctest -C ${{env.BUILD_TYPE}}
 
   build_amd:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.

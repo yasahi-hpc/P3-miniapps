@@ -16,4 +16,4 @@ export UCX_MEMTYPE_CACHE=n
 export UCX_IB_GPU_DIRECT_RDMA=no
 
 mpiexec.hydra -n 2 \
-    ../build/vlp4d_mpi/openmp/vlp4d_mpi --num_threads 36 --teams 1 --device 0 --num_gpus 8 --device_map 1 -f SLD10.dat
+    ../build/miniapps/vlp4d_mpi/openmp/vlp4d_mpi --num_threads 36 --teams 1 --device 0 --num_gpus 8 --device_map 1 -f SLD10.dat
