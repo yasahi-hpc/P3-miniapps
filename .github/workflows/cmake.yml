@@ -42,7 +42,7 @@ jobs:
     - name: Test
       # Execute tests defined by the CMake configuration. Testing on CPU only
       if: ${{ matrix.backend }} == 'OPENMP'
-        run: docker-compose run nvidia_sdk_env ctest -C ${{env.BUILD_TYPE}}
+      run: docker-compose run nvidia_sdk_env ctest -C ${{env.BUILD_TYPE}}
 
   build_amd:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
