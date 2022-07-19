@@ -51,9 +51,15 @@ private:
 
 public:
   View() : name_("empty"), is_empty_(true), total_offset_(0), offsets_{0} {}
-  View(const std::string name, std::array<size_type, extents_type::rank()> extents)
+
+  template <typename SizeType>
+  View(const std::string name, std::array<SizeType, extents_type::rank()> extents)
     : name_(name), is_empty_(false), total_offset_(0), offsets_{0} {
-    init(extents, offsets_);
+    // Cast to size_t explicitly
+    std::array<size_type, extents_type::rank()> _extents;
+    std::transform(extents.begin(), extents.end(), _extents.begin(),
+                   [](const SizeType e) -> size_type { return static_cast<size_type>(e);} );
+    init(_extents, offsets_);
   }
   
   // Kokkos like constructor
