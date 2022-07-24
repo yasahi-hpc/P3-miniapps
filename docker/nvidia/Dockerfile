@@ -4,7 +4,7 @@ FROM nvcr.io/nvidia/tensorflow:${TENSORFLOW_VERSION}-tf1-py3
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y sudo && \
     apt-get install -y wget && \
-    apt-get install -y libfftw3-dev \
+    apt-get install -y libfftw3-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
