@@ -16,6 +16,10 @@ else()
     message(FATAL_ERROR "No parallel backend specified. One of CUDA, and OPENMP must be On.")
 endif()
 
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL NVHPC)
+    target_compile_options(math_lib INTERFACE -fast)
+endif()
+
 # Compiler versions
 target_compile_features(math_lib INTERFACE cxx_std_17)
 
