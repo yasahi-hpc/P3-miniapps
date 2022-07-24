@@ -1,4 +1,4 @@
-ARG TENSORFLOW_VERSION=21.12
+ARG TENSORFLOW_VERSION=21.03
 FROM nvcr.io/nvidia/tensorflow:${TENSORFLOW_VERSION}-tf1-py3
 
 RUN apt-get update && apt-get -y upgrade && \
