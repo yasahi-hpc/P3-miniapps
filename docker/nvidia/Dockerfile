@@ -1,4 +1,6 @@
-FROM nvcr.io/nvidia/nvhpc:22.5-devel-cuda_multi-ubuntu20.04
+ARG TENSORFLOW_VERSION=22.06
+FROM nvcr.io/nvidia/tensorflow:${TENSORFLOW_VERSION}-tf1-py3
+
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y libfftw3-dev
 WORKDIR /work
