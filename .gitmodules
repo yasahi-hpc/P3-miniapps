@@ -4,3 +4,6 @@
 [submodule "ext_lib/googletest"]
 	path = ext_lib/googletest
 	url = https://github.com/google/googletest
+[submodule "ext_lib/kokkos"]
+	path = ext_lib/kokkos
+	url = https://github.com/kokkos/kokkos.git

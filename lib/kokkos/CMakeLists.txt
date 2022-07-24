@@ -1,8 +1,5 @@
 add_library(math_lib INTERFACE)
 
-# Find libraries
-find_package(Kokkos REQUIRED)
-
 set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 
 if(BACKEND STREQUAL "CUDA")
@@ -27,12 +24,5 @@ target_compile_features(math_lib INTERFACE cxx_std_17)
 
 # Enable macro
 target_compile_definitions(math_lib INTERFACE ENABLE_KOKKOS)
-
-# Linking libraries
-#target_link_libraries(math_lib INTERFACE Kokkos::kokkos
-#    $<$<BOOL:${ENABLE_OPENMP}>: fftw3>
-#    $<$<BOOL:${ENABLE_HIP}>: roc::rocfft>
-#    $<$<BOOL:${ENABLE_CUDA}>: CUDA::cufft>
-#    )
 
 target_include_directories(math_lib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
