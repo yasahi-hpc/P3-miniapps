@@ -19,7 +19,7 @@ jobs:
     
     strategy:
       matrix:
-          programming-model: ['KOKKOS']
+          programming-model: ['KOKKOS', 'THRUST']
           backend: ['OPENMP']
 
     steps:

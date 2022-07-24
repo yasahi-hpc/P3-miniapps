@@ -1,4 +1,4 @@
-ARG TENSORFLOW_VERSION=22.06
+ARG TENSORFLOW_VERSION=21.12
 FROM nvcr.io/nvidia/tensorflow:${TENSORFLOW_VERSION}-tf1-py3
 
 RUN apt-get update && apt-get -y upgrade && \
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get -y upgrade && \
     rm -rf /var/lib/apt/lists/*
 
 # Install newer CMake manually
-ARG CMAKE_VERSION=3.22.2
+ARG CMAKE_VERSION=3.23.2
 ARG build_dir=/tmp/build
 
 ENV CMAKE_DIR=/opt/cmake
