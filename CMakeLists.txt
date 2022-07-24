@@ -14,6 +14,13 @@ set(PROGRAMMING_MODEL AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 set(BACKEND AUTO CACHE STRING "CHOICE OF PARALLEL BACKEND")
 set(APPLICATION AUTO CACHE STRING "CHOICE OF APPLICATION")
 
+if(PROGRAMMING_MODEL STREQUAL "KOKKOS")
+    find_package(Kokkos CONFIG)
+    if(NOT kokkos_FOUND)
+        add_subdirectory(ext_lib/kokkos)
+    endif()
+endif()
+
 add_subdirectory(lib)
 
 include(CTest)
