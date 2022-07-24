@@ -35,7 +35,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: > 
         docker-compose run nvidia_env cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
-        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
+        -DBUILD_TESTING=OFF -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
 
     - name: Build
       # Build your program with the given configuration
@@ -65,7 +65,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: > 
         docker-compose run nvidia_hpc_sdk_env cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=nvc++
-        -DBUILD_TESTING=OFF -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
+        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
 
     - name: Build
       # Build your program with the given configuration
