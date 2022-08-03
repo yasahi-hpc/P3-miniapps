@@ -14,7 +14,7 @@ jobs:
   build_nvidia_env:
     runs-on: ubuntu-latest
     env: 
-      programming_models: KOKKOS THRUST
+      programming_models: KOKKOS THRUST CUDA
       backends: OPENMP CUDA
 
     steps:
@@ -28,8 +28,10 @@ jobs:
     - name: Configure CMake for OPENMP backend
       run: |
         for programming_model in ${{ env.programming_models }}; do
-          docker-compose run nvidia_env cmake -B build_${programming_model}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
-            -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=OPENMP
+          if [ ${programming_model} != "CUDA" ]; then
+            docker-compose run nvidia_env cmake -B build_${programming_model}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
+              -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=OPENMP
+          fi
         done
 
     - name: Configure CMake for CUDA backend
@@ -50,9 +52,15 @@ jobs:
       run: |
         for programming_model in ${{ env.programming_models }}; do
           for backend in ${{ env.backends }}; do
-            docker-compose run nvidia_env cmake --build build_${programming_model}_${backend} --config ${{env.BUILD_TYPE}}
+            if [ ${programming_model} != "CUDA" ] || [ ${backend} != "OPENMP" ]; then
+              docker-compose run nvidia_env cmake --build build_${programming_model}_${backend} --config ${{env.BUILD_TYPE}}
+            fi
           done
         done
+
+    - name: Test
+      # Execute tests defined by the CMake configuration. Testing on CPU only
+      run: docker-compose run nvidia_env ctest --test-dir build_THRUST_OPENMP -C ${{env.BUILD_TYPE}}
 
       ###test_on_nvidia_env: 
       ###  runs-on: ubuntu-latest
