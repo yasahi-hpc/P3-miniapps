@@ -1,9 +1,17 @@
 version: '3'
 
 services:
-  nvidia_sdk_env:
+  nvidia_env:
     build:
-      context: docker/nvidia_sdk
+      context: docker/nvidia
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/work'
+    working_dir: /work
+
+  nvidia_hpc_sdk_env:
+    build:
+      context: docker/nvidia_hpc_sdk
       dockerfile: Dockerfile
     volumes:
       - '.:/work'

@@ -63,11 +63,14 @@ public:
   }
   
   // Kokkos like constructor
+  /*
   template <typename... I,
              std::enable_if_t<
                std::is_integral_v<
                  std::tuple_element_t<0, std::tuple<I...>>
                >, std::nullptr_t> = nullptr>
+    */
+  template <typename... I>
   View(const std::string name, I... indices)
     : name_(name), is_empty_(false), total_offset_(0), offsets_{0} {
     std::array<size_type, extents_type::rank()> extents = {static_cast<size_type>(indices)...};
