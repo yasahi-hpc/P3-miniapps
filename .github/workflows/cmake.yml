@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        programming_models: "KOKKOS", "THRUST"
-        backends: "OPENMP", "CUDA"
+        programming_models: ["KOKKOS", "THRUST"]
+        backends: ["OPENMP", "CUDA"]
 
     steps:
     - uses: actions/checkout@v3
