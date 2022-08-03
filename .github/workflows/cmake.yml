@@ -126,11 +126,11 @@ jobs:
         for programming_model in ${{ env.programming_models }}; do
           if [ ${programming_model} = "KOKKOS" ]; then
             docker-compose run ${{ env.container }} cmake -B build_${programming_model} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{ env.compiler }} -DCMAKE_HIP_ARCHITECTURES=${{env.HIP_ARCHITECTURES}} \
-              -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=HIP \
+              -DBUILD_TESTING=On -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=HIP \
               -DKokkos_ENABLE_OPENMP=On -DKokkos_ENABLE_HIP=On -DKokkos_ARCH_VEGA908=On -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=On
           else
             docker-compose run ${{ env.container }} cmake -B build_${programming_model} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{ env.compiler }} -DCMAKE_HIP_ARCHITECTURES=${{env.HIP_ARCHITECTURES}} \
-              -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=HIP
+              -DBUILD_TESTING=On -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=HIP
           fi
         done
 
