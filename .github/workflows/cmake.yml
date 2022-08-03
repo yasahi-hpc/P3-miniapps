@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        programming_models: KOKKOS THRUST
-        backends: OPENMP CUDA
+        programming_models: "KOKKOS", "THRUST"
+        backends: "OPENMP", "CUDA"
 
     steps:
     - uses: actions/checkout@v3
@@ -31,7 +31,7 @@ jobs:
 
     - name: Configure CMake
       run: |
-        for programming_model in ${{programming_models}}; do
+        for programming_model in ${{env.programming_models}}; do
           docker-compose run nvidia_env cmake -B build_${{programming_model}}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
           -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=OPENMP
 
@@ -49,8 +49,8 @@ jobs:
     - name: Build
       # Build your program with the given configuration
       run: |
-        for programming_model in ${{programming_models}}; do
-          for backend in ${{backends}}; do
+        for programming_model in ${{env.programming_models}}; do
+          for backend in ${{env.backends}}; do
             docker-compose run nvidia_env cmake --build build_${{programming_model}}_${{backend}} --config ${{env.BUILD_TYPE}}
           done
         done
