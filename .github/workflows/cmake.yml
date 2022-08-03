@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        programming_models: ["KOKKOS", "THRUST"]
-        backends: ["OPENMP", "CUDA"]
+        programming_models: KOKKOS THRUST
+        backends: OPENMP CUDA
 
     steps:
     - uses: actions/checkout@v3
@@ -29,31 +29,40 @@ jobs:
     - name: Update submodules
       run: git submodule update --remote --recursive
 
-    - name: Configure CMake
-      run: |
-        for programming_model in ${{env.programming_models}}; do
-          docker-compose run nvidia_env cmake -B build_${{programming_model}}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
-          -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=OPENMP
-
-          if [ ${{programming_model}} = KOKKOS ]; then
-            # Kokkos with CUDA needs dedicated compile commands
-            docker-compose run nvidia_env cmake -B build_KOKKOS_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=/work/ext_lib/bin/nvcc_wrapper -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
-            -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=CUDA
-            -DKokkos_ENABLE_OPENMP=On -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_LAMBDA=On -DKokkos_ARCH_AMPERE80=On -DKokkos_ARCH_SKX=On -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=On
-          else
-            docker-compose run nvidia_env cmake -B build_${{programming_model}}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
-            -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=CUDA
-          fi
-        done
-
-    - name: Build
+    - name: Echo
       # Build your program with the given configuration
       run: |
         for programming_model in ${{env.programming_models}}; do
           for backend in ${{env.backends}}; do
-            docker-compose run nvidia_env cmake --build build_${{programming_model}}_${{backend}} --config ${{env.BUILD_TYPE}}
+            echo ${{backend}} ${{programming_model}}
           done
         done
+
+      ###- name: Configure CMake
+      ###  run: |
+      ###    for programming_model in ${{env.programming_models}}; do
+      ###      docker-compose run nvidia_env cmake -B build_${{programming_model}}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+      ###      -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=OPENMP
+
+      ###      if [ ${{programming_model}} = KOKKOS ]; then
+      ###        # Kokkos with CUDA needs dedicated compile commands
+      ###        docker-compose run nvidia_env cmake -B build_KOKKOS_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=/work/ext_lib/bin/nvcc_wrapper -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+      ###        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=CUDA
+      ###        -DKokkos_ENABLE_OPENMP=On -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_LAMBDA=On -DKokkos_ARCH_AMPERE80=On -DKokkos_ARCH_SKX=On -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=On
+      ###      else
+      ###        docker-compose run nvidia_env cmake -B build_${{programming_model}}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+      ###        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=CUDA
+      ###      fi
+      ###    done
+
+      ###- name: Build
+      ###  # Build your program with the given configuration
+      ###  run: |
+      ###    for programming_model in ${{env.programming_models}}; do
+      ###      for backend in ${{env.backends}}; do
+      ###        docker-compose run nvidia_env cmake --build build_${{programming_model}}_${{backend}} --config ${{env.BUILD_TYPE}}
+      ###      done
+      ###    done
 
           ###build_nvidia_hpc_sdk:
           ###  # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
