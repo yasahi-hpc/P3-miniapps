@@ -16,6 +16,8 @@ jobs:
     env: 
       programming_models: KOKKOS THRUST CUDA
       backends: OPENMP CUDA
+      compiler: g++
+      nvcc_wrapper: /work/ext_lib/kokkos/bin/nvcc_wrapper
       container: nvidia_env
 
     steps:
@@ -30,7 +32,7 @@ jobs:
       run: |
         for programming_model in ${{ env.programming_models }}; do
           if [ ${programming_model} != "CUDA" ]; then
-            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
+            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{ env.compiler }} -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
               -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=OPENMP
           fi
         done
@@ -39,11 +41,11 @@ jobs:
       run: |
         for programming_model in ${{ env.programming_models }}; do
           if [ ${programming_model} = "KOKKOS" ]; then
-            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=/work/ext_lib/kokkos/bin/nvcc_wrapper -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
+            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{ env.nvcc_wrapper }} -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
               -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=CUDA \
               -DKokkos_ENABLE_OPENMP=On -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_LAMBDA=On -DKokkos_ARCH_AMPERE80=On -DKokkos_ARCH_SKX=On -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=On
           else
-            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
+            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{ env.compiler }} -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
               -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=CUDA
           fi
         done
@@ -83,7 +85,7 @@ jobs:
       run: | 
         for programming_model in ${{ env.programming_models }}; do
           for backend in ${{ env.backends }}; do
-            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_${backend} -DCMAKE_CXX_COMPILER=${{ env.compiler }} --config ${{env.BUILD_TYPE}} \
+            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_${backend} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{ env.compiler }} \
               -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=${backend}
           done
         done
