@@ -22,5 +22,7 @@ RUN CMAKE_SCRIPT=cmake-${CMAKE_VERSION}-linux-x86_64.sh && \
 ENV PATH=${CMAKE_DIR}/bin:$PATH
 
 WORKDIR /work
+RUN pwd
+RUN ls /work/ext_lib/kokkos/bin
 ENV FFTWDIR "/usr"
 CMD ["bash"]
