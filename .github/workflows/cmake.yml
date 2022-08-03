@@ -22,45 +22,56 @@ jobs:
     - name: Update submodules
       run: git submodule update --remote --recursive
 
-    - name: Build nvidia environment
-      run: docker-compose run nvidia_env
-
-  test_on_nvidia_env: 
-    runs-on: ubuntu-latest
-    needs: build_nvidia_env
-
-    strategy:
-      matrix:
-        programming-model: ['KOKKOS', 'THRUST']
-        backend: ['OPENMP', 'CUDA']
-
-    steps:
-    - uses: actions/checkout@v3
-
     - name: Configure CMake for OPENMP backend
-      if: ${{ matrix.backend == 'OPENMP' }}
       run: |
-        docker-compose run nvidia_env cmake -B build_${{ matrix.programming-model }}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
-          -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=OPENMP
-
-    - name: Configure CMake for KOKKOS with CUDA backend
-      if: ${{ (matrix.programming-model == 'KOKKOS' ) && (matrix.backend == 'CUDA') }}
-      run: |
-        # Kokkos with CUDA needs dedicated compile commands
-        docker-compose run nvidia_env cmake -B build_KOKKOS_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=/work/ext_lib/bin/nvcc_wrapper -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
-        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=KOKKOS -DBACKEND=CUDA
-        -DKokkos_ENABLE_OPENMP=On -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_LAMBDA=On -DKokkos_ARCH_AMPERE80=On -DKokkos_ARCH_SKX=On -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=On
-
-    - name: Configure CMake for non-KOKKOS with CUDA backend
-      if: ${{ (matrix.programming-model != 'KOKKOS' ) && (matrix.backend == 'CUDA') }}
-      run: |
-        docker-compose run nvidia_env cmake -B build_${{ matrix.programming-model }}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
-        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=CUDA
+        for programming_model in KOKKOS THRUST; do
+          docker-compose run nvidia_env cmake -B build_${programming_model}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+            -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=OPENMP
+        done
 
     - name: Build
       # Build your program with the given configuration
       run: |
-        docker-compose run nvidia_env cmake --build build_${{ matrix.programming-model }}_${{ matrix.backend }} --config ${{env.BUILD_TYPE}}
+        for programming_model in KOKKOS THRUST; do
+          docker-compose run nvidia_env cmake --build build_${programming_model}_OPENMP --config ${{env.BUILD_TYPE}}
+        done
+
+      ###test_on_nvidia_env: 
+      ###  runs-on: ubuntu-latest
+      ###  needs: build_nvidia_env
+
+      ###  strategy:
+      ###    matrix:
+      ###      programming-model: ['KOKKOS', 'THRUST']
+      ###      backend: ['OPENMP', 'CUDA']
+
+      ###  steps:
+      ###  - uses: actions/checkout@v3
+
+      ###  - name: Configure CMake for OPENMP backend
+      ###    if: ${{ matrix.backend == 'OPENMP' }}
+      ###    run: >
+      ###      docker-compose run nvidia_env cmake -B build_${{ matrix.programming-model }}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+      ###        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=OPENMP
+
+      ###  - name: Configure CMake for KOKKOS with CUDA backend
+      ###    if: ${{ (matrix.programming-model == 'KOKKOS' ) && (matrix.backend == 'CUDA') }}
+      ###    run: >
+      ###      # Kokkos with CUDA needs dedicated compile commands
+      ###      docker-compose run nvidia_env cmake -B build_KOKKOS_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=/work/ext_lib/bin/nvcc_wrapper -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+      ###      -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=KOKKOS -DBACKEND=CUDA
+      ###      -DKokkos_ENABLE_OPENMP=On -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_LAMBDA=On -DKokkos_ARCH_AMPERE80=On -DKokkos_ARCH_SKX=On -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=On
+
+      ###  - name: Configure CMake for non-KOKKOS with CUDA backend
+      ###    if: ${{ (matrix.programming-model != 'KOKKOS' ) && (matrix.backend == 'CUDA') }}
+      ###    run: >
+      ###      docker-compose run nvidia_env cmake -B build_${{ matrix.programming-model }}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+      ###      -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=CUDA
+
+      ###  - name: Build
+      ###    # Build your program with the given configuration
+      ###    run: >
+      ###      docker-compose run nvidia_env cmake --build build_${{ matrix.programming-model }}_${{ matrix.backend }} --config ${{env.BUILD_TYPE}}
 
           ###build_nvidia_hpc_sdk:
           ###  # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
