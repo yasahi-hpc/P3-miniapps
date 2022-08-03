@@ -63,7 +63,7 @@ jobs:
       # Execute tests defined by the CMake configuration. Testing on CPU only
       run: docker-compose run ${{ env.container }} ctest --test-dir build_THRUST_OPENMP -C ${{env.BUILD_TYPE}}
 
-  build_nvidia_hpc_sdk:
+  build_nvidia_hpc_sdk_env:
     runs-on: ubuntu-latest
     env: 
       programming_models: OPENMP OPENACC STDPAR
@@ -83,7 +83,7 @@ jobs:
       run: | 
         for programming_model in ${{ env.programming_models }}; do
           for backend in ${{ env.backends }}; do
-            docker-compose run ${{ env.container }} cmake --build build_${programming_model}_${backend} -DCMAKE_CXX_COMPILER=${{ env.compiler }} --config ${{env.BUILD_TYPE}} \
+            docker-compose run ${{ env.container }} cmake -B build_${programming_model}_${backend} -DCMAKE_CXX_COMPILER=${{ env.compiler }} --config ${{env.BUILD_TYPE}} \
               -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=${backend}
           done
         done
