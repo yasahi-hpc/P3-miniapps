@@ -27,14 +27,14 @@ jobs:
 
     - name: Configure CMake for OPENMP backend
       run: |
-        for programming_model in ${env.programming_models}; do
+        for programming_model in ${{ env.programming_models }}; do
           docker-compose run nvidia_env cmake -B build_${programming_model}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
             -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=OPENMP
         done
 
     - name: Configure CMake for KOKKOS with CUDA backend
       run: |
-        for programming_model in ${env.programming_models}; do
+        for programming_model in ${{ env.programming_models }}; do
           if [ ${programming_model} = "KOKKOS" ]; then
             docker-compose run nvidia_env cmake -B build_${programming_model}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=/work/ext_lib/bin/nvcc_wrapper -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}} \
               -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${programming_model} -DBACKEND=CUDA \
@@ -48,7 +48,7 @@ jobs:
     - name: Build
       # Build your program with the given configuration
       run: |
-        for programming_model in ${env.programming_models}; do
+        for programming_model in ${{ env.programming_models }}; do
           docker-compose run nvidia_env cmake --build build_${programming_model}_${backend} --config ${{env.BUILD_TYPE}}
         done
 
