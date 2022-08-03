@@ -16,11 +16,10 @@ jobs:
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-          programming-model: ['KOKKOS', 'THRUST']
-          backend: ['OPENMP']
+
+    env:
+        programming_models: KOKKOS THRUST
+        backends: OPENMP CUDA
 
     steps:
     - uses: actions/checkout@v3
@@ -31,76 +30,91 @@ jobs:
       run: git submodule update --remote --recursive
 
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: > 
-        docker-compose run nvidia_env cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
-        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
+      run: >
+          for programming_model in ${{env.programming_models}}; do
+            docker-compose run nvidia_env cmake -B build_${{programming_model}}_OPENMP -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+            -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=OPENMP
+
+            if [ ${{programming_model}} = KOKKOS ]; then
+              # Kokkos with CUDA needs dedicated compile commands
+              docker-compose run nvidia_env cmake -B build_KOKKOS_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=/work/ext_lib/bin/nvcc_wrapper -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+              -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=CUDA
+              -DKokkos_ENABLE_OPENMP=On -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_LAMBDA=On -DKokkos_ARCH_AMPERE80=On -DKokkos_ARCH_SKX=On -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=On
+            else
+              docker-compose run nvidia_env cmake -B build_${{programming_model}}_CUDA -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CUDA_ARCHITECTURES=${{env.CUDA_ARCHITECTURES}}
+              -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{programming_model}} -DBACKEND=CUDA
+            fi
+          done
 
     - name: Build
       # Build your program with the given configuration
-      run: docker-compose run nvidia_env cmake --build build --config ${{env.BUILD_TYPE}}
+      run: >
+          for programming_model in ${{env.programming_models}}; do
+            for backend in ${{env.backends}}; do
+              docker-compose run nvidia_env cmake --build build_${{programming_model}}_${{backend}} --config ${{env.BUILD_TYPE}}
+            done
+          done
 
-  build_nvidia_hpc_sdk:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        programming-model: ['OPENMP', 'OPENACC', 'STDPAR']
-        backend: ['OPENMP', 'CUDA']
+          ###build_nvidia_hpc_sdk:
+          ###  # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+          ###  # You can convert this to a matrix build if you need cross-platform coverage.
+          ###  # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+          ###  runs-on: ubuntu-latest
+          ###  
+          ###  strategy:
+          ###    matrix:
+          ###      programming-model: ['OPENMP', 'OPENACC', 'STDPAR']
+          ###      backend: ['OPENMP', 'CUDA']
 
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        
-    - name: Update submodules
-      run: git submodule update --remote --recursive
+          ###  steps:
+          ###  - uses: actions/checkout@v3
+          ###    with:
+          ###      submodules: recursive
+          ###      
+          ###  - name: Update submodules
+          ###    run: git submodule update --remote --recursive
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: > 
-        docker-compose run nvidia_hpc_sdk_env cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=nvc++
-        -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
+          ###  - name: Configure CMake
+          ###    # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+          ###    # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+          ###    run: > 
+          ###      docker-compose run nvidia_hpc_sdk_env cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=nvc++
+          ###      -DBUILD_TESTING=ON -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=${{ matrix.backend }}
 
-    - name: Build
-      # Build your program with the given configuration
-      run: docker-compose run nvidia_hpc_sdk_env cmake --build . --config ${{env.BUILD_TYPE}}
+          ###  - name: Build
+          ###    # Build your program with the given configuration
+          ###    run: docker-compose run nvidia_hpc_sdk_env cmake --build . --config ${{env.BUILD_TYPE}}
 
-    - name: Test
-      # Execute tests defined by the CMake configuration. Testing on CPU only
-      if: ${{ matrix.backend == 'OPENMP' }}
-      run: docker-compose run nvidia_hpc_sdk_env ctest -C ${{env.BUILD_TYPE}}
+          ###  - name: Test
+          ###    # Execute tests defined by the CMake configuration. Testing on CPU only
+          ###    if: ${{ matrix.backend == 'OPENMP' }}
+          ###    run: docker-compose run nvidia_hpc_sdk_env ctest -C ${{env.BUILD_TYPE}}
 
-  build_amd:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        programming-model: ['OPENMP', 'HIP', 'THRUST']
+          ###build_amd:
+          ###  # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+          ###  # You can convert this to a matrix build if you need cross-platform coverage.
+          ###  # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+          ###  runs-on: ubuntu-latest
+          ###  
+          ###  strategy:
+          ###    matrix:
+          ###      programming-model: ['OPENMP', 'HIP', 'THRUST']
 
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        
-    - name: Update submodules
-      run: git submodule update --remote --recursive
+          ###  steps:
+          ###  - uses: actions/checkout@v3
+          ###    with:
+          ###      submodules: recursive
+          ###      
+          ###  - name: Update submodules
+          ###    run: git submodule update --remote --recursive
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: > 
-        docker-compose run amd_env cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=hipcc -DCMAKE_HIP_ARCHITECTURES=${{env.HIP_ARCHITECTURES}}
-        -DBUILD_TESTING=OFF -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=HIP
+          ###  - name: Configure CMake
+          ###    # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+          ###    # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+          ###    run: > 
+          ###      docker-compose run amd_env cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=hipcc -DCMAKE_HIP_ARCHITECTURES=${{env.HIP_ARCHITECTURES}}
+          ###      -DBUILD_TESTING=OFF -DPROGRAMMING_MODEL=${{ matrix.programming-model }} -DBACKEND=HIP
 
-    - name: Build
-      # Build your program with the given configuration
-      run: docker-compose run amd_env cmake --build build --config ${{env.BUILD_TYPE}}
+          ###  - name: Build
+          ###    # Build your program with the given configuration
+          ###    run: docker-compose run amd_env cmake --build build --config ${{env.BUILD_TYPE}}
