@@ -1,5 +1,6 @@
 ARG TENSORFLOW_VERSION=21.12
 FROM nvcr.io/nvidia/tensorflow:${TENSORFLOW_VERSION}-tf2-py3
+RUN ls
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y sudo && \
@@ -22,7 +23,8 @@ RUN CMAKE_SCRIPT=cmake-${CMAKE_VERSION}-linux-x86_64.sh && \
 ENV PATH=${CMAKE_DIR}/bin:$PATH
 
 WORKDIR /work
-RUN pwd
-RUN ls /work/ext_lib/kokkos/bin
+RUN ls /work
+RUN ls /work/ext_lib
+RUN ls /work/ext_lib/kokkos
 ENV FFTWDIR "/usr"
 CMD ["bash"]
