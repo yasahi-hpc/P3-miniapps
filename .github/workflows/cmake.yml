@@ -11,15 +11,8 @@ env:
   HIP_ARCHITECTURES: gfx908
 
 jobs:
-  build_nvidia:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  build_nvidia_env:
     runs-on: ubuntu-latest
-
-    env:
-        programming_models: KOKKOS THRUST
-        backends: OPENMP CUDA
 
     steps:
     - uses: actions/checkout@v3
@@ -29,14 +22,25 @@ jobs:
     - name: Update submodules
       run: git submodule update --remote --recursive
 
+    - name: Build nvidia environment
+      run: docker-compose run nvidia_env
+
+  test_on_nvidia_env: 
+    runs-on: ubuntu-latest
+    needs: build_nvidia_env
+
+    strategy:
+      matrix:
+        programming-model: ['KOKKOS', 'THRUST']
+        backend: ['OPENMP', 'CUDA']
+
+    steps:
+    - uses: actions/checkout@v3
+
     - name: Echo
       # Build your program with the given configuration
       run: |
-        for programming_model in ${{env.programming_models}}; do
-          for backend in ${{env.backends}}; do
-            echo ${{backend}} ${{programming_model}}
-          done
-        done
+        echo ${{ matrix.backend }} ${{ matrix.programming-model }}
 
       ###- name: Configure CMake
       ###  run: |
