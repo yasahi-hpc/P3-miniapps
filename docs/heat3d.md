@@ -240,6 +240,7 @@ Local (nx, ny, nz) = 512, 512, 256
 Global (nx, ny, nz) = 512, 512, 512
 
 L2_norm: 0.00355178
+3D Range policy
 STDPAR backend
 Elapsed time: 3.62221 [s]
 Bandwidth/GPU: 296.433 [GB/s]
